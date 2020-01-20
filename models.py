@@ -1,24 +1,12 @@
-import requests
 import logging
+
+
+from api import SquadApi
+
 
 logger = logging.getLogger('models')
 logger.setLevel(logging.DEBUG)
 
-class SquadApi:
-    url = None
-    token = None
-
-    @staticmethod
-    def configure(url=None, token=None):
-        SquadApi.url = url if url[-1] is '/' else url + '/'
-        SquadApi.token = token
-        logger.debug('SquadApi: url = "%s" and token = "%s"' % (SquadApi.url, 'yes' if SquadApi.token else 'no'))
-
-    @staticmethod
-    def get(endpoint, params):
-        url = '%s%s' % (SquadApi.url, endpoint)
-        logger.debug('GET %s (%s)' % (url, params))
-        return requests.get(url=url, params=params)
 
 class SquadObject:
     endpoint = None
