@@ -1,12 +1,27 @@
 #!/usr/bin/env python3
 
-from models import *
+import unittest
+
+
+from api import SquadApi
+from models import (
+    Squad,
+    Group
+)
+
 
 SquadApi.configure(url='https://qa-reports.linaro.org')
 
-squad = Squad()
-groups = squad.groups()
-for g in groups:
-    print(g)
 
-print(squad.group('lkft'))
+class ModelsTest(unittest.TestCase):
+
+    def setUp(self):
+        self.squad = Squad()
+
+    def test_groups(self):
+        groups = self.squad.groups()
+        self.assertTrue(True, len(groups))
+
+
+if __name__ == '__main__':
+    unittest.main()
