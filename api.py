@@ -17,7 +17,15 @@ class SquadApi:
 
     @staticmethod
     def get(endpoint, params):
-        url = '%s%s' % (SquadApi.url, endpoint)
+        if endpoint.startswith('http'):
+            parsed_url = urllib.parse.urlparse(endpoint)
+            assert SquadApi.url == '%s/%s' % (parsed_url.scheme, parsed_url.netloc), \
+                   'Given url (%s) is does not match pre-configured one!'
+
+            params.update(urllib.parse.parse_qs(parsed_url.query))
+            endpoint = parsed_url.path
+
+        url = '%s%s' % (SquadApi.url, endpoint if endpoint[0] is not '/' else endpoint[1:])
         logger.debug('GET %s (%s)' % (url, params))
         return requests.get(url=url, params=params)
 
