@@ -1,5 +1,6 @@
 import requests
 import logging
+import urllib
 
 
 logger = logging.getLogger('api')
@@ -19,7 +20,7 @@ class SquadApi:
     def get(endpoint, params):
         if endpoint.startswith('http'):
             parsed_url = urllib.parse.urlparse(endpoint)
-            assert SquadApi.url == '%s/%s' % (parsed_url.scheme, parsed_url.netloc), \
+            assert SquadApi.url == '%s://%s/' % (parsed_url.scheme, parsed_url.netloc), \
                    'Given url (%s) is does not match pre-configured one!'
 
             params.update(urllib.parse.parse_qs(parsed_url.query))

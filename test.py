@@ -5,6 +5,7 @@ import unittest
 
 from api import SquadApi
 from models import Squad, Group, Project, Build, TestJob, TestRun, Test, Suite, Environment, Backend, EmailTemplate, KnownIssue, SuiteMetadata, Annotation, MetricThreshold, Report
+from utils import first
 
 SquadApi.configure(url='http://localhost:8000')
 
@@ -81,6 +82,32 @@ class SquadTest(unittest.TestCase):
     def test_reports(self):
         reports = self.squad.reports()
         self.assertTrue(True, len(reports))
+
+
+class BuildTest(unittest.TestCase):
+
+    def setUp(self):
+        self.build = first(Squad().builds(count=1))
+
+    def test_basic(self):
+        self.assertTrue(self.build is not None)
+
+    def test_build_metadata(self):
+        metadata = self.build.metadata
+        self.assertTrue(metadata.__id__ != '')
+
+
+class TestRunTest(unittest.TestCase):
+
+    def setUp(self):
+        self.testrun = first(Squad().testruns(count=1))
+
+    def test_basic(self):
+        self.assertTrue(self.testrun is not None)
+
+    def test_testrun_environment(self):
+        environment = self.testrun.environment
+        self.assertTrue(environment.__id__ != '')
 
 
 if __name__ == '__main__':

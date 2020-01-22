@@ -1,9 +1,10 @@
 import logging
 import uuid
+from itertools import groupby
 
 
 from api import SquadApi
-from utils import first
+from utils import first, parse_test_name, parse_metric_name
 import settings
 
 
@@ -11,6 +12,7 @@ logger = logging.getLogger('models')
 logger.setLevel(logging.DEBUG)
 
 DEFAULT_COUNT = settings.DEFAULT_NUM_OF_OBJECTS
+ALL = -1
 
 
 class SquadObject:
@@ -25,8 +27,13 @@ class SquadObject:
         objects = {}
         for result in results:
             obj = klass()
-            for attr in klass.attrs:
-                setattr(obj, attr, result[attr])
+            attrs = klass.attrs if len(klass.attrs) else [attr.replace(' ', '_') for attr in result.keys()]
+            for attr in attrs:
+                try:
+                    setattr(obj, attr, result[attr])
+                except (AttributeError, KeyError) as e:
+                    print(e)
+                    print(attr)
             objects[obj.__id__] = obj
 
         return objects
@@ -43,10 +50,10 @@ class SquadObject:
         """
             Generic get method to retrieve objects from API
             count: number of objects to fetch, defaults to 50,
-                      -1 means follow pagination
+                      -1 (ALL) means follow pagination
         """
 
-        if count == -1:
+        if count == ALL:
             count = settings.MAX_NUM_OF_OBJECTS
 
         filters['limit'] = count if count < settings.SQUAD_MAX_PAGE_LIMIT else settings.SQUAD_MAX_PAGE_LIMIT
@@ -64,7 +71,8 @@ class SquadObject:
         return objects
 
     def get(self, _id):
-        result = self.__fetch__(self.__class__, {'id': _id}, 1)
+        count = 1
+        result = self.__fetch__(self.__class__, {'id': _id}, count)
         return first(result) if len(result) else None
 
 
@@ -128,12 +136,12 @@ class Group(SquadObject):
 
     def projects(self, count=DEFAULT_COUNT, **filters):
         filters.update({'group': self.id})
-        self.__fetch__(Project, filters, count)
+        return self.__fetch__(Project, filters, count)
 
     def project(self, slug):
         filters = {'slug': slug}
-        objects = self.projects(**filters)
-        return objects[0]
+        objects = self.projects(count=1, **filters)
+        return first(objects)
 
 
 class Project(SquadObject):
@@ -150,20 +158,35 @@ class Project(SquadObject):
 
     def build(self, version):
         filters = {'version': version}
-        objects = self.builds(**filters)
-        return objects[0]
+        objects = self.builds(count=1, **filters)
+        return first(objects)
 
 
 class Build(SquadObject):
 
     endpoint = '/api/builds/'
-    attrs = ['url', 'id', 'testjobs', 'status', 'metadata', 'finished',
+    attrs = ['url', 'id', 'testjobs', 'status', 'finished',
              'version', 'created_at', 'datetime', 'patch_id', 'keep_data', 'project',
              'patch_source', 'patch_baseline']
 
-    def testruns(self, count=DEFAULT_COUNT, **filters):
+    def testruns(self, count=ALL, **filters):
         filters.update({'build': self.id})
         return self.__fetch__(TestRun, filters, count)
+
+    __metadata__ = None
+
+    @property
+    def metadata(self):
+        if self.__metadata__ is None:
+            endpoint = '%s%d/metadata' % (self.endpoint, self.id)
+            response = SquadApi.get(endpoint, {})
+            objects = self.__fill__(BuildMetadata, [response.json()])
+            self.__metadata__ = first(objects)
+        return self.__metadata__
+
+
+class BuildMetadata(SquadObject):
+    pass
 
 
 class TestJob(SquadObject):
@@ -179,10 +202,64 @@ class TestJob(SquadObject):
 class TestRun(SquadObject):
 
     endpoint = '/api/testruns/'
-    attrs = ['url', 'id', 'tests_file', 'metrics_file', 'metadata_file', 'log_file',
-             'tests', 'metrics', 'created_at', 'completed', 'datetime', 'build_url',
+    attrs = ['url', 'id', 'metadata_file', 'log_file',
+             'created_at', 'completed', 'datetime', 'build_url',
              'job_id', 'job_status', 'job_url', 'resubmit_url', 'data_processed',
              'status_recorded', 'build', 'environment']
+
+    def __setattr__(self, attr, value):
+        if attr == 'environment' and value.startswith('http'):
+            response = SquadApi.get(value, {})
+            objs = self.__fill__(Environment, [response.json()])
+            value = first(objs)
+        super(TestRun, self).__setattr__(attr, value)
+
+    __tests__ = None
+
+    def tests(self, count=ALL, **filters):
+        if self.__tests__ is None:
+            filters.update({'test_run': self.id})
+            self.__tests__ = self.__fetch__(Test, filters, count)
+        return self.__tests__
+
+    class Metric(SquadObject):
+        pass
+
+    __metrics__ = None
+
+    def metrics(self, count=ALL, **filters):
+        if self.__metrics__ is None:
+            TestRun.Metric.endpoint = '%s%d/metrics' % (self.endpoint, self.id)
+            self.__metrics__ = self.__fetch__(TestRun.Metric, filters, count)
+        return self.__metrics__
+
+    test_suites = []
+    metric_suites = []
+
+    class TestSuite:
+        name = ''
+        tests = []
+
+    class MetricSuite:
+        name = ''
+        metrics = []
+
+    def fill_metric_and_test_suites(self):
+        tests = self.tests()
+        for suite_name, tests in groupby(sorted(tests.values(), key=lambda t: t.name), lambda t: parse_test_name(t.name)[0]):
+            test_suite = TestRun.TestSuite()
+            test_suite.name = suite_name
+            test_suite.tests = [t for t in tests]
+            self.test_suites.append(test_suite)
+
+        metrics = self.metrics()
+        for suite_name, metrics in groupby(sorted(metrics.values(), key=lambda m: m.name), lambda m: parse_metric_name(m.name)[0]):
+            metric_suite = TestRun.MetricSuite()
+            metric_suite.name = suite_name
+            metric_suite.tests = [m for m in metrics]
+            self.test_suites.append(test_suite)
+
+
 
 
 class Test(SquadObject):

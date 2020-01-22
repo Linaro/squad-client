@@ -1,0 +1,4 @@
+Things to improve in squad-client 
+
+* create a cache mechanism: sometimes same objects are requested over and over, where
+  instead they could be stored in memory, that'd save up a few HTTP requests

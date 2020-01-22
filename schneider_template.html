@@ -1,0 +1,76 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <style>
+        </style>
+    </head>
+    <body>
+        <div id="content">
+            <div id="introduction">
+                <h1>Schneider Report for build {{ build.version }}</h1>
+                <p>(-- write important text for the report here --)
+            </div>
+            <div id="build">
+                <h2>Details for build {{ build.version }}<h2>
+                <div id="build-details">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">build location</th>
+                                <td>{{ build.metadata.build_location }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="testrun-list">
+                {% for testrun in testruns %}
+                <div class="testrun">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Job<th>
+                                <td><a href="https://validation.linaro.org/scheduler/job/{{ testrun.job_id }}">Job url</a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Environment<th>
+                                <td>{{ testrun.environment.slug }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Tests</th>
+                                <td>
+                                    <table class="table">
+                                        <thead>
+                                            <th scope="col">Suite</th>
+                                            <th scope="col">Test</th>
+                                        </thead>
+                                        <tbody>
+                                            {% for suite in testrun.test_suites %}
+                                            <tr>
+                                                <th scope="row">{{ suite.name }}</th>
+                                                <td>
+                                                    <table class="table">
+                                                        <tbody>
+                                                            {% for test in suite.tests %}
+                                                            <tr>
+                                                                <td>{{ test.name }}</td>
+                                                                <td>{{ test.status }}</td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            </div><!-- / testrun-list -->
+        </div>
+    </body>
+</html>
