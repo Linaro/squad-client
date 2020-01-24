@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 
-from api import SquadApi
-from models import Squad
-
 import jinja2
+import sys
+
+
+sys.path.append('..')
+
+
+from squad_client.api import SquadApi
+from squad_client.models import Squad
 
 
 # Configure SQUAD url

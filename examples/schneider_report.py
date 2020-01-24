@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 import os
 import jinja2
+import sys
 
 
-from api import SquadApi
-from models import Squad
+sys.path.append('..')
+
+
+from squad_client.api import SquadApi
+from squad_client.models import Squad
 
 
 SquadApi.configure(url='https://qa-reports.linaro.org/', token=os.getenv('QA_REPORTS_TOKEN'))
-#SquadApi.configure(url='http://localhost:8000/', token=os.getenv('QA_REPORTS_TOKEN'))
-
-#group = Squad().group('lkft')
-#project = group.project('linux-stable-rc-4.14-oe-sanity')
-#build = project.build('v4.14.74')
 group = Squad().group('schneider')
 project = group.project('schneider')
 build = project.build('184')
