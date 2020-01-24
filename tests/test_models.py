@@ -3,9 +3,10 @@
 import unittest
 
 
-from api import SquadApi
-from models import Squad, Group, Project, Build, TestJob, TestRun, Test, Suite, Environment, Backend, EmailTemplate, KnownIssue, SuiteMetadata, Annotation, MetricThreshold, Report
-from utils import first
+from squad_client.api import SquadApi
+from squad_client.models import Squad, Group, Project, Build, TestJob, TestRun, Test, Suite, Environment, Backend, EmailTemplate, KnownIssue, SuiteMetadata, Annotation, MetricThreshold, Report
+from squad_client.utils import first
+
 
 SquadApi.configure(url='http://localhost:8000')
 
@@ -108,7 +109,3 @@ class TestRunTest(unittest.TestCase):
     def test_testrun_environment(self):
         environment = self.testrun.environment
         self.assertTrue(environment.__id__ != '')
-
-
-if __name__ == '__main__':
-    unittest.main()
