@@ -9,11 +9,15 @@ logger = logging.getLogger('api')
 class SquadApi:
     url = None
     token = None
+    headers = None
 
     @staticmethod
     def configure(url=None, token=None):
+        if token:
+            SquadApi.token = token
+            SquadApi.headers = {"Authorization": 'token %s' % token}
+
         SquadApi.url = url if url[-1] is '/' else url + '/'
-        SquadApi.token = token
         logger.debug('SquadApi: url = "%s" and token = "%s"' % (SquadApi.url, 'yes' if SquadApi.token else 'no'))
 
     @staticmethod
@@ -28,5 +32,5 @@ class SquadApi:
 
         url = '%s%s' % (SquadApi.url, endpoint if endpoint[0] is not '/' else endpoint[1:])
         logger.debug('GET %s (%s)' % (url, params))
-        return requests.get(url=url, params=params)
+        return requests.get(url=url, params=params, headers=SquadApi.headers)
 

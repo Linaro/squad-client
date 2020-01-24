@@ -3,9 +3,9 @@ import uuid
 from itertools import groupby
 
 
-from api import SquadApi
-from utils import first, parse_test_name, parse_metric_name
-import settings
+from .api import SquadApi
+from .utils import first, parse_test_name, parse_metric_name
+from . import settings
 
 
 logger = logging.getLogger('models')
@@ -169,9 +169,15 @@ class Build(SquadObject):
              'version', 'created_at', 'datetime', 'patch_id', 'keep_data', 'project',
              'patch_source', 'patch_baseline']
 
-    def testruns(self, count=ALL, **filters):
+    def testruns(self, count=ALL, bucket_suites=False, **filters):
         filters.update({'build': self.id})
-        return self.__fetch__(TestRun, filters, count)
+        testruns = self.__fetch__(TestRun, filters, count)
+
+        if bucket_suites:
+            for _id in testruns.keys():
+                testruns[_id].bucket_metric_and_test_suites()
+
+        return testruns
 
     __metadata__ = None
 
@@ -244,22 +250,22 @@ class TestRun(SquadObject):
         name = ''
         metrics = []
 
-    def fill_metric_and_test_suites(self):
-        tests = self.tests()
-        for suite_name, tests in groupby(sorted(tests.values(), key=lambda t: t.name), lambda t: parse_test_name(t.name)[0]):
+    def bucket_metric_and_test_suites(self):
+        all_tests = self.tests()
+        self.test_suites = []
+        for suite_name, tests in groupby(sorted(all_tests.values(), key=lambda t: t.name), lambda t: parse_test_name(t.name)[0]):
             test_suite = TestRun.TestSuite()
             test_suite.name = suite_name
             test_suite.tests = [t for t in tests]
             self.test_suites.append(test_suite)
 
-        metrics = self.metrics()
-        for suite_name, metrics in groupby(sorted(metrics.values(), key=lambda m: m.name), lambda m: parse_metric_name(m.name)[0]):
+        all_metrics = self.metrics()
+        self.metric_suites = []
+        for suite_name, metrics in groupby(sorted(all_metrics.values(), key=lambda m: m.name), lambda m: parse_metric_name(m.name)[0]):
             metric_suite = TestRun.MetricSuite()
             metric_suite.name = suite_name
-            metric_suite.tests = [m for m in metrics]
-            self.test_suites.append(test_suite)
-
-
+            metric_suite.metrics = [m for m in metrics]
+            self.metric_suites.append(metric_suite)
 
 
 class Test(SquadObject):
