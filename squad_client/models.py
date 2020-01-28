@@ -185,7 +185,7 @@ class Build(SquadObject):
     def metadata(self):
         if self.__metadata__ is None:
             endpoint = '%s%d/metadata' % (self.endpoint, self.id)
-            response = SquadApi.get(endpoint, {})
+            response = SquadApi.get(endpoint)
             objects = self.__fill__(BuildMetadata, [response.json()])
             self.__metadata__ = first(objects)
         return self.__metadata__
@@ -215,7 +215,7 @@ class TestRun(SquadObject):
 
     def __setattr__(self, attr, value):
         if attr == 'environment' and value.startswith('http'):
-            response = SquadApi.get(value, {})
+            response = SquadApi.get(value)
             objs = self.__fill__(Environment, [response.json()])
             value = first(objs)
         super(TestRun, self).__setattr__(attr, value)

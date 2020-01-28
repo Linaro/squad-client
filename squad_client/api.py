@@ -37,16 +37,29 @@ class SquadApi:
         logger.debug('SquadApi: url = "%s" and token = "%s"' % (SquadApi.url, 'yes' if SquadApi.token else 'no'))
 
     @staticmethod
-    def get(endpoint, params):
+    def get(endpoint, params={}):
         if endpoint.startswith('http'):
             parsed_url = urllib.parse.urlparse(endpoint)
-            assert SquadApi.url == '%s://%s/' % (parsed_url.scheme, parsed_url.netloc), \
-                   'Given url (%s) is does not match pre-configured one!'
+
+            tmp_url = '%s://%s/' % (parsed_url.scheme, parsed_url.netloc)
+            if SquadApi.url != tmp_url:
+               raise ApiException('Given url (%s) is does not match pre-configured one!' % tmp_url)
 
             params.update(urllib.parse.parse_qs(parsed_url.query))
             endpoint = parsed_url.path
 
         url = '%s%s' % (SquadApi.url, endpoint if endpoint[0] is not '/' else endpoint[1:])
         logger.debug('GET %s (%s)' % (url, params))
-        return requests.get(url=url, params=params, headers=SquadApi.headers)
+        try:
+            response = requests.get(url=url, params=params, headers=SquadApi.headers)
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            raise ApiException('Http Error: %s' % e)
+        except requests.exceptions.ConnectionError as e:
+            raise ApiException('Error Connecting: %s' %e)
+        except requests.exceptions.Timeout as e:
+            raise ApiException('Timeout Error: %s' % e)
+        except requests.exceptions.RequestException as e:
+            raise ApiException('OOps: Something unexpected happened while requesting the API: %s' % e)
+        return response
 
