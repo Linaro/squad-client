@@ -28,6 +28,6 @@ def retrieve_build_results(build_url):
             for suite in testrun.metric_suites:
                 metric_suites[suite.name] = {m.name: m.result for m in suite.metrics}
 
-            results[testrun.environment.slug] = {'tests': [], 'metrics': []}
+            results[testrun.environment.slug] = {'tests': test_suites, 'metrics': metric_suites}
 
     return results    
