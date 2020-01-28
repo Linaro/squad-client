@@ -1,4 +1,6 @@
 def first(_dict):
+    if _dict is None or len(_dict) is 0:
+        return None
     return next(iter(_dict.values()))
 
 def parse_test_name(name):
