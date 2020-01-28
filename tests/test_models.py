@@ -20,9 +20,17 @@ class SquadTest(unittest.TestCase):
         groups = self.squad.groups()
         self.assertTrue(True, len(groups))
 
+    def test_not_found_groups(self):
+        groups = self.squad.groups(name__startswith='no group with this name')
+        self.assertEqual(0, len(groups))
+
     def test_groups_with_count(self):
         four_groups = self.squad.groups(count=4)
         self.assertEqual(4, len(four_groups))
+
+    def test_not_found_group(self):
+        not_found_group = self.squad.group('this-group-does-not-really-exist')
+        self.assertEqual(None, not_found_group)
 
     def test_group(self):
         lkft_group = self.squad.group('lkft')
