@@ -143,6 +143,9 @@ class Group(SquadObject):
         objects = self.projects(count=1, **filters)
         return first(objects)
 
+    def __repr__(self):
+        return self.slug
+
 
 class Project(SquadObject):
 
@@ -160,6 +163,9 @@ class Project(SquadObject):
         filters = {'version': version}
         objects = self.builds(count=1, **filters)
         return first(objects)
+
+    def __repr__(self):
+        return self.slug
 
 
 class Build(SquadObject):
@@ -189,6 +195,9 @@ class Build(SquadObject):
             objects = self.__fill__(BuildMetadata, [response.json()])
             self.__metadata__ = first(objects)
         return self.__metadata__
+
+    def __repr__(self):
+        return self.version
 
 
 class BuildMetadata(SquadObject):

@@ -9,3 +9,11 @@ def parse_test_name(name):
 
 def parse_metric_name(name):
     return parse_test_name(name)
+
+def split_group_project_slug(group_project_slug):
+    group_slug, project_slug = group_project_slug.split('/')
+    return (group_slug, project_slug)
+
+def split_build_url(build_slug):
+    group_slug, project_slug, _, build_version = build_slug.split('/')
+    return (group_slug, project_slug, build_version)
