@@ -2,3 +2,12 @@ Things to improve in squad-client
 
 * create a cache mechanism: sometimes same objects are requested over and over, where
   instead they could be stored in memory, that'd save up a few HTTP requests
+
+* I think we can improve this: https://github.com/Linaro/squad/issues/634 by using
+  the same approach that was used to improve performance of finding regressions and fixes.
+  Instead of querying all tests of a given testrun, maybe we can pass up to 200 testruns at
+  at time to reduce trips to the api.
+
+* we should pick a license before migrating this repo to Linaro's: MIT, BST, 2-clause... ?
+
+* add copyright Linaro, authors Charles and Amro
