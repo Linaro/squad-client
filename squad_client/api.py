@@ -1,9 +1,22 @@
 import requests
 import logging
 import urllib
+import re
 
+
+url_validator_regex = re.compile(
+        r'^(?:http|ftp)s?://' # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain...
+        r'localhost|' #localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
+        r'(?::\d+)?' # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
 logger = logging.getLogger('api')
+
+
+class ApiException(requests.exceptions.RequestException):
+    pass
 
 
 class SquadApi:
@@ -12,7 +25,10 @@ class SquadApi:
     headers = None
 
     @staticmethod
-    def configure(url=None, token=None):
+    def configure(url, token=None):
+        if url_validator_regex.match(url) is None:
+            raise ApiException('Malformed url: "%s"' % url)
+
         if token:
             SquadApi.token = token
             SquadApi.headers = {"Authorization": 'token %s' % token}
