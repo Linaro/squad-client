@@ -1,0 +1,8 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: squad_client
+Upstream-Contact: SQUAD development mailing list <squad-dev@lists.linaro.org>
+Source: https://github.com/Linaro/squad_client
+
+Files: *
+Copyright: 2020 Linaro Limited
+License: MIT
