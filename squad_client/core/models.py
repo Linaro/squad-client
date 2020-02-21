@@ -4,8 +4,8 @@ from itertools import groupby
 
 
 from .api import SquadApi
-from .utils import first, parse_test_name, parse_metric_name
-from . import settings
+from squad_client.utils import first, parse_test_name, parse_metric_name
+from squad_client import settings
 
 
 logger = logging.getLogger('models')
