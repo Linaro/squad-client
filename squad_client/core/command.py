@@ -15,7 +15,7 @@ class SquadClientCommand:
         return SquadClientCommand.klasses[args.command].run(args)
 
     def register(self, subparser):
-        subparser.add_parser(self.command, help=self.help_text)
+        return subparser.add_parser(self.command, help=self.help_text)
 
     def run(args):
         raise NotImplementedError
