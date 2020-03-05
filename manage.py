@@ -20,7 +20,8 @@ def main():
         parser.print_help()
         return -1
 
-    return SquadClientCommand.process(args)
+    rc = SquadClientCommand.process(args)
+    return 1 if rc is False else 0 if rc is True else -1
 
 
 if __name__ == '__main__':
