@@ -1,0 +1,15 @@
+include Dockerfile
+include CHANGELOG.md
+include README.md
+include COPYRIGHTS
+include LICENSE
+include requirements*.txt
+include manage.py
+include .gitignore
+include .coveragerc
+include .coverage
+
+recursive-include tests/ *
+recursive-include scripts/ *
+recursive-include squad_client/ *
+recursive-include examples/ *

@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -eu
+
+v="$1"
+
+# sign & upload
+for f in dist/*; do
+    gpg --detach-sign --armor "$f"
+done
+twine upload dist/*
+
+git tag -s -m "SQUAD Client release $v" "$v"
+git push
+git push --tags
+
+rm -rf build/
+rm -rf dist/

@@ -1,0 +1,66 @@
+#!/bin/sh
+
+set -eu
+
+export SQUAD_CLIENT_RELEASE=1
+
+v=$(python3 -c 'from squad_client.version import __version__ as v; print(v)')
+if git rev-parse --verify --quiet "${v}" >/dev/null; then
+    echo "Version ${v} has already been released. Let's prepare a new one"
+    editor squad_client/version.py
+fi
+
+v=$(python3 -c 'from squad_client.version import __version__ as v; print(v)')
+if git rev-parse --verify --quiet "${v}" >/dev/null; then
+    echo "Version ${v} has already been released. Aborting"
+    exit 1
+fi
+
+if ! grep -q "^# $v" CHANGELOG.md; then
+    echo "Let's now document the changes in CHANGELOG.md"
+    editor CHANGELOG.md
+fi
+
+if ! grep -q "^# $v" CHANGELOG.md; then
+    echo "E: Version $v is not documented in CHANGELOG.md. Please do that before releasing"
+    exit 1
+fi
+
+changed=$(git diff-index --name-only HEAD -- | (grep -v 'CHANGELOG.md\|squad_client/version.py' || true))
+if [ -n "$changed" ]; then
+    echo "E: uncommited changes found; cannot release like this"
+    echo "I: changed files:"
+    echo "$changed"
+    echo "I: CHANGELOG.md and squad_client/version.py are excused, they would be committed automatically"
+    exit 1
+fi
+
+if [ "${TEST:-yes}" != "no" ]; then
+    ./manage.py test
+fi
+
+git commit --message "New release: ${v}" CHANGELOG.md squad_client/version.py || true
+
+# build
+rm -rf build/ dist/ *.egg-info/
+python3 setup.py sdist bdist_wheel
+
+# test
+tar=$(mktemp tar.XXXXXXXXX)
+git=$(mktemp git.XXXXXXXXX)
+trap cleanup INT TERM EXIT
+cleanup() {
+    rm -rf "$tar" "$git"
+}
+git ls-tree -r --name-only HEAD | grep -v '\.tar$' | sort > "$git"
+
+tar taf dist/squad-client-${v}.tar.gz | cut -d / -f 2- | grep -v '\(/$\|^$\|PKG-INFO\|egg-info\|\.pyc\)' | sort > "$tar"
+diff -u "$tar" "$git"
+
+if [ "${UPLOAD:-yes}" = 'no' ]; then
+    echo "I: not uploading packages; they are left in dist/"
+    echo "I: you can run \`./scripts/upload $v\` to make the upload"
+    return
+fi
+
+./scripts/upload "$v"
