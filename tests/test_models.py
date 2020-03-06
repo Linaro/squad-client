@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
-
 import unittest
 
 
-from squad_client.api import SquadApi
-from squad_client.models import Squad, Group, Project, Build, TestJob, TestRun, Test, Suite, Environment, Backend, EmailTemplate, KnownIssue, SuiteMetadata, Annotation, MetricThreshold, Report
+from squad_client.core.api import SquadApi
+from squad_client.core.models import Squad, Group, Project, Build, TestJob, TestRun, Test, Suite, Environment, Backend, EmailTemplate, KnownIssue, SuiteMetadata, Annotation, MetricThreshold, Report
 from squad_client.utils import first
 
 

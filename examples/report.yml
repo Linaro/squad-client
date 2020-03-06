@@ -1,0 +1,9 @@
+squad_url: http://localhost:8000
+reports:
+    - name: Name of the report
+      template: my_template.html.jinja2
+      context:
+          projects:
+              type: Project
+              filters:
+                  group__slug: lkft

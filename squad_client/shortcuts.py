@@ -1,4 +1,4 @@
-from .models import Squad
+from .core.models import Squad
 from .utils import split_build_url, first
 
 squad = Squad()

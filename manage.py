@@ -1,31 +1,28 @@
 #!/usr/bin/env python3
 
-
 import argparse
 import sys
 
 
-import tests
+from squad_client.core.command import SquadClientCommand
+from squad_client.commands import *
 
 
-class Manage:
+def main():
+    parser = argparse.ArgumentParser(prog='./manage.py')
+    parser.add_argument('--debug', action='store_true', help='display debug messages')
+    subparser = parser.add_subparsers(help='available subcommands', dest='command')
 
-    def __init__(self):
-        parser = argparse.ArgumentParser(description='Manage Squad-Client')
-        parser.add_argument('command', help='Subcommand to run')
-        args = parser.parse_args(sys.argv[1:2])
-        if not hasattr(self, args.command):
-            print('Unrecognized command')
-            parser.print_help()
-            exit(1)
-        getattr(self, args.command)()
+    SquadClientCommand.add_commands(subparser)
 
-    def test(self):
-        parser = argparse.ArgumentParser(description='Runs tests for Squad-Client')
-        args = parser.parse_args(sys.argv[2:])
-        print('Running tests')
-        tests.run()
+    args = parser.parse_args()
+    if args.command is None:
+        parser.print_help()
+        return -1
+
+    rc = SquadClientCommand.process(args)
+    return 1 if rc is False else 0 if rc is True else -1
 
 
 if __name__ == '__main__':
-    Manage()
+    sys.exit(main())

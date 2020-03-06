@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 
-from squad_client.api import SquadApi, ApiException
+from squad_client.core.api import SquadApi, ApiException
 
 
 def is_test_server_running():

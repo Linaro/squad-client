@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 
-from squad_client.api import SquadApi
+from squad_client.core.api import SquadApi
 from squad_client.shortcuts import retrieve_latest_builds, retrieve_build_results
 
 
@@ -16,4 +16,4 @@ class ShortcutsTest(TestCase):
 
     def test_retrieve_build_results(self):
         results = retrieve_build_results('lkft/linux-stable-rc-4.14-oe-sanity/build/v4.14.74')
-        print(results)
+        self.assertIsNotNone(results)

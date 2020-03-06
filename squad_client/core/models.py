@@ -4,8 +4,9 @@ from itertools import groupby
 
 
 from .api import SquadApi
-from .utils import first, parse_test_name, parse_metric_name
-from . import settings
+from squad_client.exceptions import InvalidSquadObject
+from squad_client.utils import first, parse_test_name, parse_metric_name
+from squad_client import settings
 
 
 logger = logging.getLogger('models')
@@ -18,6 +19,18 @@ ALL = -1
 class SquadObject:
     endpoint = None
     attrs = []
+    types = None
+
+    @classmethod
+    def get_type(cls, _type):
+        if SquadObject.types is None:
+            SquadObject.types = {c.__name__: c for c in SquadObject.__subclasses__() if c is not Squad}
+
+        returned_type = SquadObject.types.get(_type)
+        if returned_type is None:
+            raise InvalidSquadObject('There is no SquadObject of type "%s"' % _type)
+
+        return returned_type
 
     @property
     def __id__(self):
@@ -77,6 +90,9 @@ class SquadObject:
 
 
 class Squad(SquadObject):
+
+    def fetch(self, klass, count=ALL, **filters):
+        return self.__fetch__(klass, filters, count)
 
     def groups(self, count=DEFAULT_COUNT, **filters):
         return self.__fetch__(Group, filters, count)

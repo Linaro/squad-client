@@ -10,20 +10,56 @@ The main purpose of this tool is to ease report customization based on one's spe
 
 ## Report generation
 
-Here is a snippet of code that would help one list all groups of a SQUAD instance:
+squad-client has a built-in feature that reads in a yaml file describing a basic report with simple data querying:
 
-```python
-from squad_client.api import SquadApi
-from squad_client.models import Squad
-from jinja2 import Template
-
-SquadApi.configure(url='https://qa-reports.linaro.org/')
-groups = Squad().groups()
-
-template = Template('Groups: {% for group in groups %} {{ group.name }} {% endfor %}!')
-with open('report', 'w') as report:
-    report.write(template.render(groups=groups.values()))
+```yaml
+squad_url: http://localhost:8000
+reports:
+    - name: Name of the report
+      template: my_template.html.jinja2
+      # output: generated_report.html  # will be printed to stdout if omitted
+      context:
+          # keys under this directive are going to be available in the template
+          projects: # same as projects = Squad().projects(group__slug='lkft')
+              type: Project
+              filters:
+                  group__slug: lkft  
 ```
+
+Save that to a file named `my-report.yml`. Now write the report template:
+
+```jinja2
+{% for project_id, project in projects.items() %}
+  {{ project.slug }}
+{% endfor %}
+
+```
+
+Save that to `my_template.html.jinja2`. Now to generate that report described in `my-report.yml`, just run
+
+```sh
+./manage.py report --report-config my-report.yaml
+```
+
+The output of this command should look similar to:
+
+```
+    project: linaro-hikey-stable-rc-4.4-oe
+
+    project: linux-developer-oe
+
+    project: linux-mainline-oe
+
+    project: linux-mainline-oe-sanity
+
+    project: linux-next-oe
+
+    project: linux-next-oe-new
+    
+    ...
+```
+
+#### Complex reports
 
 More complex filtering and data retrieval are available. Here is an example of getting a specific build:
 
