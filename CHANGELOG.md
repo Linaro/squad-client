@@ -1,3 +1,9 @@
+# 0.3
+
+This release make changes Dockerfile to make it better to
+run squad-client in docker.
+
+
 # 0.2
 
 This release automates build of squad-client docker image
