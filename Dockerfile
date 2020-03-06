@@ -10,7 +10,9 @@ RUN apt-get update -q=2 && \
         python3-wheel \
         python3-yaml
 
-WORKDIR /app
+WORKDIR /squad_client
 COPY . ./
 
-RUN pip3 install -r requirements.txt
+RUN SQUAD_CLIENT_RELEASE=1 pip3 install .
+
+WORKDIR /reports

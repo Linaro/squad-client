@@ -7,8 +7,8 @@ class SquadClientCommand:
     def add_commands(subparser):
         for klass in SquadClientCommand.__subclasses__():
             obj = klass()
-            obj.register(subparser)
-            SquadClientCommand.klasses[obj.command] = obj
+            if obj.register(subparser) is None:
+                SquadClientCommand.klasses[obj.command] = obj
 
     @staticmethod
     def process(args):
