@@ -15,6 +15,7 @@ twine upload dist/*
 echo 'Login to hub.docker.com:'
 docker login
 docker push qareports/squad-client:$v
+docker push qareports/squad-client
 
 # Push to github
 git tag -s -m "SQUAD Client release $v" "$v"
