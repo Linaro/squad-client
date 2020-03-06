@@ -7,8 +7,8 @@ import sys
 sys.path.append('..')
 
 
-from squad_client.api import SquadApi
-from squad_client.models import Squad
+from squad_client.core.api import SquadApi
+from squad_client.core.models import Squad
 
 
 SquadApi.configure(url='https://qa-reports.linaro.org/', token=os.getenv('QA_REPORTS_TOKEN'))
