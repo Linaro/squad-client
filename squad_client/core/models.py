@@ -183,7 +183,7 @@ class Project(SquadObject):
 class Build(SquadObject):
 
     endpoint = '/api/builds/'
-    attrs = ['url', 'id', 'testjobs', 'status', 'finished',
+    attrs = ['url', 'id', 'testjobs', 'finished',
              'version', 'created_at', 'datetime', 'patch_id', 'keep_data', 'project',
              'patch_source', 'patch_baseline']
 
@@ -198,6 +198,7 @@ class Build(SquadObject):
         return testruns
 
     __metadata__ = None
+    __status__ = None
 
     @property
     def metadata(self):
@@ -208,11 +209,24 @@ class Build(SquadObject):
             self.__metadata__ = first(objects)
         return self.__metadata__
 
+    @property
+    def status(self):
+        if self.__status__ is None:
+            endpoint = '%s%d/status' % (self.endpoint, self.id)
+            response = SquadApi.get(endpoint)
+            objects = self.__fill__(BuildStatus, [response.json()])
+            self.__status__ = first(objects)
+        return self.__status__
+
     def __repr__(self):
         return self.version
 
 
 class BuildMetadata(SquadObject):
+    pass
+
+
+class BuildStatus(SquadObject):
     pass
 
 
