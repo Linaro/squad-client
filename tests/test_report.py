@@ -61,6 +61,7 @@ class ReportTest(unittest.TestCase):
         generated = report.generate()
         self.assertEqual('Report: fetched string', generated)
 
+
 class ReportGeneratorTest(unittest.TestCase):
 
     @patch('squad_client.core.models.Squad.fetch')
@@ -82,5 +83,4 @@ class ReportGeneratorTest(unittest.TestCase):
 
         self.assertEqual(1, len(reports))
 
-        report = reports[0]
         self.assertEqual('Report: fetched string', output.getvalue())

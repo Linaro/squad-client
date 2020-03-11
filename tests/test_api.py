@@ -32,4 +32,3 @@ class SquadApiTest(TestCase):
                 SquadApi.get('/api/groups')
         else:
             self.assertTrue(SquadApi.get('/api/groups') is not None)
-

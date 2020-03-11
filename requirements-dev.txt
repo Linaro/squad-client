@@ -1,2 +1,3 @@
 squad
 coverage
+flake8

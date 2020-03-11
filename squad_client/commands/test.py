@@ -1,15 +1,17 @@
-import sys
 import os
 
 
 from squad_client.core.command import SquadClientCommand
 
+
 INCLUDE_TESTS_CMD = True
+
 
 try:
     import tests
 except ImportError:
     INCLUDE_TESTS_CMD = False
+
 
 class TestCommand(SquadClientCommand):
     command = 'test'
