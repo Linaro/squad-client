@@ -40,9 +40,13 @@ class SquadObject:
         objects = {}
         for result in results:
             obj = klass()
-            attrs = klass.attrs if len(klass.attrs) else [attr for attr in result.keys()]
+            attrs = klass.attrs if len(klass.attrs) else [attr.replace(' ', '_') for attr in result.keys()]
             for attr in attrs:
-                setattr(obj, attr.replace(' ', '_').replace('/','_').replace('-','_'), result[attr])
+                try:
+                    setattr(obj, attr, result[attr])
+                except (AttributeError, KeyError) as e:
+                    print(e)
+                    print(attr)
             objects[obj.__id__] = obj
 
         return objects
@@ -183,9 +187,14 @@ class Project(SquadObject):
 class Build(SquadObject):
 
     endpoint = '/api/builds/'
-    attrs = ['url', 'id', 'testjobs', 'finished',
+    attrs = ['url', 'id', 'testjobs', 'status', 'finished',
              'version', 'created_at', 'datetime', 'patch_id', 'keep_data', 'project',
              'patch_source', 'patch_baseline']
+
+    total_pass_summary = 0
+    total_fail_summary = 0
+    total_skip_summary = 0
+    total_xfail_summary = 0
 
     def testruns(self, count=ALL, bucket_suites=False, **filters):
         filters.update({'build': self.id})
@@ -194,11 +203,14 @@ class Build(SquadObject):
         if bucket_suites:
             for _id in testruns.keys():
                 testruns[_id].bucket_metric_and_test_suites()
+                self.total_pass_summary += testruns[_id].total_pass
+                self.total_fail_summary += testruns[_id].total_fail
+                self.total_skip_summary += testruns[_id].total_skip
+                self.total_xfail_summary += testruns[_id].total_xfail
 
         return testruns
 
     __metadata__ = None
-    __status__ = None
 
     @property
     def metadata(self):
@@ -209,24 +221,11 @@ class Build(SquadObject):
             self.__metadata__ = first(objects)
         return self.__metadata__
 
-    @property
-    def status(self):
-        if self.__status__ is None:
-            endpoint = '%s%d/status' % (self.endpoint, self.id)
-            response = SquadApi.get(endpoint)
-            objects = self.__fill__(BuildStatus, [response.json()])
-            self.__status__ = first(objects)
-        return self.__status__
-
     def __repr__(self):
         return self.version
 
 
 class BuildMetadata(SquadObject):
-    pass
-
-
-class BuildStatus(SquadObject):
     pass
 
 
@@ -245,8 +244,13 @@ class TestRun(SquadObject):
     endpoint = '/api/testruns/'
     attrs = ['url', 'id', 'metadata_file', 'log_file',
              'created_at', 'completed', 'datetime', 'build_url',
-             'job_id', 'job_status', 'job_url', 'resubmit_url', 'data_processed',
-             'status_recorded', 'build', 'environment']
+             'job_id', 'job_status', 'job_url', 'resubmit_url',
+             'data_processed', 'status_recorded', 'build',
+             'environment']
+    total_fail = 0
+    total_pass = 0
+    total_skip = 0
+    total_xfail = 0
 
     def __setattr__(self, attr, value):
         if attr == 'environment' and value.startswith('http'):
@@ -292,7 +296,18 @@ class TestRun(SquadObject):
             for suite_name, tests in groupby(sorted(all_tests.values(), key=lambda t: t.name), lambda t: parse_test_name(t.name)[0]):
                 test_suite = TestRun.TestSuite()
                 test_suite.name = suite_name
-                test_suite.tests = [t for t in tests]
+                tests_bucket = []
+                for test in tests:
+                    tests_bucket.append(test)
+                    if test.status == 'pass':
+                        self.total_pass += 1
+                    elif test.status == 'fail':
+                        self.total_fail += 1
+                    elif test.status == 'skip':
+                        self.total_skip += 1
+                    else:
+                        self.total_xfail += 1
+                    test_suite.tests = tests_bucket
                 self.test_suites.append(test_suite)
 
         all_metrics = self.metrics()
