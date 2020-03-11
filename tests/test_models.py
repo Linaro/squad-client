@@ -1,12 +1,12 @@
 import unittest
 
-
+from . import settings
 from squad_client.core.api import SquadApi
-from squad_client.core.models import Squad
+from squad_client.core.models import Squad, ALL
 from squad_client.utils import first
 
 
-SquadApi.configure(url='http://localhost:8000')
+SquadApi.configure(url='http://localhost:%s' % settings.DEFAULT_SQUAD_PORT)
 
 
 class SquadTest(unittest.TestCase):
@@ -23,16 +23,19 @@ class SquadTest(unittest.TestCase):
         self.assertEqual(0, len(groups))
 
     def test_groups_with_count(self):
-        four_groups = self.squad.groups(count=4)
-        self.assertEqual(4, len(four_groups))
+        all_groups = self.squad.groups(count=ALL)
+        self.assertEqual(2, len(all_groups))
+
+        one_groups = self.squad.groups(count=1)
+        self.assertEqual(1, len(one_groups))
 
     def test_not_found_group(self):
         not_found_group = self.squad.group('this-group-does-not-really-exist')
         self.assertEqual(None, not_found_group)
 
     def test_group(self):
-        lkft_group = self.squad.group('lkft')
-        self.assertTrue(lkft_group is not None)
+        group = self.squad.group('my_group')
+        self.assertTrue(group is not None)
 
     def test_projects(self):
         projects = self.squad.projects()
