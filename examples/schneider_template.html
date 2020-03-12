@@ -26,6 +26,25 @@
                             <th scope="row">build location</th>
                             <td>{{ build.metadata.build_location }}</td>
                         </tr>
+			<tr>
+				<th scope="row">Total Pass Summary</th>
+				<td>{{ build.status.tests_pass if build.status.tests_pass else 0 }}</tr>
+			</tr>
+			<tr>
+				<th scope="row">Total Fail Summary</th>
+				<td>{{ build.status.tests_fail if build.status.tests_fail else 0 }}</tr>
+			</tr>
+			<tr>
+				<th scope="row">Total Skip Summary</th>
+				<td>{{ build.status.tests_skip if build.status.tests_skip else 0}}</tr>
+			</tr>
+			<tr>
+				<th scope="row">Total Xfail Summary</th>
+				<td>{{ build.status.xfail if build.status.xfail else 0}}</tr>
+			</tr>
+			<tr>
+				<th scope="row">Total Tests</th>
+				<td>{{ build.status.tests_total }}</tr>
                     </table>
                 </div>
             </div>
@@ -36,11 +55,11 @@
                     <table class="table">
                         <tr>
                             <th scope="row">Job</th>
-                            <td><a href="https://validation.linaro.org/scheduler/job/{{ testrun.job_id }}">Job url</a></td>
+			    <td><a href="https://validation.linaro.org/scheduler/job/{{ testrun.job_id }}">{{ testrun.id }}</a></td>
                         </tr>
                         <tr>
                             <th scope="row">Environment</th>
-                            <td>{{ testrun.environment.slug }}</td>
+			    <td>{{ testrun.environment.slug }}</td>
                         </tr>
                         <tr>
                             <th scope="row">Tests</th>
@@ -58,7 +77,8 @@
                                                 <tbody>
                                                     {% for test in suite.tests %}
                                                     <tr>
-                                                        <td>{{ test.short_name }} ({{ test.status }})</td>
+                                                        <td class="col-10">{{ test.short_name }}</td>
+							<td class="col-2" style="background-color:{{'blue' if test.status == 'xfail' else 'red' if test.status == 'fail' else 'yellow' if test.status == 'skip'}}">{{ test.status }}</td>
                                                     </tr>
                                                     {% endfor %}
                                                 </tbody>
@@ -69,6 +89,22 @@
                                 </table>
                             </td>
                         </tr>
+			<tr>
+				<th scope="row">Total Pass</th>
+				<td>{{ testrun.total_pass }}</td>
+			</tr>
+			<tr>
+				<th scope="row">Total Fail</th>
+				<td>{{ testrun.total_fail }}</td>
+			</tr>
+			<tr>
+				<th scope="row">Total Skip</th>
+				<td>{{ testrun.total_skip }}</td>
+			</tr>
+			<tr>
+				<th scope="row">Total xfail</th>
+				<td>{{ testrun.total_xfail }}</td>
+			</tr>
                     </table>
                 </div>
                 <div class="spacer"></div>
