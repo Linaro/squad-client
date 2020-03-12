@@ -24,3 +24,8 @@ template = templateEnv.get_template(TEMPLATE_FILE)
 outputText = template.render(group=group, project=project, build=build, testruns=testruns)
 with open('schneider_generated_report.html', 'w') as reportFile:
     reportFile.write(outputText)
+if os.getenv('TO_PDF'):
+    bash_cmd = "wkhtmltopdf schneider_generated_report.html schneider_generated_report.pdf"
+    import subprocess
+    process = subprocess.Popen(bash_cmd.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()

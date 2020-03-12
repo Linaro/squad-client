@@ -8,7 +8,8 @@ RUN apt-get update -q=2 && \
         python3-pip \
         python3-setuptools \
         python3-wheel \
-        python3-yaml
+        python3-yaml \
+        wkhtmltopdf
 
 WORKDIR /squad_client
 COPY . ./
