@@ -245,8 +245,13 @@ class TestRun(SquadObject):
     endpoint = '/api/testruns/'
     attrs = ['url', 'id', 'metadata_file', 'log_file',
              'created_at', 'completed', 'datetime', 'build_url',
-             'job_id', 'job_status', 'job_url', 'resubmit_url', 'data_processed',
-             'status_recorded', 'build', 'environment']
+             'job_id', 'job_status', 'job_url', 'resubmit_url',
+             'data_processed', 'status_recorded', 'build',
+             'environment']
+    total_fail = 0
+    total_pass = 0
+    total_skip = 0
+    total_xfail = 0
 
     def __setattr__(self, attr, value):
         if attr == 'environment' and value.startswith('http'):
@@ -292,7 +297,18 @@ class TestRun(SquadObject):
             for suite_name, tests in groupby(sorted(all_tests.values(), key=lambda t: t.name), lambda t: parse_test_name(t.name)[0]):
                 test_suite = TestRun.TestSuite()
                 test_suite.name = suite_name
-                test_suite.tests = [t for t in tests]
+                tests_bucket = []
+                for test in tests:
+                    tests_bucket.append(test)
+                    if test.status == 'pass':
+                        self.total_pass += 1
+                    elif test.status == 'fail':
+                        self.total_fail += 1
+                    elif test.status == 'skip':
+                        self.total_skip += 1
+                    else:
+                        self.total_xfail += 1
+                    test_suite.tests = tests_bucket
                 self.test_suites.append(test_suite)
 
         all_metrics = self.metrics()
