@@ -23,9 +23,13 @@
                 <div id="build-details">
                     <table class="table">
                         <tr>
-                            <th scope="row">build location</th>
-                            <td>{{ build.metadata.build_location }}</td>
-                        </tr>
+							<th scope="row" rowspan="{{ build.metadata.build_location|length }}">build location</th>
+							{% for location in build.metadata.build_location %}
+                            <td>{{ location  }}</td>
+						</tr>
+                        <tr>
+						    {% endfor %}
+						</tr>
 			<tr>
 				<th scope="row">Total Pass Summary</th>
 				<td>{{ build.status.tests_pass if build.status.tests_pass else 0 }}</tr>
@@ -49,65 +53,24 @@
                 </div>
             </div>
             <div id="testrun-list">
-                <h2>Test results per Job<h2>
-                {% for testrun in testruns %}
-                <div class="testrun">
-                    <table class="table">
-                        <tr>
-                            <th scope="row">Job</th>
-			    <td><a href="https://validation.linaro.org/scheduler/job/{{ testrun.job_id }}">{{ testrun.id }}</a></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Environment</th>
-			    <td>{{ testrun.environment.slug }}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Tests</th>
-                            <td>
-                                <table class="table">
-                                    <tr>
-                                        <th scope="col">Suite</th>
-                                        <th scope="col">Test</th>
-                                    </tr>
-                                    {% for suite in testrun.test_suites %}
-                                    <tr>
-                                        <th scope="row">{{ suite.name }}</th>
-                                        <td>
-                                            <table class="table">
-                                                <tbody>
-                                                    {% for test in suite.tests %}
-                                                    <tr>
-                                                        <td class="col-10">{{ test.short_name }}</td>
-							<td class="col-2" style="background-color:{{'blue' if test.status == 'xfail' else 'red' if test.status == 'fail' else 'yellow' if test.status == 'skip'}}">{{ test.status }}</td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </table>
-                            </td>
-                        </tr>
-			<tr>
-				<th scope="row">Total Pass</th>
-				<td>{{ testrun.total_pass }}</td>
-			</tr>
-			<tr>
-				<th scope="row">Total Fail</th>
-				<td>{{ testrun.total_fail }}</td>
-			</tr>
-			<tr>
-				<th scope="row">Total Skip</th>
-				<td>{{ testrun.total_skip }}</td>
-			</tr>
-			<tr>
-				<th scope="row">Total xfail</th>
-				<td>{{ testrun.total_xfail }}</td>
-			</tr>
-                    </table>
-                </div>
-                <div class="spacer"></div>
+                <h2>LAVA test results<h2>
+                {% for env_name, env_results in environments.items() %}
+				  <h3>{{ env_name }}<h3>
+					<table class="table" border="1">
+					  <tr><th>Test Suite</th><th>Test</th><th>Result</th></tr>
+				      {% for suite_name, results in env_results.items() %}
+					  <tr>
+						  <td rowspan="{{ results|length }}">{{ suite_name }}</td>
+						  {% for test in results %}
+						  <td class="col-10">{{ test.short_name }}</td>
+						  <td class="col-2" style="background-color:{{'blue' if test.status == 'xfail' else 'red' if test.status == 'fail' else 'yellow' if test.status == 'skip'}}">{{ test.status }}</td>
+					  </tr>
+					  <tr>
+						  {% endfor %}
+					  </tr>
+					  {% endfor %}
+					</table>
+                  <div class="spacer"></div>
                 {% endfor %}
             </div><!-- / testrun-list -->
         </div>
