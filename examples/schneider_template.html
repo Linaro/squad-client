@@ -1,3 +1,4 @@
+{% set base_url = 'https://qa-reports.linaro.org/%s/%s/' % (group.slug, project.slug) -%}
 <html>
     <head>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -23,7 +24,7 @@
     <body>
         <div id="content" class="container">
             <div id="introduction">
-                <h1>Schneider Report for build {{ build.version }}</h1>
+                <h1>Schneider Report for <a href="{{ base_url + 'build/' + build.version + '/' }}">build {{ build.version }}<a/></h1>
             </div>
             <div id="build">
                 <h2>Details for build {{ build.version }}<h2>
@@ -35,7 +36,9 @@
                                 <table>
                                         {% for location in build.metadata.build_location %}
                                         <tr>
-                                            <td style="border: none;">{{ location  }}</td>
+                                            <td style="border: none;">
+                                                <a href="{{ location }}">{{ location  }}</a>
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                 </table>
@@ -80,7 +83,9 @@
                     </tr>
                     {% for test in results -%}
                     <tr>
-                        <td>{{ test.short_name }}</td>
+                        <td>
+                            <a href="{{ base_url + 'tests/' + test.name }}">{{ test.short_name }}</a>
+                        </td>
                         <td style="background-color: {{ 'blue' if test.status == 'xfail' else 'red' if test.status == 'fail' else 'yellow' if test.status == 'skip' else 'green' }}">
                             {{ test.status }}
                         </td>
