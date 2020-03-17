@@ -23,7 +23,9 @@
     </head>
     <body>
         <div id="content" class="container">
-            <div id="introduction"></div>
+            {% if intro %}
+            <div id="introduction">{{ intro }}</div>
+            {% endif %}
             <div id="build">
                 <h2>Details for <a href="{{ base_url + 'build/' + build.version + '/' }}">build {{ build.version }}<a/><h2>
                 <div id="build-details">
