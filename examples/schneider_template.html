@@ -7,6 +7,14 @@
                 margin-bottom: 0px;
             }
 
+            .table td, .table th {
+                vertical-align: middle;
+            }
+
+            .no-border {
+                border-top: none;
+            }
+
             .spacer {
                 height: 20px;
             }
@@ -16,63 +24,73 @@
         <div id="content" class="container">
             <div id="introduction">
                 <h1>Schneider Report for build {{ build.version }}</h1>
-                <p>(-- write important text for the report here --)
             </div>
             <div id="build">
                 <h2>Details for build {{ build.version }}<h2>
                 <div id="build-details">
                     <table class="table">
                         <tr>
-							<th scope="row" rowspan="{{ build.metadata.build_location|length }}">build location</th>
-							{% for location in build.metadata.build_location %}
-                            <td>{{ location  }}</td>
-						</tr>
+                            <th rowspan="{{ build.metadata.build_location|length - 1 }}" scope="row">Build Location</th>
+                            <td>
+                                <table>
+                                        {% for location in build.metadata.build_location %}
+                                        <tr>
+                                            <td style="border: none;">{{ location  }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                </table>
+                            </td>
+                        </tr>
                         <tr>
-						    {% endfor %}
-						</tr>
-			<tr>
-				<th scope="row">Total Pass Summary</th>
-				<td>{{ build.status.tests_pass if build.status.tests_pass else 0 }}</tr>
-			</tr>
-			<tr>
-				<th scope="row">Total Fail Summary</th>
-				<td>{{ build.status.tests_fail if build.status.tests_fail else 0 }}</tr>
-			</tr>
-			<tr>
-				<th scope="row">Total Skip Summary</th>
-				<td>{{ build.status.tests_skip if build.status.tests_skip else 0}}</tr>
-			</tr>
-			<tr>
-				<th scope="row">Total Xfail Summary</th>
-				<td>{{ build.status.xfail if build.status.xfail else 0}}</tr>
-			</tr>
-			<tr>
-				<th scope="row">Total Tests</th>
-				<td>{{ build.status.tests_total }}</tr>
+                            <th scope="row">Total Pass Summary</th>
+                            <td>{{ build.status.tests_pass if build.status.tests_pass else 0 }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Fail Summary</th>
+                            <td>{{ build.status.tests_fail if build.status.tests_fail else 0 }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Skip Summary</th>
+                            <td>{{ build.status.tests_skip if build.status.tests_skip else 0}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Xfail Summary</th>
+                            <td>{{ build.status.xfail if build.status.xfail else 0}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Tests</th>
+                            <td>{{ build.status.tests_total }}</td>
+                        </tr>
                     </table>
                 </div>
             </div>
             <div id="testrun-list">
-                <h2>LAVA test results<h2>
+                <h2>LAVA test results</h2>
                 {% for env_name, env_results in environments.items() %}
-				  <h3>{{ env_name }}<h3>
-					<table class="table" border="1">
-					  <tr><th>Test Suite</th><th>Test</th><th>Result</th></tr>
-				      {% for suite_name, results in env_results.items() %}
-					  <tr>
-						  <td rowspan="{{ results|length }}">{{ suite_name }}</td>
-						  {% for test in results %}
-						  <td class="col-10">{{ test.short_name }}</td>
-						  <td class="col-2" style="background-color:{{'blue' if test.status == 'xfail' else 'red' if test.status == 'fail' else 'yellow' if test.status == 'skip'}}">{{ test.status }}</td>
-					  </tr>
-					  <tr>
-						  {% endfor %}
-					  </tr>
-					  {% endfor %}
-					</table>
-                  <div class="spacer"></div>
+                <h3>{{ env_name }}</h3>
+                <table class="table" border="1">
+                    <tr>
+                        <th class="col-2">Test Suite</th>
+                        <th class="col-9">Test</th>
+                        <th class="col-1">Result</th>
+                    </tr>
+                    {% for suite_name, results in env_results.items() -%}
+                    <tr>
+                        <td rowspan="{{ results|length + 1}}">{{ suite_name }}</td>
+                    </tr>
+                    {% for test in results -%}
+                    <tr>
+                        <td>{{ test.short_name }}</td>
+                        <td style="background-color: {{ 'blue' if test.status == 'xfail' else 'red' if test.status == 'fail' else 'yellow' if test.status == 'skip' else 'green' }}">
+                            {{ test.status }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endfor %}
+                </table>
                 {% endfor %}
-            </div><!-- / testrun-list -->
+                <div class="spacer"></div>
+            </div>
         </div>
     </body>
 </html>
