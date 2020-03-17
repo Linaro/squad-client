@@ -35,6 +35,11 @@ parser.add_argument('--template',
         dest='template',
         required=True,
         help='Rendering template')
+parser.add_argument('--intro',
+        dest='intro',
+        required=False,
+        default=None,
+        help='Free form text or HTML to be added to template introduction')
 parser.add_argument('--output',
         dest='output',
         required=True,
@@ -66,10 +71,15 @@ for env in squad_envs.values():
         else:
             suites.update({suite_name: [test]})
 
+intro = None
+if args.intro:
+    with open(args.intro, 'r') as f:
+        intro = f.read()
+
 templateLoader = jinja2.FileSystemLoader(searchpath="./")
 templateEnv = jinja2.Environment(loader=templateLoader)
 template = templateEnv.get_template(args.template)
-outputText = template.render(group=group, project=project, build=build, environments=envs)
+outputText = template.render(group=group, project=project, build=build, environments=envs, intro=intro)
 with open(args.output, 'w') as reportFile:
     reportFile.write(outputText)
 

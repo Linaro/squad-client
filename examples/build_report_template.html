@@ -1,0 +1,101 @@
+{% set base_url = 'https://qa-reports.linaro.org/%s/%s/' % (group.slug, project.slug) -%}
+<html>
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <style>
+            .table {
+                border: 1px solid #DDD;
+                margin-bottom: 0px;
+            }
+
+            .table td, .table th {
+                vertical-align: middle;
+            }
+
+            .no-border {
+                border-top: none;
+            }
+
+            .spacer {
+                height: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="content" class="container">
+            {% if intro %}
+            <div id="introduction">{{ intro }}</div>
+            {% endif %}
+            <div id="build">
+                <h2>Details for <a href="{{ base_url + 'build/' + build.version + '/' }}">build {{ build.version }}<a/><h2>
+                <div id="build-details">
+                    <table class="table">
+                        <tr>
+                            <th rowspan="{{ build.metadata.build_location|length - 1 }}" scope="row">Build Location</th>
+                            <td>
+                                <table>
+                                        {% for location in build.metadata.build_location %}
+                                        <tr>
+                                            <td style="border: none;">
+                                                <a href="{{ location }}">{{ location  }}</a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Pass Summary</th>
+                            <td>{{ build.status.tests_pass if build.status.tests_pass else 0 }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Fail Summary</th>
+                            <td>{{ build.status.tests_fail if build.status.tests_fail else 0 }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Skip Summary</th>
+                            <td>{{ build.status.tests_skip if build.status.tests_skip else 0}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Xfail Summary</th>
+                            <td>{{ build.status.xfail if build.status.xfail else 0}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Total Tests</th>
+                            <td>{{ build.status.tests_total }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="testrun-list">
+                <h2>LAVA test results</h2>
+                {% for env_name, env_results in environments.items() %}
+                <h3>{{ env_name }}</h3>
+                <table class="table" border="1">
+                    <tr>
+                        <th class="col-2">Test Suite</th>
+                        <th class="col-9">Test</th>
+                        <th class="col-1">Result</th>
+                    </tr>
+                    {% for suite_name, results in env_results.items() -%}
+                    <tr>
+                        <td rowspan="{{ results|length + 1}}">{{ suite_name }}</td>
+                    </tr>
+                    {% for test in results -%}
+                    <tr>
+                        <td>
+                            <a href="{{ base_url + 'tests/' + test.name }}">{{ test.short_name }}</a>
+                        </td>
+                        <td style="background-color: {{ 'blue' if test.status == 'xfail' else 'red' if test.status == 'fail' else 'yellow' if test.status == 'skip' else 'green' }}">
+                            {{ test.status }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% endfor %}
+                </table>
+                {% endfor %}
+                <div class="spacer"></div>
+            </div>
+        </div>
+    </body>
+</html>
