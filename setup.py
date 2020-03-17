@@ -31,7 +31,7 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'squad-client-manage=squad_client.manage:main',
+            'squad-client=squad_client.manage:main',
         ]
     },
     install_requires=requirements,
