@@ -9,7 +9,7 @@
             }
 
             .table td, .table th {
-                vertical-align: middle;
+                vertical-align: left;
             }
 
             .no-border {
@@ -69,30 +69,76 @@
             </div>
             <div id="testrun-list">
                 <h2>LAVA test results</h2>
-                {% for env_name, env_results in environments.items() %}
+                {% for env_name, testruns in environments.items() %}
                 <h3>{{ env_name }}</h3>
+                {% for testrun in testruns %}
                 <table class="table" border="1">
+                    <tr>
+                        <th class="col-2">TestJob</th>
+                        <td class="col-10" colspan="2"><a href="{{testrun.job_url}}">{{ testrun.job_id }}</a></td>
+                    </tr>
                     <tr>
                         <th class="col-2">Test Suite</th>
                         <th class="col-9">Test</th>
                         <th class="col-1">Result</th>
                     </tr>
-                    {% for suite_name, results in env_results.items() -%}
+                    {% for test_suite in testrun.test_suites %}
                     <tr>
-                        <td rowspan="{{ results|length + 1}}">{{ suite_name }}</td>
+                        <td rowspan="{{ test_suite.tests|length + 1}}">{{ test_suite.name }}</td>
                     </tr>
-                    {% for test in results -%}
+                        {% for test in test_suite.tests %}
+                        <tr>
+                            <td>
+                                <a href="{{ base_url + 'build/' + build.version + '/testrun/' + testrun.job_id + '/suite/' + test_suite.name + '/tests' }}">{{ test.short_name }}</a>
+                            </td>
+                            <td style="background-color: {{ '#45B8E3' if test.status == 'xfail' else '#E04051' if test.status == 'fail' else '#DDDD0D' if test.status == 'skip' else '#FFFFFF' }}">
+                                {{ test.status }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
                     <tr>
-                        <td>
-                            <a href="{{ base_url + 'tests/' + test.name }}">{{ test.short_name }}</a>
-                        </td>
-                        <td style="background-color: {{ 'blue' if test.status == 'xfail' else 'red' if test.status == 'fail' else 'yellow' if test.status == 'skip' else 'green' }}">
-                            {{ test.status }}
-                        </td>
+                        <th class="col-2">Total Pass</th>
+                        <td class="col-10" colspan="2">{{ testrun.total_pass }}</td>
                     </tr>
-                    {% endfor %}
-                    {% endfor %}
+                    <tr>
+                        <th class="col-2">Total Fail</th>
+                        <td class="col-10" colspan="2">{{ testrun.total_fail }}</td>
+                    </tr>
+                    <tr>
+                        <th class="col-2">Total Skip</th>
+                        <td class="col-10" colspan="2">{{ testrun.total_skip }}</td>
+                    </tr>
+                    <tr>
+                        <th class="col-2">Total Xfail</th>
+                        <td class="col-10" colspan="2">{{ testrun.total_xfail }}</td>
+                    </tr>
+                    </br>
+                    {% if testrun.metric_suites|length %}
+                        <tr>
+                            <th class="col-2">Metric Suite</th>
+                            <th class="col-9">Metric</th>
+                            <th class="col-1">Result</th>
+                        </tr>
+
+                        {% for metric_suite in testrun.metric_suites %}
+                        <tr>
+                            <td rowspan="{{ metric_suite.metrics|length + 1}}">{{ metric_suite.name }}</td>
+                        </tr>
+                            {% for metric in metric_suite.metrics %}
+                            <tr>
+                                <td>
+                                    <a href="{{ base_url + 'build/' + build.version + '/testrun/' + testrun.job_id + '/suite/' + metric_suite.name + '/metrics' }}">{{ metric.name.split("/")[1] }}</a>
+                                </td>
+                                <td>
+                                    {{ metric.result }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endif %}
                 </table>
+                {% endfor %}
                 {% endfor %}
                 <div class="spacer"></div>
             </div>

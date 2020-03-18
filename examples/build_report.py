@@ -7,7 +7,7 @@ import sys
 sys.path.append('..')
 
 from squad_client.core.api import SquadApi
-from squad_client.core.models import Squad
+from squad_client.core.models import Squad, ALL
 
 
 parser = argparse.ArgumentParser()
@@ -55,21 +55,15 @@ SquadApi.configure(url=args.server, token=args.token)
 group = Squad().group(args.group)
 project = group.project(args.project)
 build = project.build(args.build)
+testruns = build.testruns(ALL, True)
 
-squad_envs = Squad().environments(project=project.id)
-squad_suites = Squad().suites(project=project.id)
 envs = {}
-for env in squad_envs.values():
-    suites = {}
-    envs.update({env.slug: suites})
-    tests = Squad().tests(test_run__environment=env.id, test_run__build=build.id)
-    # group tests by suite
-    for test in tests.values():
-        suite_name = squad_suites[test.suite].slug
-        if suite_name in suites.keys():
-            suites[suite_name].append(test)
-        else:
-            suites.update({suite_name: [test]})
+for tr in testruns.values():
+    env_slug = tr.environment.slug
+    if env_slug in envs.keys():
+        envs[env_slug].append(tr)
+    else:
+        envs.update({env_slug: [tr]})
 
 intro = None
 if args.intro:
