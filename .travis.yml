@@ -1,0 +1,12 @@
+dist: bionic
+language: python
+python:
+  - 3.6
+cache: pip
+services:
+env:
+  - SCRIPT="./manage.py test -v"
+install:
+  - pip install -r requirements-dev.txt
+script:
+  - $SCRIPT
