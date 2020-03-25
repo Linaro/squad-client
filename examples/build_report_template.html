@@ -1,4 +1,4 @@
-{% set base_url = 'https://qa-reports.linaro.org/%s/%s/' % (group.slug, project.slug) -%}
+{% set base_url = 'https://qa-reports.linaro.org/%s/%s/' % (group.slug, project.slug) %}
 <html>
     <head>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -10,6 +10,12 @@
 
             .table td, .table th {
                 vertical-align: middle;
+		text-align: left;
+            }
+
+            .break-word{
+                word-break: break-word;
+
             }
 
             .no-border {
@@ -19,6 +25,7 @@
             .spacer {
                 height: 20px;
             }
+
         </style>
     </head>
     <body>
@@ -27,23 +34,38 @@
             <div id="introduction">{{ intro }}</div>
             {% endif %}
             <div id="build">
-                <h2>Details for <a href="{{ base_url + 'build/' + build.version + '/' }}">build {{ build.version }}<a/><h2>
+                <h2>Details for <a href="{{ base_url + 'build/' + build.version + '/' }}">build {{ build.version }}</a></h2>
                 <div id="build-details">
                     <table class="table">
+			    {% for key, value in build.metadata.__dict__.items() %}
+			    {% if value is iterable and value is not string %}
+			    <th rowspan="{{ value|length + 1}}" scope="row">{{key}}</th>
+			    <td>
+				    {% for v in value %}
+				    <tr>
+					    <td style="border: none;">
+						    {% if v|string and v is not mapping and v.startswith('http') %}
+						    <a href="{{ v }}">{{ v }}</a>
+						    {% else %}
+						    {{ v }}
+						    {% endif %}
+					    </td>
+				    </tr>
+                                {% endfor %}
+                           </td>
+			{% else %}
                         <tr>
-                            <th rowspan="{{ build.metadata.build_location|length - 1 }}" scope="row">Build Location</th>
-                            <td>
-                                <table>
-                                        {% for location in build.metadata.build_location %}
-                                        <tr>
-                                            <td style="border: none;">
-                                                <a href="{{ location }}">{{ location  }}</a>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                </table>
-                            </td>
-                        </tr>
+				<th scope="row">{{key}}</th>
+				<td style="border: none;">
+					{% if value is not number and value.startswith('http') %}
+					<a href="{{ value }}">{{ value }}</a>
+					{% else %}
+					{{ value }}
+					{% endif %}
+				</td>
+			</tr>
+			{% endif %}
+			{% endfor %}
                         <tr>
                             <th scope="row">Total Pass Summary</th>
                             <td>{{ build.status.tests_pass if build.status.tests_pass else 0 }}</td>
@@ -74,25 +96,25 @@
                 <table class="table" border="1">
                     <tr>
                         <th class="col-2">Test Suite</th>
-                        <th class="col-9">Test</th>
+                        <th class="col-5 break-word">Test</th>
                         <th class="col-1">Result</th>
                     </tr>
-                    {% for suite_name, results in env_results.items() -%}
+                    {% for suite_name, results in env_results.items() %}
                     <tr>
-                        <td rowspan="{{ results|length + 1}}">{{ suite_name }}</td>
+                        <td class="col-2" rowspan="{{ results|length + 1}}">{{ suite_name }}</td>
                     </tr>
-                    {% for test in results -%}
-                    <tr>
-                        <td>
-                            <a href="{{ base_url + 'tests/' + test.name }}">{{ test.short_name }}</a>
-                        </td>
-                        <td style="background-color: {{ 'blue' if test.status == 'xfail' else 'red' if test.status == 'fail' else 'yellow' if test.status == 'skip' else 'green' }}">
-                            {{ test.status }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                    {% endfor %}
-                </table>
+                        {% for test in results %}
+                            <tr>
+                                <td class="col-5 break-word">
+    				    <a href="{{ base_url + 'build/' + build.version + '/testrun/' + test.test_run|string + '/suite/' + suite_name + '/tests' }}">{{ test.short_name }}</a>
+                                </td>
+                                <td style="background-color: {{ '#45B8E3' if test.status == 'xfail' else '#E04051' if test.status == 'fail' else '#DDDD0D' if test.status == 'skip' else '#FFFFFF' }}">
+                                    {{ test.status }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+    		    {% endfor %}
+                 </table>
                 {% endfor %}
                 <div class="spacer"></div>
             </div>

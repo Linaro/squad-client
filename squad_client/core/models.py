@@ -21,6 +21,11 @@ class SquadObject:
     attrs = []
     types = None
 
+    def __init__(self, _id=None):
+        if _id:
+            self.endpoint += str(_id)
+            self.__fetch__()
+
     @classmethod
     def get_type(cls, _type):
         if SquadObject.types is None:
@@ -36,13 +41,21 @@ class SquadObject:
     def __id__(self):
         return self.id if 'id' in self.attrs else uuid.uuid1()
 
+    def __fill_object__(self, result, obj=None):
+
+        if obj is None:
+            obj = self
+
+        attrs = obj.attrs if len(obj.attrs) else [attr for attr in result.keys()]
+        for attr in attrs:
+            setattr(obj, attr.replace(' ', '_').replace('/', '_').replace('-', '_'), result[attr])
+
     def __fill__(self, klass, results):
+
         objects = {}
         for result in results:
             obj = klass()
-            attrs = klass.attrs if len(klass.attrs) else [attr for attr in result.keys()]
-            for attr in attrs:
-                setattr(obj, attr.replace(' ', '_').replace('/', '_').replace('-', '_'), result[attr])
+            self.__fill_object__(result, obj)
             objects[obj.__id__] = obj
 
         return objects
@@ -55,12 +68,18 @@ class SquadObject:
 
         return '%s(%s)' % (class_name, ', '.join(attrs_str))
 
-    def __fetch__(self, klass, filters, count):
+    def __fetch__(self, klass=None, filters=None, count=DEFAULT_COUNT):
         """
             Generic get method to retrieve objects from API
             count: number of objects to fetch, defaults to 50,
                       -1 (ALL) means follow pagination
         """
+
+        if klass is None:
+            response = SquadApi.get(self.endpoint)
+            result = response.json()
+            self.__fill_object__(result)
+            return
 
         if count == ALL:
             count = settings.MAX_NUM_OF_OBJECTS
@@ -324,7 +343,7 @@ class TestRun(SquadObject):
 class Test(SquadObject):
 
     endpoint = '/api/tests/'
-    attrs = ['id', 'name', 'short_name', 'status', 'result', 'log', 'has_known_issues',
+    attrs = ['id', 'name', 'short_name', 'status', 'result', 'test_run', 'log', 'has_known_issues',
              'suite', 'known_issues']
 
 
