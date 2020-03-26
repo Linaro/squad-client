@@ -5,7 +5,7 @@ import sys
 
 
 from squad_client.core.command import SquadClientCommand
-from squad_client.commands import *
+from squad_client.commands import *  # noqa
 
 
 def main():

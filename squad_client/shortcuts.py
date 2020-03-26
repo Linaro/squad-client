@@ -3,8 +3,10 @@ from .utils import split_build_url, first
 
 squad = Squad()
 
+
 def retrieve_latest_builds(project_full_name, count=10):
     return squad.builds(count=count, project__full_name=project_full_name)
+
 
 def retrieve_build_results(build_url):
     group_slug, project_slug, build_version = split_build_url(build_url)
@@ -30,4 +32,4 @@ def retrieve_build_results(build_url):
 
             results[testrun.environment.slug] = {'tests': test_suites, 'metrics': metric_suites}
 
-    return results    
+    return results

@@ -1,5 +1,3 @@
-import logging
-import jinja2
 import yaml
 
 
@@ -28,7 +26,7 @@ class ReportCommand(SquadClientCommand):
             report_path = path.abspath(args.report_config)
             chdir(path.dirname(report_path))
             args.report_config = path.basename(report_path)
-                
+
         return self.__generate__(args.report_config)
 
     def __generate__(self, report_config):

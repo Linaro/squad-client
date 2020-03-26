@@ -44,7 +44,8 @@ class Report:
 
 
 class ReportContext:
-    class Context: pass
+    class Context:
+        pass
 
     def __init__(self, context={}):
         """

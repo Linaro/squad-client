@@ -1,13 +1,13 @@
 from unittest import TestCase
 
-
+from . import settings
 from squad_client.core.api import SquadApi, ApiException
 
 
 def is_test_server_running():
     import socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    result = sock.connect_ex(('localhost', 8000))
+    result = sock.connect_ex(('localhost', settings.DEFAULT_SQUAD_PORT))
     sock.close()
     return result == 0
 
@@ -15,7 +15,7 @@ def is_test_server_running():
 class SquadApiTest(TestCase):
 
     def setUp(self):
-        SquadApi.configure(url='http://localhost:8000')
+        SquadApi.configure(url='http://localhost:%s' % settings.DEFAULT_SQUAD_PORT)
 
     def test_malformed_url(self):
         with self.assertRaises(ApiException):
@@ -32,4 +32,3 @@ class SquadApiTest(TestCase):
                 SquadApi.get('/api/groups')
         else:
             self.assertTrue(SquadApi.get('/api/groups') is not None)
-

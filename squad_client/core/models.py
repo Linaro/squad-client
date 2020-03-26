@@ -42,7 +42,7 @@ class SquadObject:
             obj = klass()
             attrs = klass.attrs if len(klass.attrs) else [attr for attr in result.keys()]
             for attr in attrs:
-                setattr(obj, attr.replace(' ', '_').replace('/','_').replace('-','_'), result[attr])
+                setattr(obj, attr.replace(' ', '_').replace('/', '_').replace('-', '_'), result[attr])
             objects[obj.__id__] = obj
 
         return objects

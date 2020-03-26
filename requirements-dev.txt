@@ -1,2 +1,4 @@
+-r requirements.txt
 squad
 coverage
+flake8

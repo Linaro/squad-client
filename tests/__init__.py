@@ -1,8 +1,30 @@
-import unittest
-import os
+import subprocess as sp
 
-def run():
-    loader = unittest.TestLoader()
-    tests = loader.discover(os.path.dirname(os.path.abspath(__file__)))
-    testRunner = unittest.runner.TextTestRunner()
-    testRunner.run(tests)
+
+from squad_client.core.api import SquadApi
+from .squad_service import SquadService
+
+
+def run(coverage=False, tests=['discover'], verbose=False):
+    squad_service = SquadService()
+    if not squad_service.start() or not squad_service.apply_fixtures('tests/fixtures.py'):
+        print('Aborting tests!')
+        return False
+
+    SquadApi.configure(url=squad_service.host)
+
+    argv = ['-m', 'unittest'] + tests
+    if len(tests) == 0 and verbose:
+        argv += ['discover', '-v']
+
+    if coverage:
+        print('\t --coverage is enabled, run `coverage report -m` to view coverage report')
+        argv = ['coverage', 'run', '--source', 'squad_client'] + argv
+    else:
+        argv = ['python3'] + argv
+
+    proc = sp.Popen(argv)
+    proc.wait()
+
+    squad_service.stop()
+    return proc.returncode == 0
