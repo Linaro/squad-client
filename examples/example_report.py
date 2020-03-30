@@ -7,8 +7,8 @@ import sys
 sys.path.append('..')
 
 
-from squad_client.api import SquadApi
-from squad_client.models import Squad
+from squad_client.core.api import SquadApi
+from squad_client.core.models import Squad
 
 
 # Configure SQUAD url
