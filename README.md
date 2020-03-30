@@ -64,8 +64,8 @@ The output of this command should look similar to:
 More complex filtering and data retrieval are available. Here is an example of getting a specific build:
 
 ```python
-from squad_client.api import SquadApi
-from squad_client.models import Squad
+from squad_client.core.api import SquadApi
+from squad_client.core.models import Squad
 
 SquadApi.configure(url='https://qa-reports.linaro.org/')
 
