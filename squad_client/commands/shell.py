@@ -1,4 +1,5 @@
 import IPython
+import sys
 
 
 from squad_client.core.command import SquadClientCommand
