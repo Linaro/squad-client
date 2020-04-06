@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 import argparse
-import os
 import jinja2
 import sys
-
 sys.path.append('..')
 
+from itertools import groupby
 from squad_client.core.api import SquadApi
-from squad_client.core.models import Squad
-
+from squad_client.core.models import Squad, SquadObject, ALL
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--debug',
@@ -59,10 +57,11 @@ build = project.build(args.build)
 squad_envs = Squad().environments(project=project.id)
 squad_suites = Squad().suites(project=project.id)
 envs = {}
+
 for env in squad_envs.values():
     suites = {}
     envs.update({env.slug: suites})
-    tests = Squad().tests(test_run__environment=env.id, test_run__build=build.id)
+    tests = Squad().tests(count=ALL, test_run__environment=env.id, test_run__build=build.id)
     # group tests by suite
     for test in tests.values():
         suite_name = squad_suites[test.suite].slug
@@ -82,5 +81,3 @@ template = templateEnv.get_template(args.template)
 outputText = template.render(group=group, project=project, build=build, environments=envs, intro=intro)
 with open(args.output, 'w') as reportFile:
     reportFile.write(outputText)
-
-
