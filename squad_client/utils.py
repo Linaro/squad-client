@@ -1,3 +1,6 @@
+import json
+
+
 def first(_dict):
     if _dict is None or len(_dict) == 0:
         return None
@@ -21,3 +24,7 @@ def split_group_project_slug(group_project_slug):
 def split_build_url(build_slug):
     group_slug, project_slug, _, build_version = build_slug.split('/')
     return (group_slug, project_slug, build_version)
+
+
+def to_json(thing):
+    return json.dumps(thing)

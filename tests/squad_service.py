@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import subprocess as sp
 import time
 import requests
@@ -15,8 +16,12 @@ TIMEOUT = 1  # as name says, squad-admin timed out
 ERROR = 2  # squad-admin didn't time out but returned non-zero status
 
 
+base_path = os.path.dirname(__file__)
+squad_settings_file_path = os.path.join(base_path, 'squad_settings.py')
+
+
 class SquadAdmin:
-    def __init__(self, env={'DATABASE': settings.DEFAULT_SQUAD_DATABASE_CONFIG}):
+    def __init__(self, env={'DATABASE': settings.DEFAULT_SQUAD_DATABASE_CONFIG, 'SQUAD_EXTRA_SETTINGS': squad_settings_file_path}):
         self.cmd = ['squad-admin']
         self.env = os.environ.copy()
         self.env.update(env)
@@ -54,9 +59,10 @@ class SquadAdmin:
         return proc
 
     def migrate(self):
-        proc = self.__run_process__(['migrate'])
+        proc = self.__run_process__(['migrate'], stderr=sp.PIPE)
         if not proc.ok:
             self.logger.error('Failed to migrate!')
+            print(proc.err.decode('utf-8'), file=sys.stderr)
         return proc
 
     def runserver(self, port=8000):
