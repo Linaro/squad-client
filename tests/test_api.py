@@ -4,14 +4,6 @@ from . import settings
 from squad_client.core.api import SquadApi, ApiException
 
 
-def is_test_server_running():
-    import socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    result = sock.connect_ex(('localhost', settings.DEFAULT_SQUAD_PORT))
-    sock.close()
-    return result == 0
-
-
 class SquadApiTest(TestCase):
 
     def setUp(self):
@@ -25,10 +17,13 @@ class SquadApiTest(TestCase):
         with self.assertRaises(ApiException):
             SquadApi.get('http://some.other.url')
 
-    def test_server_response(self):
-        # will require automatic test server to shutdown, for now, just to it by hand before running this test
-        if not is_test_server_running():
-            with self.assertRaises(ApiException):
-                SquadApi.get('/api/groups')
-        else:
-            self.assertTrue(SquadApi.get('/api/groups') is not None)
+    def test_unauthorized_access(self):
+        response = SquadApi.get('/my_group/my_private_project')
+        self.assertFalse(response.ok)
+
+        SquadApi.configure(url='http://localhost:%s' % settings.DEFAULT_SQUAD_PORT, token='193cd8bb41ab9217714515954e8724f651ef8601')
+        response = SquadApi.get('/my_group/my_private_project')
+        self.assertTrue(response.ok)
+
+        # reset config
+        self.setUp()
