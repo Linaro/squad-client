@@ -24,4 +24,4 @@ class TestCommand(SquadClientCommand):
 
     def run(self, args):
         print('Running tests')
-        tests.run(args.coverage, args.tests, args.verbose)
+        return tests.run(args.coverage, args.tests, args.verbose)

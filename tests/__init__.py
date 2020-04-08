@@ -1,7 +1,6 @@
 import subprocess as sp
 
 
-from squad_client.core.api import SquadApi
 from .squad_service import SquadService
 
 
@@ -10,8 +9,6 @@ def run(coverage=False, tests=['discover'], verbose=False):
     if not squad_service.start() or not squad_service.apply_fixtures('tests/fixtures.py'):
         print('Aborting tests!')
         return False
-
-    SquadApi.configure(url=squad_service.host)
 
     argv = ['-m', 'unittest'] + tests
     if len(tests) == 0 and verbose:

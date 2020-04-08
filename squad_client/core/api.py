@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import requests
 import logging
 import urllib
@@ -13,6 +14,18 @@ url_validator_regex = re.compile(
     r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
 logger = logging.getLogger('api')
+
+
+@contextmanager
+def http_request():
+    try:
+        yield
+    except requests.exceptions.ConnectionError as e:
+        raise ApiException('Error Connecting: %s' % e)
+    except requests.exceptions.Timeout as e:
+        raise ApiException('Timeout Error: %s' % e)
+    except requests.exceptions.RequestException as e:
+        raise ApiException('OOps: Something unexpected happened while requesting the API: %s' % e)
 
 
 class ApiException(requests.exceptions.RequestException):
@@ -50,15 +63,14 @@ class SquadApi:
 
         url = '%s%s' % (SquadApi.url, endpoint if endpoint[0] != '/' else endpoint[1:])
         logger.debug('GET %s (%s)' % (url, params))
-        try:
+
+        with http_request():
             response = requests.get(url=url, params=params, headers=SquadApi.headers)
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as e:
-            raise ApiException('Http Error: %s' % e)
-        except requests.exceptions.ConnectionError as e:
-            raise ApiException('Error Connecting: %s' % e)
-        except requests.exceptions.Timeout as e:
-            raise ApiException('Timeout Error: %s' % e)
-        except requests.exceptions.RequestException as e:
-            raise ApiException('OOps: Something unexpected happened while requesting the API: %s' % e)
+        return response
+
+    @staticmethod
+    def post(endpoint, params={}, data={}):
+        url = '%s%s' % (SquadApi.url, endpoint if endpoint[0] != '/' else endpoint[1:])
+        with http_request():
+            response = requests.post(url=url, params=params, data=data, headers=SquadApi.headers)
         return response

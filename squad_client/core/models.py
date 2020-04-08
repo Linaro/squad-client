@@ -5,7 +5,7 @@ from itertools import groupby
 
 from .api import SquadApi
 from squad_client.exceptions import InvalidSquadObject
-from squad_client.utils import first, parse_test_name, parse_metric_name
+from squad_client.utils import first, parse_test_name, parse_metric_name, to_json
 from squad_client import settings
 
 
@@ -39,7 +39,13 @@ class SquadObject:
 
     @property
     def __id__(self):
-        return self.id if 'id' in self.attrs else uuid.uuid1()
+        if not hasattr(self, 'id'):
+            setattr(self, 'id', None)
+
+        if self.id is None:
+            self.id = uuid.uuid1()
+
+        return self.id
 
     def __fill_object__(self, result, obj=None):
 
@@ -159,6 +165,30 @@ class Squad(SquadObject):
     def reports(self, count=DEFAULT_COUNT, **filters):
         return self.__fetch__(Report, filters, count)
 
+    def submit(self, group=None, project=None, build=None, environment=None,
+               tests=None, metrics=None, metadata=None, log=None, attachments=None):
+
+        path = '/api/submit/%s/%s/%s/%s' % (group.slug, project.slug, build.version, environment.slug)
+
+        data = {}
+        if tests:
+            tests_dict = {}
+            for test in tests.values():
+                if hasattr(test, 'log') and test.log is not None and len(test.log):
+                    value = {'log': test.log, 'result': test.status}
+                else:
+                    value = test.status
+                tests_dict[test.name] = value
+            data['tests'] = to_json(tests_dict)
+        if metrics:
+            data['metrics'] = to_json({metric.name: metric.result for metric in metrics.values()})
+        if metadata:
+            data['metadata'] = to_json(metadata)
+        if log:
+            data['log'] = log
+        # TODO handle attachments
+        return SquadApi.post(path, data=data)
+
 
 class Group(SquadObject):
 
@@ -259,6 +289,24 @@ class TestJob(SquadObject):
              'parent_job']
 
 
+class MetricSuite:
+    name = ''
+    __metrics__ = {}
+
+    def add_metric(self, metric):
+        if self.__metric__ is None:
+            self.__metric__ = {}
+        self.__metrics__[metric.id] = metric
+
+    @property
+    def metrics(self):
+        return self.__metrics__
+
+
+class Metric(SquadObject):
+    pass
+
+
 class TestRun(SquadObject):
 
     endpoint = '/api/testruns/'
@@ -271,9 +319,12 @@ class TestRun(SquadObject):
     total_pass = 0
     total_skip = 0
     total_xfail = 0
+    metadata = None
+    attachments = None
+    log = None
 
     def __setattr__(self, attr, value):
-        if attr == 'environment' and value.startswith('http'):
+        if attr == 'environment' and type(value) is str and value.startswith('http'):
             response = SquadApi.get(value)
             objs = self.__fill__(Environment, [response.json()])
             value = first(objs)
@@ -281,44 +332,45 @@ class TestRun(SquadObject):
 
     __tests__ = None
 
+    def add_test(self, test):
+        if self.__tests__ is None:
+            self.__tests__ = {}
+        self.__tests__[test.__id__] = test
+
     def tests(self, count=ALL, **filters):
         if self.__tests__ is None:
             filters.update({'test_run': self.id})
             self.__tests__ = self.__fetch__(Test, filters, count)
         return self.__tests__
 
-    class Metric(SquadObject):
-        pass
-
     __metrics__ = None
+
+    def add_metric(self, metric):
+        if self.__metrics__ is None:
+            self.__metrics__ = {}
+        self.__metrics__[metric.__id__] = metric
 
     def metrics(self, count=ALL, **filters):
         if self.__metrics__ is None:
-            TestRun.Metric.endpoint = '%s%d/metrics' % (self.endpoint, self.id)
-            self.__metrics__ = self.__fetch__(TestRun.Metric, filters, count)
+            Metric.endpoint = '%s%d/metrics' % (self.endpoint, self.id)
+            self.__metrics__ = self.__fetch__(Metric, filters, count)
         return self.__metrics__
 
     test_suites = []
     metric_suites = []
-
-    class TestSuite:
-        name = ''
-        tests = []
-
-    class MetricSuite:
-        name = ''
-        metrics = []
 
     def bucket_metric_and_test_suites(self):
         all_tests = self.tests()
         self.test_suites = []
         if len(all_tests):
             for suite_name, tests in groupby(sorted(all_tests.values(), key=lambda t: t.name), lambda t: parse_test_name(t.name)[0]):
-                test_suite = TestRun.TestSuite()
+                test_suite = Suite()
                 test_suite.name = suite_name
-                tests_bucket = []
+                self.test_suites.append(test_suite)
+
                 for test in tests:
-                    tests_bucket.append(test)
+                    test_suite.add_test(test)
+
                     if test.status == 'pass':
                         self.total_pass += 1
                     elif test.status == 'fail':
@@ -327,17 +379,28 @@ class TestRun(SquadObject):
                         self.total_skip += 1
                     else:
                         self.total_xfail += 1
-                    test_suite.tests = tests_bucket
-                self.test_suites.append(test_suite)
 
         all_metrics = self.metrics()
         if len(all_metrics):
             self.metric_suites = []
             for suite_name, metrics in groupby(sorted(all_metrics.values(), key=lambda m: m.name), lambda m: parse_metric_name(m.name)[0]):
-                metric_suite = TestRun.MetricSuite()
+                metric_suite = MetricSuite()
                 metric_suite.name = suite_name
-                metric_suite.metrics = [m for m in metrics]
+                [metric_suite.add_metric(m) for m in metrics]
                 self.metric_suites.append(metric_suite)
+
+    def submit_results(self):
+        squad = Squad()
+        return squad.submit(
+            group=self.build.project.group,
+            project=self.build.project,
+            build=self.build,
+            environment=self.environment,
+            tests=self.tests(),
+            metrics=self.metrics(),
+            metadata=self.metadata,
+            log=self.log,
+            attachments=self.attachments)
 
 
 class Test(SquadObject):
@@ -351,6 +414,17 @@ class Suite(SquadObject):
 
     endpoint = '/api/suites/'
     attrs = ['id', 'slug', 'name', 'project']
+
+    __tests__ = {}
+
+    def add_test(self, test):
+        if self.__tests__ is None:
+            self.__tests__ = {}
+        self.__tests__[test.id] = test
+
+    @property
+    def tests(self):
+        return self.__tests__
 
 
 class Environment(SquadObject):

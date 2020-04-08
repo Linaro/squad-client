@@ -8,10 +8,16 @@
 from squad.core import models as m
 from squad.ci import models as mci
 
+from rest_framework.authtoken.models import Token
+
+user = m.User.objects.create(username='admin_user', is_superuser=True)
+token = Token.objects.create(user=user, key='193cd8bb41ab9217714515954e8724f651ef8601')
+
 group = m.Group.objects.create(slug='my_group')
 group2 = m.Group.objects.create(slug='my_other_group')
 
 project = group.projects.create(slug='my_project')
+project_private = group.projects.create(slug='my_private_project', is_public=False)
 
 build = project.builds.create(version='my_build')
 build2 = project.builds.create(version='my_build2')
