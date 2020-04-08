@@ -1,7 +1,11 @@
+import logging
 from squad_client.core.command import SquadClientCommand
 
 
 INCLUDE_TESTS_CMD = True
+
+
+logger = logging.getLogger()
 
 
 try:
@@ -23,5 +27,5 @@ class TestCommand(SquadClientCommand):
         parser.add_argument('--coverage', help='run tests with coverage', action='store_true', default=False)
 
     def run(self, args):
-        print('Running tests')
+        logger.info('Running tests')
         return tests.run(args.coverage, args.tests, args.verbose)

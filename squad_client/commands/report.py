@@ -1,3 +1,4 @@
+import logging
 import yaml
 
 
@@ -6,6 +7,9 @@ from os import path, chdir
 
 from squad_client.core.command import SquadClientCommand
 from squad_client.report import ReportGenerator
+
+
+logger = logging.getLogger()
 
 
 class ReportCommand(SquadClientCommand):
@@ -17,9 +21,9 @@ class ReportCommand(SquadClientCommand):
         parser.add_argument('--report-config', help='yaml file configuring the report. Assume `report.yml` by default', default='report.yml', dest='report_config')
 
     def run(self, args):
-        print('Running report')
+        logger.info('Running report')
         if not path.isfile(args.report_config):
-            print('Report config file "%s" not found!' % args.report_config)
+            logger.error('Report config file "%s" not found!' % args.report_config)
             return False
 
         if args.report_config != 'report.yml':
@@ -30,7 +34,7 @@ class ReportCommand(SquadClientCommand):
         return self.__generate__(args.report_config)
 
     def __generate__(self, report_config):
-        print('generating based on %s' % report_config)
+        logger.info('generating based on %s' % report_config)
         config = self.__parse_config__(report_config)
         generator = ReportGenerator(config.get('squad_url'), config.get('token'))
         for r in config.get('reports'):

@@ -1,8 +1,12 @@
 import IPython
+import logging
 import sys
 
 
 from squad_client.core.command import SquadClientCommand
+
+
+logger = logging.getLogger()
 
 
 class ShellCommand(SquadClientCommand):
@@ -20,7 +24,8 @@ class ShellCommand(SquadClientCommand):
                 try:
                     program = compile(script_source.read(), args.script, 'exec')
                 except SyntaxError as e:
-                    print('Cannot run "%s": %s' % (args.script, e))
+                    logger.error('Cannot run "%s": %s' % (args.script, e))
+                    return False
             sys.argv = [args.script] + args.script_params.split(" ")
             exec(program)
             return True
