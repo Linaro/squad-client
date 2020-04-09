@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 import requests
 import logging
 import urllib
@@ -13,19 +12,8 @@ url_validator_regex = re.compile(
     r'(?::\d+)?'  # optional port
     r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
-logger = logging.getLogger('api')
 
-
-@contextmanager
-def http_request():
-    try:
-        yield
-    except requests.exceptions.ConnectionError as e:
-        raise ApiException('Error Connecting: %s' % e)
-    except requests.exceptions.Timeout as e:
-        raise ApiException('Timeout Error: %s' % e)
-    except requests.exceptions.RequestException as e:
-        raise ApiException('OOps: Something unexpected happened while requesting the API: %s' % e)
+logger = logging.getLogger()
 
 
 class ApiException(requests.exceptions.RequestException):
@@ -39,7 +27,7 @@ class SquadApi:
 
     @staticmethod
     def configure(url, token=None):
-        if url_validator_regex.match(url) is None:
+        if url is None or url_validator_regex.match(url) is None:
             raise ApiException('Malformed url: "%s"' % url)
 
         if token:
@@ -51,26 +39,49 @@ class SquadApi:
 
     @staticmethod
     def get(endpoint, params={}):
-        if endpoint.startswith('http'):
-            parsed_url = urllib.parse.urlparse(endpoint)
+        return SquadApi.__request__('GET', endpoint, params=params)
 
+    @staticmethod
+    def post(endpoint, params={}, data={}):
+        return SquadApi.__request__('POST', endpoint, params=params, data=data)
+
+    @staticmethod
+    def __request__(method, endpoint, **kwargs):
+        if SquadApi.url is None:
+            raise ApiException('Missing "url" in SquadApi configuration. Example: `export SQUAD_HOST=http://qa-reports.linaro.org`')
+
+        if endpoint.startswith('http'):
+
+            parsed_url = urllib.parse.urlparse(endpoint)
             tmp_url = '%s://%s/' % (parsed_url.scheme, parsed_url.netloc)
             if SquadApi.url != tmp_url:
                 raise ApiException('Given url (%s) is does not match pre-configured one!' % tmp_url)
 
-            params.update(urllib.parse.parse_qs(parsed_url.query))
             endpoint = parsed_url.path
 
-        url = '%s%s' % (SquadApi.url, endpoint if endpoint[0] != '/' else endpoint[1:])
-        logger.debug('GET %s (%s)' % (url, params))
+            params = kwargs.get('params', {})
+            params.update(urllib.parse.parse_qs(parsed_url.query))
+            kwargs['params'] = params
 
-        with http_request():
-            response = requests.get(url=url, params=params, headers=SquadApi.headers)
-        return response
-
-    @staticmethod
-    def post(endpoint, params={}, data={}):
         url = '%s%s' % (SquadApi.url, endpoint if endpoint[0] != '/' else endpoint[1:])
-        with http_request():
-            response = requests.post(url=url, params=params, data=data, headers=SquadApi.headers)
-        return response
+        logger.debug('%s %s' % (method, url))
+
+        if SquadApi.headers:
+            kwargs['headers'] = SquadApi.headers
+
+        try:
+            response = requests.request(method, url, **kwargs)
+            if response.status_code == 401:
+                msg = 'Unauthorized access to "%s"' % url
+                # logger.error(msg)
+                if SquadApi.token is None:
+                    raise ApiException('%s. Consider `export SQUAD_TOKEN=your-squad-token`' % msg)
+
+            return response
+
+        except requests.exceptions.ConnectionError as e:
+            raise ApiException('Error Connecting: %s' % e)
+        except requests.exceptions.Timeout as e:
+            raise ApiException('Timeout Error: %s' % e)
+        except requests.exceptions.RequestException as e:
+            raise ApiException('OOps: Something unexpected happened while requesting the API: %s' % e)

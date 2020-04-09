@@ -5,7 +5,7 @@ python:
 cache: pip
 services:
 env:
-  - SCRIPT="./manage.py test -v"
+  - SCRIPT="./manage.py --squad-host http://localhost:9000 test -v"
 install:
   - pip install -r requirements-dev.txt
 script:
