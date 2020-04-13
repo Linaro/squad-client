@@ -467,7 +467,7 @@ class Annotation(SquadObject):
 class MetricThreshold(SquadObject):
 
     endpoint = '/api/metricthresholds/'
-    attrs = ['url', 'id', 'name', 'value', 'is_higher_better', 'project']
+    attrs = ['url', 'id', 'name', 'value', 'is_higher_better', 'environment']
 
 
 class Report(SquadObject):
