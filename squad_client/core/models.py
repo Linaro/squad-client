@@ -307,6 +307,12 @@ class Metric(SquadObject):
     pass
 
 
+class TestRunStatus(SquadObject):
+    attrs = ['id', 'tests_pass', 'tests_fail', 'tests_xfail',
+             'tests_skip', 'metrics_summary', 'has_metrics',
+             'suite', 'suite_version']
+
+
 class TestRun(SquadObject):
 
     endpoint = '/api/testruns/'
@@ -315,10 +321,6 @@ class TestRun(SquadObject):
              'job_id', 'job_status', 'job_url', 'resubmit_url',
              'data_processed', 'status_recorded', 'build',
              'environment']
-    total_fail = 0
-    total_pass = 0
-    total_skip = 0
-    total_xfail = 0
     metadata = None
     attachments = None
     log = None
@@ -367,18 +369,8 @@ class TestRun(SquadObject):
                 test_suite = Suite()
                 test_suite.name = suite_name
                 self.test_suites.append(test_suite)
-
                 for test in tests:
                     test_suite.add_test(test)
-
-                    if test.status == 'pass':
-                        self.total_pass += 1
-                    elif test.status == 'fail':
-                        self.total_fail += 1
-                    elif test.status == 'skip':
-                        self.total_skip += 1
-                    else:
-                        self.total_xfail += 1
 
         all_metrics = self.metrics()
         if len(all_metrics):
@@ -401,6 +393,17 @@ class TestRun(SquadObject):
             metadata=self.metadata,
             log=self.log,
             attachments=self.attachments)
+
+    __summary__ = None
+
+    def summary(self):
+        if self.__summary__ is None:
+            self.__summary__ = first(self.statuses(suite__isnull=True))
+        return self.__summary__
+
+    def statuses(self, count=ALL, **filters):
+        TestRunStatus.endpoint = '%s%d/status' % (self.endpoint, self.id)
+        return self.__fetch__(TestRunStatus, filters, count)
 
 
 class Test(SquadObject):
