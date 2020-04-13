@@ -1,4 +1,4 @@
 -r requirements.txt
-squad
+squad>=1.9
 coverage
 flake8

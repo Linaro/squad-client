@@ -40,5 +40,5 @@ testjob = testrun.test_jobs.create(backend=backend, target=project, target_build
 
 emailtemplate = m.EmailTemplate.objects.create(name='my_emailtemplate')
 suitemetadata = m.SuiteMetadata.objects.create(name='my_suitemetadata')
-metricthreshold = m.MetricThreshold.objects.create(project=project, value=42)
+metricthreshold = m.MetricThreshold.objects.create(environment=environment, value=42)
 report = build.delayed_reports.create()
