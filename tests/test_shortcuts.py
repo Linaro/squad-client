@@ -39,11 +39,12 @@ class SubmitResultsShortcutTest(TestCase):
         self.assertTrue(len(results) > 0)
 
     def test_malformed_data(self):
+        # job_id already exists
         metadata = {'job_id': '12345', 'a-metadata-field': 'value'}
-        tests = {'testa': 'pass', 'testb': {'result': 'pass', 'log': 'the log'}}
+        tests = {'test-malformed': 'pass', 'testb': {'result': 'pass', 'log': 'the log'}}
         metrics = {'metrica': 42}
         submit_results(group_project_slug='my_group/my_project', build_version='my_build',
                        env_slug='my_env', tests=tests, metrics=metrics, metadata=metadata)
 
-        results = self.squad.tests(name='testa')
-        self.assertTrue(len(results) > 0)
+        results = self.squad.tests(name='test-malformed')
+        self.assertTrue(len(results) == 0)
