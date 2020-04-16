@@ -6,6 +6,7 @@
 #
 
 from squad.core import models as m
+from squad.core.tasks import RecordTestRunStatus
 from squad.ci import models as mci
 
 from rest_framework.authtoken.models import Token
@@ -34,6 +35,8 @@ passed_test = testrun.tests.create(suite=suite, result=True, name='my_passed_tes
 failed_test = testrun.tests.create(suite=suite, result=False, name='my_failed_test')
 xfailed_test = testrun.tests.create(suite=suite, result=True, name='my_xfailed_test', has_known_issues=True)
 skipped_test = testrun.tests.create(suite=suite, result=None, name='my_skipped_test')
+
+RecordTestRunStatus()(testrun)
 
 backend = mci.Backend.objects.create()
 testjob = testrun.test_jobs.create(backend=backend, target=project, target_build=build)
