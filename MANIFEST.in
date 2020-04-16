@@ -8,6 +8,7 @@ include manage.py
 include .gitignore
 include .coveragerc
 include .coverage
+include .travis.yml
 
 recursive-include tests/ *
 recursive-include scripts/ *
