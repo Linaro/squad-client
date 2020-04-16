@@ -12,10 +12,14 @@ from squad_client.commands import *  # noqa
 
 
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter('[%(levelname)s] %(message)s')
+ch = logging.StreamHandler()
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 
 def main():
-
     parser = argparse.ArgumentParser(prog='./manage.py')
     parser.add_argument('--debug', action='store_true', help='display debug messages')
     parser.add_argument('--squad-host', help='SQUAD host, example: https://qa-reports.linaro.org')

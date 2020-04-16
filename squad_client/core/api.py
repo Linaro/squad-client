@@ -76,6 +76,8 @@ class SquadApi:
                 # logger.error(msg)
                 if SquadApi.token is None:
                     raise ApiException('%s. Consider `export SQUAD_TOKEN=your-squad-token`' % msg)
+            elif response.status_code == 500:
+                logger.error('You hit a bug in SQUAD, please report it at https://github.com/Linaro/squad/issues/new so we can get it fixed.')
 
             return response
 

@@ -23,8 +23,8 @@ class SubmitCommand(SquadClientCommand):
         result_group.add_argument("--result-name", help="Single result name")
         parser.add_argument(
             "--result-value",
-            help="Single result output (pass/fail)",
-            choices=["pass", "fail"],
+            help="Single result output (pass/fail/skip)",
+            choices=["pass", "fail", "skip"],
         )
         parser.add_argument(
             "--metrics",
@@ -67,23 +67,28 @@ class SubmitCommand(SquadClientCommand):
         return True
 
     def __read_input_file(self, file_path):
+        if not self.__check_file(file_path):
+            return None
+
+        _, ext = os.path.splitext(file_path)
+        if ext not in ['.json', '.yml', '.yaml']:
+            logger.error('File "%s" is neither JSON nor YAML')
+            return None
+
+        parser = json.load if ext == '.json' else yaml.safe_load
+        parser_exception = json.JSONDecodeError if ext == '.json' else yaml.YAMLError
         output_dict = None
         with open(file_path, "r") as results_file:
             try:
-                output_dict = json.load(results_file)
-            except json.JSONDecodeError:
-                logger.warning("JSON parsing failed")
-                results_file.seek(0)
-                try:
-                    output_dict = yaml.safe_load(results_file)
-                except yaml.YAMLError as exc:
-                    logger.warning("YAML parsing failed")
+                output_dict = parser(results_file)
+            except parser_exception as e:
+                logger.error('Failed parsing file "%s": %s' % (file_path, e))
 
         return output_dict
 
     def run(self, args):
-        results_dict = None
-        metrics_dict = None
+        results_dict = {}
+        metrics_dict = {}
         metadata_dict = None
         logs_file = None
         if args.result_name:
@@ -91,28 +96,32 @@ class SubmitCommand(SquadClientCommand):
                 logger.error("Test result value is required")
                 return False
             results_dict = {args.result_name: args.result_value}
-        elif args.results:
-            if not self.__check_file(args.results):
-                return False
+
+        if args.results:
             results_dict = self.__read_input_file(args.results)
-        elif args.metrics:
-            if not self.__check_file(args.metrics):
+            if results_dict is None:
                 return False
+
+        if args.metrics:
             metrics_dict = self.__read_input_file(args.metrics)
-        else:
+            if metrics_dict is None:
+                return False
+
+        if args.result_name is None and args.results is None and args.metrics is None:
             logger.error(
-                "At last one of --result-name, --results, --metrics is required"
+                "At least one of --result-name, --results, --metrics is required"
             )
             return False
 
         if args.metadata:
-            if not self.__check_file(args.metadata):
-                return False
             metadata_dict = self.__read_input_file(args.metadata)
+            if metadata_dict is None:
+                return False
+
         if args.logs:
             if not self.__check_file(args.logs):
                 return False
-            with open(args_logs, "r") as logs_file_souce:
+            with open(args.logs, "r") as logs_file_source:
                 logs_file = logs_file_source.read()
 
         for filename in args.attachments:

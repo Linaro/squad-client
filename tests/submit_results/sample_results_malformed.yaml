@@ -1,0 +1,4 @@
+---
+yaml-test-1: pass
+yaml-test-2: log: yaml-test-2 log
+    result: fail

@@ -9,8 +9,7 @@ from squad_client.utils import first, parse_test_name, parse_metric_name, to_jso
 from squad_client import settings
 
 
-logger = logging.getLogger('models')
-logger.setLevel(logging.DEBUG)
+logger = logging.getLogger()
 
 DEFAULT_COUNT = settings.DEFAULT_NUM_OF_OBJECTS
 ALL = -1
@@ -169,6 +168,8 @@ class Squad(SquadObject):
                tests=None, metrics=None, metadata=None, log=None, attachments=None):
 
         path = '/api/submit/%s/%s/%s/%s' % (group.slug, project.slug, build.version, environment.slug)
+        num_tests = 0
+        num_metrics = 0
 
         data = {}
         if tests:
@@ -179,15 +180,25 @@ class Squad(SquadObject):
                 else:
                     value = test.status
                 tests_dict[test.name] = value
+            num_tests = len(tests_dict)
             data['tests'] = to_json(tests_dict)
         if metrics:
-            data['metrics'] = to_json({metric.name: metric.result for metric in metrics.values()})
+            metrics_dict = {metric.name: metric.result for metric in metrics.values()}
+            num_metrics = len(metrics_dict)
+            data['metrics'] = to_json(metrics_dict)
         if metadata:
             data['metadata'] = to_json(metadata)
         if log:
             data['log'] = log
+
+        logger.info('Submitting %i tests, %i metrics' % (num_tests, num_metrics))
+
         # TODO handle attachments
-        return SquadApi.post(path, data=data)
+        response = SquadApi.post(path, data=data)
+        status_code = response.status_code
+        if status_code not in [200, 201, 500]:
+            logger.error('Failed to submit results: %s' % response.text)
+        return response.ok
 
 
 class Group(SquadObject):
@@ -338,7 +349,7 @@ class TestRun(SquadObject):
         self.__tests__[test.__id__] = test
 
     def tests(self, count=ALL, **filters):
-        if self.__tests__ is None:
+        if self.__tests__ is None and hasattr(self, 'id') and self.id is not None:
             filters.update({'test_run': self.id})
             self.__tests__ = self.__fetch__(Test, filters, count)
         return self.__tests__
@@ -351,7 +362,7 @@ class TestRun(SquadObject):
         self.__metrics__[metric.__id__] = metric
 
     def metrics(self, count=ALL, **filters):
-        if self.__metrics__ is None:
+        if self.__metrics__ is None and hasattr(self, 'id') and self.id is not None:
             Metric.endpoint = '%s%d/metrics' % (self.endpoint, self.id)
             self.__metrics__ = self.__fetch__(Metric, filters, count)
         return self.__metrics__

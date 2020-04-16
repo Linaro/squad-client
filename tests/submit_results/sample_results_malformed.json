@@ -1,0 +1,7 @@
+{
+    "json-test-1": "pass",
+    "json-test-2": {
+        "log": "json-test-2 log":
+        "result": "fail"
+    }
+}
