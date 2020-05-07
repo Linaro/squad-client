@@ -16,6 +16,26 @@ url_validator_regex = re.compile(
 logger = logging.getLogger()
 
 
+# ref: https://git.linaro.org/lava/lava-lab.git/tree/shared/lab-scripts/rerun_health_check.py#n13
+class NullAuth(requests.auth.AuthBase):
+    '''force requests to ignore the ``.netrc``
+
+    Some sites do not support regular authentication, but we still
+    want to store credentials in the ``.netrc`` file and submit them
+    as form elements. Without this, requests would otherwise use the
+    .netrc which leads, on some sites, to a 401 error.
+
+    Use with::
+
+        requests.get(url, auth=NullAuth())
+
+    Copied from: https://github.com/psf/requests/issues/2773#issuecomment-174312831
+    '''
+
+    def __call__(self, r):
+        return r
+
+
 class ApiException(requests.exceptions.RequestException):
     pass
 
@@ -70,7 +90,7 @@ class SquadApi:
             kwargs['headers'] = SquadApi.headers
 
         try:
-            response = requests.request(method, url, **kwargs)
+            response = requests.request(method, url, auth=NullAuth(), **kwargs)
             if response.status_code == 401:
                 msg = 'Unauthorized access to "%s"' % url
                 # logger.error(msg)
