@@ -378,7 +378,7 @@ class TestRun(SquadObject):
 
     def metrics(self, count=ALL, **filters):
         if self.__metrics__ is None and hasattr(self, 'id') and self.id is not None:
-            Metric.endpoint = '%s%d/metrics' % (self.endpoint, self.id)
+            filters.update({'test_run': self.id})
             self.__metrics__ = self.__fetch__(Metric, filters, count)
         return self.__metrics__
 
@@ -426,7 +426,7 @@ class TestRun(SquadObject):
         return self.__summary__
 
     def statuses(self, count=ALL, **filters):
-        TestRunStatus.endpoint = '/'.join([self.endpoint, 'status'])
+        TestRunStatus.endpoint = '/'.join([TestRun.endpoint[:-1], str(self.id), 'status'])
         return self.__fetch__(TestRunStatus, filters, count)
 
 
