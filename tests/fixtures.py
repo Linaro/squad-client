@@ -29,6 +29,7 @@ build6 = project.builds.create(version='my_build6')
 
 environment = project.environments.create(slug='my_env')
 suite = project.suites.create(slug='my_suite')
+suite2 = project.suites.create(slug='my_other_suite')
 
 testrun = build.test_runs.create(environment=environment)
 passed_test = testrun.tests.create(suite=suite, result=True, name='my_passed_test')

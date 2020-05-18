@@ -122,3 +122,19 @@ class TestRunTest(unittest.TestCase):
     def test_testrun_status(self):
         status = self.testrun.summary()
         self.assertEqual(1, status.tests_fail)
+
+
+class ProjectTest(unittest.TestCase):
+
+    def setUp(self):
+        self.project = first(Squad().projects(slug='my_project'))
+
+    def test_basic(self):
+        self.assertTrue(self.project is not None)
+
+    def test_project_suites(self):
+        suites = self.project.suites()
+        self.assertEqual(2, len(suites))
+
+        suite = self.project.suite('my_suite')
+        self.assertEqual(suite.slug, 'my_suite')
