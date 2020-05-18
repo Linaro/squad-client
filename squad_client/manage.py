@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+import requests_cache
 import sys
 
 
@@ -24,6 +25,7 @@ def main():
     parser.add_argument('--debug', action='store_true', help='display debug messages')
     parser.add_argument('--squad-host', help='SQUAD host, example: https://qa-reports.linaro.org')
     parser.add_argument('--squad-token', help='SQUAD authentication token')
+    parser.add_argument('--cache', default=0, help='Cache API results for N number of seconds. Disabled by default.')
     subparser = parser.add_subparsers(help='available subcommands', dest='command')
 
     SquadClientCommand.add_commands(subparser)
@@ -44,6 +46,10 @@ def main():
     except ApiException as e:
         logger.error('Failed to configure squad api: %s' % e)
         return -1
+
+    if args.cache > 0:
+        logger.debug('Caching results in "squad_client_cache.sqlite" for %d seconds' % args.cache)
+        requests_cache.install_cache('squad_client_cache', expire_after=args.cache)
 
     rc = SquadClientCommand.process(args)
     return 1 if rc is False else 0 if rc is True else -1
