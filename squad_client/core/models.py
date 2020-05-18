@@ -137,6 +137,9 @@ class Squad(SquadObject):
     def tests(self, count=DEFAULT_COUNT, **filters):
         return self.__fetch__(Test, filters, count)
 
+    def metrics(self, count=DEFAULT_COUNT, **filters):
+        return self.__fetch__(Metric, filters, count)
+
     def suites(self, count=DEFAULT_COUNT, **filters):
         return self.__fetch__(Suite, filters, count)
 
@@ -324,7 +327,8 @@ class MetricSuite:
 
 
 class Metric(SquadObject):
-    pass
+    endpoint = '/api/metrics/'
+    attrs = ['id', 'name', 'short_name', 'measurement_list', 'result', 'is_outlier', 'test_run', 'suite', 'metadata']
 
 
 class TestRunStatus(SquadObject):
@@ -422,7 +426,7 @@ class TestRun(SquadObject):
         return self.__summary__
 
     def statuses(self, count=ALL, **filters):
-        TestRunStatus.endpoint = '%s%d/status' % (self.endpoint, self.id)
+        TestRunStatus.endpoint = '/'.join([self.endpoint, 'status'])
         return self.__fetch__(TestRunStatus, filters, count)
 
 
