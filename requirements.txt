@@ -1,4 +1,5 @@
 requests
+requests_cache
 jinja2
 ipython
 pyyaml
