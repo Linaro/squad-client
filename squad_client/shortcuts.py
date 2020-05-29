@@ -29,7 +29,7 @@ def retrieve_build_results(build_url):
             testrun = testruns[_id]
             test_suites = {}
             for suite in testrun.test_suites:
-                test_suites[suite.name] = {t.short_name: t.status for t in suite.tests.values()}
+                test_suites[suite.name] = {t.short_name: t.status for t in suite.tests().values()}
 
             metric_suites = {}
             for suite in testrun.metric_suites:
