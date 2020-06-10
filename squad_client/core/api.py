@@ -44,6 +44,7 @@ class SquadApi:
     url = None
     token = None
     headers = None
+    schema_nested_eps = set()
 
     @staticmethod
     def configure(url, token=None):
@@ -56,6 +57,10 @@ class SquadApi:
 
         SquadApi.url = url if url[-1] == '/' else url + '/'
         logger.debug('SquadApi: url = "%s" and token = "%s"' % (SquadApi.url, 'yes' if SquadApi.token else 'no'))
+        nested_ep_list = re.findall(r'\w+/\w+/<id>/\w+', SquadApi.get('api/schema').text)
+        for ep in nested_ep_list:
+            splitted = ep.split('/')
+            SquadApi.schema_nested_eps.add((splitted[1][:-1], splitted[3]))
 
     @staticmethod
     def get(endpoint, params={}):
