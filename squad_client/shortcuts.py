@@ -78,4 +78,4 @@ def submit_results(group_project_slug=None, build_version=None, env_slug=None, t
         metric.result = metrics[metric_name]
         testrun.add_metric(metric)
 
-    testrun.submit_results()
+    return testrun.submit_results()
