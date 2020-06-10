@@ -8,3 +8,7 @@ class InvalidReportOutput(Exception):
 
 class InvalidReportTemplate(Exception):
     pass
+
+
+class InvalidSquadLookup(Exception):
+    pass

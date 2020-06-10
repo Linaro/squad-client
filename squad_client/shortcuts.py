@@ -5,6 +5,10 @@ from .utils import split_build_url, first, split_group_project_slug
 squad = Squad()
 
 
+def compare_builds(baseline_id, build_id):
+    return Project.compare_builds(baseline_id, build_id)
+
+
 def retrieve_latest_builds(project_full_name, count=10):
     return squad.builds(count=count, project__full_name=project_full_name)
 

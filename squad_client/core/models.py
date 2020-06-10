@@ -4,7 +4,7 @@ from itertools import groupby
 
 
 from .api import SquadApi
-from squad_client.exceptions import InvalidSquadObject
+from squad_client.exceptions import InvalidSquadObject, InvalidSquadLookup
 from squad_client.utils import first, parse_test_name, parse_metric_name, to_json
 from squad_client import settings
 
@@ -250,6 +250,23 @@ class Project(SquadObject):
 
     def __repr__(self):
         return self.slug
+
+    @staticmethod
+    def compare_builds(baseline_id, build_id):
+        try:
+            int(baseline_id)
+            int(build_id)
+        except ValueError:
+            raise ValueError("IDs must be valid integers")
+        baseline = Build(baseline_id)
+        to_compare = Build(build_id)
+        if baseline.id and to_compare.id:
+            proj_id = baseline.project.split("/")[-2]
+            if proj_id != to_compare.project.split("/")[-2]:
+                raise InvalidSquadLookup("Argument builds must belong to same project")
+            url = ''.join([Project.endpoint, str(proj_id), '/compare_builds'])
+            params = {'baseline': baseline_id, 'to_compare': build_id}
+            return SquadApi.get(url, params).json()
 
 
 class Build(SquadObject):
