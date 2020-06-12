@@ -128,6 +128,8 @@ class ProjectTest(unittest.TestCase):
 
     def setUp(self):
         self.project = first(Squad().projects(slug='my_project'))
+        self.build = first(Squad().builds(version='my_build'))
+        self.build2 = first(Squad().builds(version='my_build2'))
 
     def test_basic(self):
         self.assertTrue(self.project is not None)
@@ -138,3 +140,7 @@ class ProjectTest(unittest.TestCase):
 
         suite = self.project.suite('my_suite')
         self.assertEqual(suite.slug, 'my_suite')
+
+    def test_compare_builds_from_same_project(self):
+        comparison = self.project.compare_builds(self.build2.id, self.build.id)
+        self.assertEqual('Cannot report regressions/fixes on a non-finished builds', comparison[0])
