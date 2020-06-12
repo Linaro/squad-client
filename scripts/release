@@ -44,8 +44,8 @@ git commit --message "New release: ${v}" CHANGELOG.md squad_client/version.py ||
 # build
 rm -rf build/ dist/ *.egg-info/
 python3 setup.py sdist bdist_wheel
-docker build -t qareports/squad-client:$v .
-docker tag qareports/squad-client:$v qareports/squad-client
+docker build -t squadproject/squad-client:$v .
+docker tag squadproject/squad-client:$v squadproject/squad-client:latest
 
 # test
 tar=$(mktemp tar.XXXXXXXXX)
