@@ -1,3 +1,21 @@
+# 0.6
+
+This 0.6 release adds basic caching for fetching data. It also adds
+support for fetching metrics and a shortcut for comparing two builds
+from the same project.
+
+Complete list of changes below:
+
+* core:
+  * api: ignore netrc auth
+  * models: add metrics
+  * models: add suite do project model
+  * models: fix metrics and testrun status endpoints
+  * shortcuts: add shortcut to compare builds
+* manage: add basic caching
+* shortcuts: return exit code of submit operation
+* tests: add test for submit_results return value
+
 # 0.5
 
 This release includes many new additions and bug fixes to
