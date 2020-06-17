@@ -28,6 +28,7 @@ build5 = project.builds.create(version='my_build5')
 build6 = project.builds.create(version='my_build6')
 
 environment = project.environments.create(slug='my_env')
+environment2 = project.environments.create(slug='my_other_env')
 suite = project.suites.create(slug='my_suite')
 suite2 = project.suites.create(slug='my_other_suite')
 

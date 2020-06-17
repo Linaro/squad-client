@@ -134,6 +134,13 @@ class ProjectTest(unittest.TestCase):
     def test_basic(self):
         self.assertTrue(self.project is not None)
 
+    def test_project_environments(self):
+        environments = self.project.environments()
+        self.assertEqual(2, len(environments))
+
+        environment = self.project.environment('my_env')
+        self.assertEqual(environment.slug, 'my_env')
+
     def test_project_suites(self):
         suites = self.project.suites()
         self.assertEqual(2, len(suites))

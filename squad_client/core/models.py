@@ -239,6 +239,15 @@ class Project(SquadObject):
         objects = self.builds(count=1, **filters)
         return first(objects)
 
+    def environments(self, count=DEFAULT_COUNT, **filters):
+        filters.update({'project': self.id})
+        return self.__fetch__(Environment, filters, count)
+
+    def environment(self, slug):
+        filters = {'slug': slug}
+        objects = self.environments(count=1, **filters)
+        return first(objects)
+
     def suites(self, count=DEFAULT_COUNT, **filters):
         filters.update({'project': self.id})
         return self.__fetch__(Suite, filters, count)
