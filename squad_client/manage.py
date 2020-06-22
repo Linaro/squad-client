@@ -35,17 +35,18 @@ def main():
         parser.print_help()
         return -1
 
-    squad_host = args.squad_host or os.getenv('SQUAD_HOST')
-    squad_token = args.squad_token or os.getenv('SQUAD_TOKEN')
-    if squad_host is None:
-        logger.error('Either --squad-host or SQUAD_HOST env variable are required')
-        return -1
+    if args.command != 'test':
+        squad_host = args.squad_host or os.getenv('SQUAD_HOST')
+        squad_token = args.squad_token or os.getenv('SQUAD_TOKEN')
+        if squad_host is None:
+            logger.error('Either --squad-host or SQUAD_HOST env variable are required')
+            return -1
 
-    try:
-        SquadApi.configure(squad_host, token=squad_token)
-    except ApiException as e:
-        logger.error('Failed to configure squad api: %s' % e)
-        return -1
+        try:
+            SquadApi.configure(squad_host, token=squad_token)
+        except ApiException as e:
+            logger.error('Failed to configure squad api: %s' % e)
+            return -1
 
     if args.cache > 0:
         logger.debug('Caching results in "squad_client_cache.sqlite" for %d seconds' % args.cache)
