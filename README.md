@@ -77,7 +77,7 @@ build = project.build('v4.14.74')
 build = Squad().group('lkft').project('linux-stable-rc-4.14-oe-sanity').build('v4.14.74')
 
 # filtering is also available
-finished_builds = Squad().group('lkft').project('linux-stable-rc-4.14-oe-sanity').builds(finished=True)
+finished_builds = Squad().group('lkft').project('linux-stable-rc-4.14-oe-sanity').builds(status__finished=True)
 ```
 
 For more examples, see `examples` folder.
