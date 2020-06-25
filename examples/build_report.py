@@ -94,7 +94,7 @@ for env in squad_envs.values():
         envs_summaries[env.slug]['fail'] += testrun_summary.tests_fail
         envs_summaries[env.slug]['xfail'] += testrun_summary.tests_xfail
         envs_summaries[env.slug]['skip'] += testrun_summary.tests_skip
-        testruns[tr] = testrun.job_id
+        testruns[tr] = testrun.id
 
 intro = None
 if args.intro:

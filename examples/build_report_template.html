@@ -126,7 +126,7 @@
                                 </tr>
                                 {% for test in results %}
                                     {% if test.status  %}
-                                        {% set url = 'tests' %}
+                                        {% set url = 'test/' + test.short_name + "/details/" %}
                                     {% else %}
                                         {% set url = 'metrics'  %}
                                     {% endif %}
