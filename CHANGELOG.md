@@ -1,3 +1,22 @@
+# 0.7
+
+This 0.7 release adds a method in project to fetch its environments
+among other minor bug fixes.
+
+The release also changes the home of squad-client docker image to
+squadproject/squad-client.
+
+Complete list of changes below:
+
+* add methods to fetch environments from a project
+* change the attribute from complete to finished
+* core: models: add nested endpoints to models
+* examples: fix URL in build_report
+* fix the example for filtering on finished builds
+* manage: avoid configuring api when running tests
+* release: change docker repo to squadproject
+
+
 # 0.6
 
 This 0.6 release adds basic caching for fetching data. It also adds
