@@ -71,6 +71,14 @@ class SquadApi:
         return SquadApi.__request__('POST', endpoint, params=params, data=data)
 
     @staticmethod
+    def patch(endpoint, params={}, data={}):
+        return SquadApi.__request__('PATCH', endpoint, params=params, data=data)
+
+    @staticmethod
+    def delete(endpoint, params={}, data={}):
+        return SquadApi.__request__('DELETE', endpoint, params=params, data=data)
+
+    @staticmethod
     def __request__(method, endpoint, **kwargs):
         if SquadApi.url is None:
             raise ApiException('Missing "url" in SquadApi configuration. Example: `export SQUAD_HOST=http://qa-reports.linaro.org`')
@@ -101,6 +109,8 @@ class SquadApi:
                 # logger.error(msg)
                 if SquadApi.token is None:
                     raise ApiException('%s. Consider `export SQUAD_TOKEN=your-squad-token`' % msg)
+            elif response.status_code == 403:
+                raise ApiException('%s %s is forbidden' % (method, endpoint))
             elif response.status_code == 500:
                 logger.error('You hit a bug in SQUAD, please report it at https://github.com/Linaro/squad/issues/new so we can get it fixed.')
 

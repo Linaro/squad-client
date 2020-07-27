@@ -3,9 +3,9 @@ import uuid
 from itertools import groupby
 
 
-from .api import SquadApi
+from .api import SquadApi, ApiException
 from squad_client.exceptions import InvalidSquadObject, InvalidSquadLookup
-from squad_client.utils import first, parse_test_name, parse_metric_name, to_json
+from squad_client.utils import first, parse_test_name, parse_metric_name, to_json, get_class_name
 from squad_client import settings
 
 
@@ -13,6 +13,10 @@ logger = logging.getLogger()
 
 DEFAULT_COUNT = settings.DEFAULT_NUM_OF_OBJECTS
 ALL = -1
+
+
+class SquadObjectException(Exception):
+    pass
 
 
 class SquadObject:
@@ -51,7 +55,7 @@ class SquadObject:
         if obj is None:
             obj = self
 
-        nested_endpoints = [x[1] for x in SquadApi.schema_nested_eps if x[0].lower() == obj.__class__.__name__.lower()]
+        nested_endpoints = [x[1] for x in SquadApi.schema_nested_eps if x[0].lower() == get_class_name(obj).lower()]
         if nested_endpoints:
             setattr(obj, 'nested_endpoints', nested_endpoints)
 
@@ -70,7 +74,7 @@ class SquadObject:
         return objects
 
     def __str__(self):
-        class_name = self.__class__.__name__
+        class_name = get_class_name(self)
         attrs_str = []
         for attr in self.attrs:
             attrs_str.append('%s: "%s"' % (attr, getattr(self, attr)))
@@ -111,6 +115,73 @@ class SquadObject:
         count = 1
         result = self.__fetch__(self.__class__, {'id': _id}, count)
         return first(result) if len(result) else None
+
+    def pre_save(self):
+        pass
+
+    def post_save(self):
+        pass
+
+    def save(self):
+        self.pre_save()
+
+        data = {}
+        class_name = get_class_name(self)
+
+        for attr in self.attrs:
+            if not hasattr(self, attr):
+                continue
+
+            value = getattr(self, attr, None)
+            if value is None:
+                continue
+
+            if isinstance(value, SquadObject):
+                # value is a relation object
+                if not hasattr(value, 'id'):
+                    raise SquadObjectException('Failed to save %s: %s has no id' % (class_name, attr))
+                # TODO: some objects have url as reference to other objects, ex:
+                # project.group is a group url, instead of id
+                # we need to standardize it
+                # For now, only projects can be created this way
+                data[attr] = value.url
+            else:
+                data[attr] = value
+
+        endpoint = self.endpoint
+        request = SquadApi.post
+        if hasattr(self, 'id') and type(self.id) is not uuid.UUID:
+            endpoint = '%s%s/' % (endpoint, self.id)
+            request = SquadApi.patch
+
+        try:
+            response = request(endpoint, data=data)
+            if response.status_code in [400, 401, 405]:
+                raise SquadObjectException('Failed to save %s: %s' % (class_name, response.text))
+
+            self.__fill_object__(response.json())
+            self.post_save()
+
+        except ApiException as e:
+            logger.error(e)
+            raise SquadObjectException(str(e))
+
+    def delete(self):
+        class_name = get_class_name(self)
+
+        if not hasattr(self, 'id') or type(self.id) is uuid.UUID:
+            raise SquadObjectException('Failed to delete %s: it must contain a valid "id"' % class_name)
+
+        endpoint = '%s%s/' % (self.endpoint, self.id)
+
+        try:
+            response = SquadApi.delete(endpoint)
+            if response.status_code in [400, 401, 405]:
+                raise SquadObjectException('Failed to delete %s: %s' % (class_name, response.text))
+
+        except ApiException as e:
+            logger.error(e)
+            raise SquadObjectException(str(e))
 
 
 class Squad(SquadObject):
@@ -222,6 +293,13 @@ class Group(SquadObject):
         objects = self.projects(count=1, **filters)
         return first(objects)
 
+    def create_project(self, slug=None, plugins_list=None):
+        new_project = Project()
+        new_project.slug = slug
+        new_project.group = self
+        new_project.enabled_plugins_list = plugins_list or ['linux-log-parser']
+        new_project.save()
+
     def __repr__(self):
         return self.slug
 
@@ -280,6 +358,10 @@ class Project(SquadObject):
             url = ''.join([Project.endpoint, str(proj_id), '/compare_builds'])
             params = {'baseline': baseline_id, 'to_compare': build_id}
             return SquadApi.get(url, params).json()
+
+    def pre_save(self):
+        if not hasattr(self, 'enabled_plugins_list'):
+            self.enabled_plugins_list = []
 
 
 class Build(SquadObject):

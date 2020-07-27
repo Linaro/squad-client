@@ -28,3 +28,7 @@ def split_build_url(build_slug):
 
 def to_json(thing):
     return json.dumps(thing)
+
+
+def get_class_name(obj):
+    return obj.__class__.__name__

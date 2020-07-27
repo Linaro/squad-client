@@ -2,7 +2,7 @@ import unittest
 
 from . import settings
 from squad_client.core.api import SquadApi
-from squad_client.core.models import Squad, ALL
+from squad_client.core.models import Squad, ALL, Project
 from squad_client.utils import first
 
 
@@ -127,6 +127,8 @@ class TestRunTest(unittest.TestCase):
 class ProjectTest(unittest.TestCase):
 
     def setUp(self):
+        SquadApi.configure(url='http://localhost:%s' % settings.DEFAULT_SQUAD_PORT, token='193cd8bb41ab9217714515954e8724f651ef8601')
+
         self.project = first(Squad().projects(slug='my_project'))
         self.build = first(Squad().builds(version='my_build'))
         self.build2 = first(Squad().builds(version='my_build2'))
@@ -151,3 +153,35 @@ class ProjectTest(unittest.TestCase):
     def test_compare_builds_from_same_project(self):
         comparison = self.project.compare_builds(self.build2.id, self.build.id)
         self.assertEqual('Cannot report regressions/fixes on a non-finished builds', comparison[0])
+
+    def test_create_project(self):
+        group = Squad().group('my_group')
+        slug = 'test-create-project'
+        new_project = Project()
+        new_project.slug = slug
+        new_project.group = group
+        new_project.enabled_plugins_list = ['linux-log-parser']
+        new_project.save()
+
+        check_project = first(Squad().projects(slug=slug, group__slug=group.slug))
+        self.assertEqual(new_project.id, check_project.id)
+
+        new_project.delete()
+
+
+class GroupTest(unittest.TestCase):
+
+    def setUp(self):
+        SquadApi.configure(url='http://localhost:%s' % settings.DEFAULT_SQUAD_PORT, token='193cd8bb41ab9217714515954e8724f651ef8601')
+
+        self.group = first(Squad().groups(slug='my_group'))
+
+    def test_create_project(self):
+        project_slug = 'test-create-project2'
+        self.group.create_project(slug=project_slug)
+
+        check_project = Squad().projects(slug=project_slug, group__slug=self.group.slug)
+        self.assertEqual(1, len(check_project))
+
+        p = first(check_project)
+        p.delete()
