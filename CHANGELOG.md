@@ -1,3 +1,14 @@
+# 0.8
+
+This 0.8 release fixes the number of suites retrieved in build_report
+and allow users to create projects using the client. A newer version
+will come in quickly allowing all models to be created/deleted.
+
+Complete list of changes going in:
+
+core: models allow project creation
+examples: fix suite retrieval in build_report.py
+
 # 0.7
 
 This 0.7 release adds a method in project to fetch its environments
