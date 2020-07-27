@@ -55,7 +55,7 @@ project = group.project(args.project)
 build = project.build(args.build)
 
 squad_envs = Squad().environments(project=project.id)
-squad_suites = Squad().suites(project=project.id)
+squad_suites = Squad().suites(project=project.id, count=-1)
 envs = {}
 envs_summaries = {}
 testruns = {}
