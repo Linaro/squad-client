@@ -361,7 +361,8 @@ class Project(SquadObject):
 
     def pre_save(self):
         if not hasattr(self, 'enabled_plugins_list'):
-            self.enabled_plugins_list = []
+            # TODO: make enabled_plugins_list optional
+            self.enabled_plugins_list = ['linux-log-parser']
 
 
 class Build(SquadObject):
