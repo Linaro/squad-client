@@ -1,3 +1,13 @@
+# 0.8.1
+
+This 0.8.1 release just turns the featured added in 0.8 into a command line.
+It makes possible to create or update a project using command line arguments.
+
+Complete list of changes going in:
+
+* commands: add create_or_update_project command
+* shortcuts: add create_or_update_project shortcut
+
 # 0.8
 
 This 0.8 release fixes the number of suites retrieved in build_report
