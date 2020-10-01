@@ -20,7 +20,10 @@ class SubmitCommand(SquadClientCommand):
             "--results",
             help="File with test results to submit. Max 5MB. JSON and YAML formats are supported",
         )
-        result_group.add_argument("--result-name", help="Single result name")
+        result_group.add_argument(
+            "--result-name",
+            help="Single result name. Please use suite_name/test_name as value for this parameter"
+        )
         parser.add_argument(
             "--result-value",
             help="Single result output (pass/fail/skip)",
