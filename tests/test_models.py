@@ -185,3 +185,16 @@ class GroupTest(unittest.TestCase):
 
         p = first(check_project)
         p.delete()
+
+
+class SuiteTest(unittest.TestCase):
+
+    def setUp(self):
+        self.suite = first(Squad().suites(slug='my_suite'))
+
+    def test_basic(self):
+        self.assertTrue(self.suite is not None)
+
+    def test_suite_tests(self):
+        tests = self.suite.tests()
+        self.assertEqual(4, len(tests))

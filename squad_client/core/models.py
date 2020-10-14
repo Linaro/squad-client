@@ -61,7 +61,8 @@ class SquadObject:
 
         attrs = obj.attrs if len(obj.attrs) else [attr for attr in result.keys()]
         for attr in attrs:
-            setattr(obj, attr.replace(' ', '_').replace('/', '_').replace('-', '_'), result[attr])
+            if attr in result.keys():
+                setattr(obj, attr.replace(' ', '_').replace('/', '_').replace('-', '_'), result[attr])
 
     def __fill__(self, klass, results):
 
@@ -81,7 +82,7 @@ class SquadObject:
 
         return '%s(%s)' % (class_name, ', '.join(attrs_str))
 
-    def __fetch__(self, klass=None, filters=None, count=DEFAULT_COUNT):
+    def __fetch__(self, klass=None, filters=None, count=DEFAULT_COUNT, endpoint=None):
         """
             Generic get method to retrieve objects from API
             count: number of objects to fetch, defaults to 50,
@@ -99,7 +100,7 @@ class SquadObject:
 
         filters['limit'] = count if count < settings.SQUAD_MAX_PAGE_LIMIT else settings.SQUAD_MAX_PAGE_LIMIT
         objects = {}
-        url = klass.endpoint
+        url = endpoint or klass.endpoint
         while url and len(objects) < count:
             response = SquadApi.get(url, filters)
             result = response.json()
@@ -555,15 +556,17 @@ class Suite(SquadObject):
     endpoint = '/api/suites/'
     attrs = ['id', 'slug', 'name', 'project']
 
-    __tests__ = {}
+    __tests__ = None
 
     def add_test(self, test):
         if self.__tests__ is None:
             self.__tests__ = {}
-        self.__tests__[test.id] = test
+        self.__tests__[test.__id__] = test
 
-    @property
-    def tests(self):
+    def tests(self, count=ALL, **filters):
+        if self.__tests__ is None and hasattr(self, 'id') and self.id is not None:
+            endpoint = '%s%d/tests' % (self.endpoint, self.id)
+            self.__tests__ = self.__fetch__(Test, filters, count, endpoint=endpoint)
         return self.__tests__
 
 
