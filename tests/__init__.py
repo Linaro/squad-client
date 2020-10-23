@@ -11,8 +11,12 @@ def run(coverage=False, tests=['discover'], verbose=False):
         return False
 
     argv = ['-m', 'unittest'] + tests
-    if len(tests) == 0 and verbose:
-        argv += ['discover', '-v']
+
+    if len(tests) == 0:
+        argv += ['discover']
+
+    if verbose:
+        argv += ['-v']
 
     if coverage:
         print('\t --coverage is enabled, run `coverage report -m` to view coverage report')
