@@ -163,6 +163,12 @@ class SubmitCommandTest(unittest.TestCase):
         self.assertFalse(proc.ok)
         self.assertIn('Failed parsing file', proc.err)
 
+    def test_submit_results_bad_extension(self):
+        p = "tests/submit_results/sample_results.txt"
+        proc = self.manage_submit(results=p)
+        self.assertFalse(proc.ok)
+        self.assertIn('File "%s" does not have a JSON or YAML file extension' % p, proc.err)
+
     def test_submit_single_metric(self):
         proc = self.manage_submit(metrics='tests/submit_results/sample_metrics.json')
         self.assertTrue(proc.ok)

@@ -75,7 +75,7 @@ class SubmitCommand(SquadClientCommand):
 
         _, ext = os.path.splitext(file_path)
         if ext not in ['.json', '.yml', '.yaml']:
-            logger.error('File "%s" is neither JSON nor YAML')
+            logger.error('File "%s" does not have a JSON or YAML file extension' % file_path)
             return None
 
         parser = json.load if ext == '.json' else yaml.safe_load
