@@ -32,11 +32,16 @@ environment2 = project.environments.create(slug='my_other_env')
 suite = project.suites.create(slug='my_suite')
 suite2 = project.suites.create(slug='my_other_suite')
 
+metadata_my_passed_test, _ = m.SuiteMetadata.objects.get_or_create(kind='test', suite=suite.slug, name='my_passed_test')
+metadata_my_failed_test, _ = m.SuiteMetadata.objects.get_or_create(kind='test', suite=suite.slug, name='my_failed_test')
+metadata_my_xfailed_test, _ = m.SuiteMetadata.objects.get_or_create(kind='test', suite=suite.slug, name='my_xfailed_test')
+metadata_my_skipped_test, _ = m.SuiteMetadata.objects.get_or_create(kind='test', suite=suite.slug, name='my_skipped_test')
+
 testrun = build.test_runs.create(environment=environment)
-passed_test = testrun.tests.create(suite=suite, result=True, name='my_passed_test')
-failed_test = testrun.tests.create(suite=suite, result=False, name='my_failed_test')
-xfailed_test = testrun.tests.create(suite=suite, result=True, name='my_xfailed_test', has_known_issues=True)
-skipped_test = testrun.tests.create(suite=suite, result=None, name='my_skipped_test')
+passed_test = testrun.tests.create(suite=suite, result=True, metadata=metadata_my_passed_test)
+failed_test = testrun.tests.create(suite=suite, result=False, metadata=metadata_my_failed_test)
+xfailed_test = testrun.tests.create(suite=suite, result=True, metadata=metadata_my_xfailed_test, has_known_issues=True)
+skipped_test = testrun.tests.create(suite=suite, result=None, metadata=metadata_my_skipped_test)
 
 RecordTestRunStatus()(testrun)
 
