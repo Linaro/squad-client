@@ -71,7 +71,7 @@ class SubmitCommandTest(unittest.TestCase):
         self.squad = Squad()
         SquadApi.configure(url=self.testing_server, token=self.testing_token)
 
-    def manage_submit(self, results=None, result_name=None, result_value=None, metrics=None,
+    def manage_submit(self, results=None, results_layout=None, result_name=None, result_value=None, metrics=None,
                       metadata=None, attachments=None, logs=None, environment=None):
         argv = ['./manage.py', '--squad-host', self.testing_server, '--squad-token', self.testing_token,
                 'submit', '--group', 'my_group', '--project', 'my_project', '--build', 'my_build6', '--environment', 'test_submit_env']
@@ -80,6 +80,8 @@ class SubmitCommandTest(unittest.TestCase):
             argv += ['--logs', logs]
         if results:
             argv += ['--results', results]
+        if results_layout:
+            argv += ['--results-layout', results_layout]
         if metrics:
             argv += ['--metrics', metrics]
         if metadata:
@@ -144,6 +146,39 @@ class SubmitCommandTest(unittest.TestCase):
         self.assertFalse(proc.ok)
         self.assertIn('Failed parsing file', proc.err)
 
+    def test_submit_results_tuxbuild_json(self):
+        proc = self.manage_submit(results='tests/data/submit/tuxbuild/build.json', results_layout='tuxbuild_json')
+        self.assertTrue(proc.ok, msg=proc.err)
+        self.assertIn("Submitting 2 tests", proc.err)
+
+        test = first(self.squad.tests(name="x86-gcc-9-defconfig-b9979cfa"))
+        self.assertEqual("build/x86-gcc-9-defconfig-b9979cfa", test.name)
+        self.assertEqual("pass", test.status)
+
+        test = first(self.squad.tests(name="arm64-gcc-9-defconfig-5b09568e"))
+        self.assertEqual("build/arm64-gcc-9-defconfig-5b09568e", test.name)
+        self.assertEqual("fail", test.status)
+
+    def test_submit_results_tuxbuild_json_malformed(self):
+        proc = self.manage_submit(results='tests/data/submit/tuxbuild/malformed.json', results_layout='tuxbuild_json')
+        self.assertFalse(proc.ok, msg=proc.err)
+        self.assertIn("Failed to load json", proc.err)
+
+    def test_submit_results_tuxbuild_json_missing(self):
+        proc = self.manage_submit(results="tests/data/submit/tuxbuild/missing.json", results_layout="tuxbuild_json")
+        self.assertFalse(proc.ok)
+        self.assertIn("Requested file tests/data/submit/tuxbuild/missing.json doesn't exist", proc.err)
+
+    def test_submit_results_tuxbuild_json_results_opt_missing(self):
+        proc = self.manage_submit(results_layout="tuxbuild_json")
+        self.assertFalse(proc.ok)
+        self.assertIn("At least one of --result-name, --results, --metrics is required", proc.err)
+
+    def test_submit_results_tuxbuild_json_layout_arg_bad(self):
+        proc = self.manage_submit(results="tests/data/submit/tuxbuild/build.json", results_layout="bad_layout")
+        self.assertFalse(proc.ok)
+        self.assertIn("argument --results-layout: invalid choice: 'bad_layout'", proc.err)
+
     def test_submit_results_yaml(self):
         proc = self.manage_submit(results='tests/submit_results/sample_results.yaml')
         self.assertTrue(proc.ok)
@@ -179,7 +214,7 @@ class SubmitCommandTest(unittest.TestCase):
                                   metrics='tests/submit_results/sample_metrics.json',
                                   metadata='tests/submit_results/sample_metadata.json',
                                   logs='tests/submit_results/sample_log.log')
-        self.assertTrue(proc.ok)
+        self.assertTrue(proc.ok, msg=proc.err)
         self.assertIn('2 tests, 1 metrics', proc.err)
 
         testrun = first(self.squad.testruns(job_id='jsonmetadatajobid1'))

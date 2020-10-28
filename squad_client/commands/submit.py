@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import os
@@ -28,6 +29,11 @@ class SubmitCommand(SquadClientCommand):
             "--result-value",
             help="Single result output (pass/fail/skip)",
             choices=["pass", "fail", "skip"],
+        )
+        parser.add_argument(
+            "--results-layout",
+            help="Layout of the results file, if any",
+            choices=["tuxbuild_json"],
         )
         parser.add_argument(
             "--metrics",
@@ -89,6 +95,38 @@ class SubmitCommand(SquadClientCommand):
 
         return output_dict
 
+    def _load_tuxbuild_json(self, path):
+        if not self.__check_file(path):
+            return None
+
+        data = None
+        try:
+            with open(path) as f:
+                tb = {}
+                builds = json.load(f)
+
+                for b in builds:
+                    name = self._get_tuxbuild_test_name(b)
+                    tb[name] = b["build_status"]
+
+                data = tb
+
+        except json.JSONDecodeError as jde:
+            logger.error("Failed to load json: %s", jde)
+
+        except OSError as ose:
+            logger.error("Failed to open file: %s", ose)
+
+        return data
+
+    def _get_tuxbuild_test_name(self, build):
+        suite = "build"
+        kconfig_hash = hashlib.sha1(json.dumps(build["kconfig"][1:]).encode()).hexdigest()[0:8]
+
+        return "%s/%s-%s-%s-%s" % (
+            suite, build["target_arch"], build["toolchain"], build["kconfig"][0], kconfig_hash,
+        )
+
     def run(self, args):
         results_dict = {}
         metrics_dict = {}
@@ -101,7 +139,11 @@ class SubmitCommand(SquadClientCommand):
             results_dict = {args.result_name: args.result_value}
 
         if args.results:
-            results_dict = self.__read_input_file(args.results)
+            if args.results_layout == 'tuxbuild_json':
+                results_dict = self._load_tuxbuild_json(args.results)
+            else:
+                results_dict = self.__read_input_file(args.results)
+
             if results_dict is None:
                 return False
 
