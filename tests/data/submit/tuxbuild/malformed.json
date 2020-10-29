@@ -1,0 +1,55 @@
+[
+    {
+        "build_key": "t8NSUfTBZiSPbBVaXLH7kw",
+        "build_status": "pass",
+        "client_token": "3cffcab5-aaf8-446d-8dec-861da6814788",
+        "download_url": "https://builds.tuxbuild.com/t8NSUfTBZiSPbBVaXLH7kw/",
+        "errors_count": 0,
+        "git_describe": "next-20201021",
+        "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
+        "git_sha": "5302568121ba345f5c22528aefd72d775f25221e",
+        "git_short_log": "5302568121ba (\"Add linux-next specific files for 20201021\")",
+        "kconfig": [
+            "defconfig",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/lkft.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/lkft-crypto.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/distro-overrides.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/systemd.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/virtio.config",
+            "CONFIG_IGB=y",
+            "CONFIG_UNWINDER_FRAME_POINTER=y"
+        ],
+        "kernel_version": "5.9.0",
+        "status_message": "build completed",
+        "target_arch": "x86",
+        "toolchain": "gcc-9",
+        "tuxbuild_status": "complete",
+        "warnings_count": 1
+    }
+    {
+        "build_key": "B3TECkH4_1X9yKoWOPIhew",
+        "build_status": "fail",
+        "client_token": "32b482ac-2cc1-4f68-bf73-cc9f780b72cf",
+        "download_url": "https://builds.tuxbuild.com/B3TECkH4_1X9yKoWOPIhew/",
+        "errors_count": 2,
+        "git_describe": "next-20201021",
+        "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
+        "git_sha": "5302568121ba345f5c22528aefd72d775f25221e",
+        "git_short_log": "5302568121ba (\"Add linux-next specific files for 20201021\")",
+        "kconfig": [
+            "defconfig",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/lkft.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/lkft-crypto.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/distro-overrides.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/systemd.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/virtio.config",
+            "CONFIG_ARM64_MODULE_PLTS=y"
+        ],
+        "kernel_version": "5.9.0",
+        "status_message": "build failed due to compilation error(s)",
+        "target_arch": "arm64",
+        "toolchain": "gcc-9",
+        "tuxbuild_status": "complete",
+        "warnings_count": 2
+    }
+]
