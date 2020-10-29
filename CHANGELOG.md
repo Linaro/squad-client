@@ -1,3 +1,17 @@
+# 0.9
+
+This 0.9 release adds support for TuxBuild input for submitting test results
+to SQUAD.
+
+Complete list of changes going in:
+
+* Add an option to the submit command that allows the submission of tuxbuild json result files
+* Fix a file extension check error message
+* Allow the verbose flag to be used when running specific tests
+* tests: fixtures: fix fixtures to work along with recent squad changes
+* core: models: query tests in Suite class
+* commands: fix submit command docs
+
 # 0.8.1
 
 This 0.8.1 release just turns the featured added in 0.8 into a command line.
