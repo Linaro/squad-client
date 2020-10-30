@@ -121,10 +121,14 @@ class SubmitCommand(SquadClientCommand):
 
     def _get_tuxbuild_test_name(self, build):
         suite = "build"
-        kconfig_hash = hashlib.sha1(json.dumps(build["kconfig"][1:]).encode()).hexdigest()[0:8]
 
-        return "%s/%s-%s-%s-%s" % (
-            suite, build["target_arch"], build["toolchain"], build["kconfig"][0], kconfig_hash,
+        if len(build["kconfig"][1:]):
+            kconfig = "%s-%s" % (build["kconfig"][0], hashlib.sha1(json.dumps(build["kconfig"][1:]).encode()).hexdigest()[0:8])
+        else:
+            kconfig = build["kconfig"][0]
+
+        return "%s/%s-%s-%s" % (
+            suite, build["target_arch"], build["toolchain"], kconfig,
         )
 
     def run(self, args):

@@ -1,0 +1,62 @@
+[
+    {
+        "build_key": "x5Mi9j6xZItTGqVtOKmnVw",
+        "build_status": "pass",
+        "client_token": "95d6f75e-f374-457c-8833-b0c913057554",
+        "download_url": "https://builds.tuxbuild.com/x5Mi9j6xZItTGqVtOKmnVw/",
+        "errors_count": 0,
+        "git_describe": "next-20201030",
+        "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
+        "git_sha": "4e78c578cb987725eef1cec7d11b6437109e9a49",
+        "git_short_log": "4e78c578cb98 (\"Add linux-next specific files for 20201030\")",
+        "kconfig": [
+            "allnoconfig"
+        ],
+        "kernel_version": "5.10.0-rc1",
+        "status_message": "build completed",
+        "target_arch": "x86",
+        "toolchain": "gcc-8",
+        "tuxbuild_status": "complete",
+        "warnings_count": 0
+    },
+    {
+        "build_key": "cjLreGasHSZj3OctZlNdpw",
+        "build_status": "pass",
+        "client_token": "d1a50659-5a64-416d-8896-1c4d4159c31e",
+        "download_url": "https://builds.tuxbuild.com/cjLreGasHSZj3OctZlNdpw/",
+        "errors_count": 0,
+        "git_describe": "next-20201030",
+        "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
+        "git_sha": "4e78c578cb987725eef1cec7d11b6437109e9a49",
+        "git_short_log": "4e78c578cb98 (\"Add linux-next specific files for 20201030\")",
+        "kconfig": [
+            "tinyconfig"
+        ],
+        "kernel_version": "5.10.0-rc1",
+        "status_message": "build completed",
+        "target_arch": "x86",
+        "toolchain": "gcc-8",
+        "tuxbuild_status": "complete",
+        "warnings_count": 0
+    },
+    {
+        "build_key": "9NeOU1kd65bhMrL4eyI2yA",
+        "build_status": "pass",
+        "client_token": "6f740266-63ae-48e0-859c-63d9c4a947aa",
+        "download_url": "https://builds.tuxbuild.com/9NeOU1kd65bhMrL4eyI2yA/",
+        "errors_count": 0,
+        "git_describe": "next-20201030",
+        "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
+        "git_sha": "4e78c578cb987725eef1cec7d11b6437109e9a49",
+        "git_short_log": "4e78c578cb98 (\"Add linux-next specific files for 20201030\")",
+        "kconfig": [
+            "x86_64_defconfig"
+        ],
+        "kernel_version": "5.10.0-rc1",
+        "status_message": "build completed",
+        "target_arch": "x86",
+        "toolchain": "gcc-8",
+        "tuxbuild_status": "complete",
+        "warnings_count": 0
+    }
+]
