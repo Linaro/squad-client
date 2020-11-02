@@ -195,6 +195,16 @@ class SubmitCommandTest(unittest.TestCase):
         self.assertFalse(proc.ok)
         self.assertIn("argument --results-layout: invalid choice: 'bad_layout'", proc.err)
 
+    def test_submit_results_tuxbuild_json_empty_kconfig(self):
+        proc = self.manage_submit(results="tests/data/submit/tuxbuild/empty_kconfig.json", results_layout="tuxbuild_json")
+        self.assertFalse(proc.ok)
+        self.assertIn("Failed to load tuxbuild json due to a missing kconfig value: list index out of range", proc.err)
+
+    def test_submit_results_tuxbuild_json_missing_kconfig(self):
+        proc = self.manage_submit(results="tests/data/submit/tuxbuild/missing_kconfig.json", results_layout="tuxbuild_json")
+        self.assertFalse(proc.ok)
+        self.assertIn("Failed to load tuxbuild json due to a missing variable: 'kconfig'", proc.err)
+
     def test_submit_results_yaml(self):
         proc = self.manage_submit(results='tests/submit_results/sample_results.yaml')
         self.assertTrue(proc.ok)

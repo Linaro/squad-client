@@ -111,6 +111,12 @@ class SubmitCommand(SquadClientCommand):
 
                 data = tb
 
+        except IndexError as ie:
+            logger.error("Failed to load tuxbuild json due to a missing kconfig value: %s", ie)
+
+        except KeyError as ke:
+            logger.error("Failed to load tuxbuild json due to a missing variable: %s", ke)
+
         except json.JSONDecodeError as jde:
             logger.error("Failed to load json: %s", jde)
 
