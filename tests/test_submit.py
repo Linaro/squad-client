@@ -159,6 +159,22 @@ class SubmitCommandTest(unittest.TestCase):
         self.assertEqual("build/arm64-gcc-9-defconfig-5b09568e", test.name)
         self.assertEqual("fail", test.status)
 
+    def test_submit_results_tuxbuild_buildset_json(self):
+        proc = self.manage_submit(results='tests/data/submit/tuxbuild/buildset.json', results_layout='tuxbuild_json')
+        self.assertIn("Submitting 3 tests", proc.err)
+
+        test = first(self.squad.tests(name="x86-gcc-8-allnoconfig"))
+        self.assertEqual("build/x86-gcc-8-allnoconfig", test.name)
+        self.assertEqual("pass", test.status)
+
+        test = first(self.squad.tests(name="x86-gcc-8-tinyconfig"))
+        self.assertEqual("build/x86-gcc-8-tinyconfig", test.name)
+        self.assertEqual("pass", test.status)
+
+        test = first(self.squad.tests(name="x86-gcc-8-x86_64_defconfig"))
+        self.assertEqual("build/x86-gcc-8-x86_64_defconfig", test.name)
+        self.assertEqual("pass", test.status)
+
     def test_submit_results_tuxbuild_json_malformed(self):
         proc = self.manage_submit(results='tests/data/submit/tuxbuild/malformed.json', results_layout='tuxbuild_json')
         self.assertFalse(proc.ok, msg=proc.err)
@@ -178,6 +194,16 @@ class SubmitCommandTest(unittest.TestCase):
         proc = self.manage_submit(results="tests/data/submit/tuxbuild/build.json", results_layout="bad_layout")
         self.assertFalse(proc.ok)
         self.assertIn("argument --results-layout: invalid choice: 'bad_layout'", proc.err)
+
+    def test_submit_results_tuxbuild_json_empty_kconfig(self):
+        proc = self.manage_submit(results="tests/data/submit/tuxbuild/empty_kconfig.json", results_layout="tuxbuild_json")
+        self.assertFalse(proc.ok)
+        self.assertIn("Failed to load tuxbuild json due to a missing kconfig value: list index out of range", proc.err)
+
+    def test_submit_results_tuxbuild_json_missing_kconfig(self):
+        proc = self.manage_submit(results="tests/data/submit/tuxbuild/missing_kconfig.json", results_layout="tuxbuild_json")
+        self.assertFalse(proc.ok)
+        self.assertIn("Failed to load tuxbuild json due to a missing variable: 'kconfig'", proc.err)
 
     def test_submit_results_yaml(self):
         proc = self.manage_submit(results='tests/submit_results/sample_results.yaml')
