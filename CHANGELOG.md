@@ -1,3 +1,14 @@
+# 0.9.1
+
+This 0.9.1 release fixes a small bug and changes tuxbuild submission
+slightly.
+
+Complete list of changes going in:
+
+* Remove the arch from the test name when using tuxbuild json
+* Gracefully handle some tuxbuild json config errors
+* Do not show the hash for an empty kconfig
+
 # 0.9
 
 This 0.9 release adds support for TuxBuild input for submitting test results
