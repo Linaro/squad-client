@@ -133,8 +133,8 @@ class SubmitCommand(SquadClientCommand):
         else:
             kconfig = build["kconfig"][0]
 
-        return "%s/%s-%s-%s" % (
-            suite, build["target_arch"], build["toolchain"], kconfig,
+        return "%s/%s-%s" % (
+            suite, build["toolchain"], kconfig,
         )
 
     def run(self, args):
