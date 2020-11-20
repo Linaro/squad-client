@@ -209,7 +209,7 @@ class SubmitCommand(SquadClientCommand):
                 if type(key) is not str:
                     logger.error("Non-string key detected")
                     return False
-                if type(value) not in [str, dict]:
+                if type(value) not in [str, dict, int, list]:
                     logger.error("Incompatible metadata detected")
                     return False
 
