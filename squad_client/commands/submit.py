@@ -210,7 +210,7 @@ class SubmitCommand(SquadClientCommand):
                     logger.error("Non-string key detected")
                     return False
                 if type(value) not in [str, dict]:
-                    logger.error("Incompatible results detected")
+                    logger.error("Incompatible metadata detected")
                     return False
 
         submit_results(
