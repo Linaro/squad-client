@@ -33,7 +33,7 @@ class SubmitCommand(SquadClientCommand):
         parser.add_argument(
             "--results-layout",
             help="Layout of the results file, if any",
-            choices=["tuxbuild_json"],
+            choices=["tuxbuild"],
         )
         parser.add_argument(
             "--metrics",
@@ -95,7 +95,7 @@ class SubmitCommand(SquadClientCommand):
 
         return output_dict
 
-    def _load_tuxbuild_json(self, path):
+    def _load_tuxbuild(self, path):
         if not self.__check_file(path):
             return None
 
@@ -149,8 +149,8 @@ class SubmitCommand(SquadClientCommand):
             results_dict = {args.result_name: args.result_value}
 
         if args.results:
-            if args.results_layout == 'tuxbuild_json':
-                results_dict = self._load_tuxbuild_json(args.results)
+            if args.results_layout == 'tuxbuild':
+                results_dict = self._load_tuxbuild(args.results)
             else:
                 results_dict = self.__read_input_file(args.results)
 
