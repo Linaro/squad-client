@@ -71,7 +71,7 @@ class SubmitCommandTest(unittest.TestCase):
         self.squad = Squad()
         SquadApi.configure(url=self.testing_server, token=self.testing_token)
 
-    def manage_submit(self, results=None, results_layout=None, result_name=None, result_value=None, metrics=None,
+    def manage_submit(self, results=None, result_name=None, result_value=None, metrics=None,
                       metadata=None, attachments=None, logs=None, environment=None):
         argv = ['./manage.py', '--squad-host', self.testing_server, '--squad-token', self.testing_token,
                 'submit', '--group', 'my_group', '--project', 'my_project', '--build', 'my_build6', '--environment', 'test_submit_env']
@@ -80,8 +80,6 @@ class SubmitCommandTest(unittest.TestCase):
             argv += ['--logs', logs]
         if results:
             argv += ['--results', results]
-        if results_layout:
-            argv += ['--results-layout', results_layout]
         if metrics:
             argv += ['--metrics', metrics]
         if metadata:
@@ -145,65 +143,6 @@ class SubmitCommandTest(unittest.TestCase):
         proc = self.manage_submit(results='tests/submit_results/sample_results_malformed.json')
         self.assertFalse(proc.ok)
         self.assertIn('Failed parsing file', proc.err)
-
-    def test_submit_results_tuxbuild(self):
-        proc = self.manage_submit(results='tests/data/submit/tuxbuild/build.json', results_layout='tuxbuild')
-        self.assertTrue(proc.ok, msg=proc.err)
-        self.assertIn("Submitting 2 tests", proc.err)
-
-        test = first(self.squad.tests(name="gcc-9-defconfig-b9979cfa"))
-        self.assertEqual("build/gcc-9-defconfig-b9979cfa", test.name)
-        self.assertEqual("pass", test.status)
-
-        test = first(self.squad.tests(name="gcc-9-defconfig-5b09568e"))
-        self.assertEqual("build/gcc-9-defconfig-5b09568e", test.name)
-        self.assertEqual("fail", test.status)
-
-    def test_submit_results_tuxbuild_buildset_json(self):
-        proc = self.manage_submit(results='tests/data/submit/tuxbuild/buildset.json', results_layout='tuxbuild')
-        self.assertIn("Submitting 3 tests", proc.err)
-
-        test = first(self.squad.tests(name="gcc-8-allnoconfig"))
-        self.assertEqual("build/gcc-8-allnoconfig", test.name)
-        self.assertEqual("pass", test.status)
-
-        test = first(self.squad.tests(name="gcc-8-tinyconfig"))
-        self.assertEqual("build/gcc-8-tinyconfig", test.name)
-        self.assertEqual("pass", test.status)
-
-        test = first(self.squad.tests(name="gcc-8-x86_64_defconfig"))
-        self.assertEqual("build/gcc-8-x86_64_defconfig", test.name)
-        self.assertEqual("pass", test.status)
-
-    def test_submit_results_tuxbuild_malformed(self):
-        proc = self.manage_submit(results='tests/data/submit/tuxbuild/malformed.json', results_layout='tuxbuild')
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn("Failed to load json", proc.err)
-
-    def test_submit_results_tuxbuild_missing(self):
-        proc = self.manage_submit(results="tests/data/submit/tuxbuild/missing.json", results_layout="tuxbuild")
-        self.assertFalse(proc.ok)
-        self.assertIn("Requested file tests/data/submit/tuxbuild/missing.json doesn't exist", proc.err)
-
-    def test_submit_results_tuxbuild_results_opt_missing(self):
-        proc = self.manage_submit(results_layout="tuxbuild")
-        self.assertFalse(proc.ok)
-        self.assertIn("At least one of --result-name, --results, --metrics is required", proc.err)
-
-    def test_submit_results_tuxbuild_layout_arg_bad(self):
-        proc = self.manage_submit(results="tests/data/submit/tuxbuild/build.json", results_layout="bad_layout")
-        self.assertFalse(proc.ok)
-        self.assertIn("argument --results-layout: invalid choice: 'bad_layout'", proc.err)
-
-    def test_submit_results_tuxbuild_empty_kconfig(self):
-        proc = self.manage_submit(results="tests/data/submit/tuxbuild/empty_kconfig.json", results_layout="tuxbuild")
-        self.assertFalse(proc.ok)
-        self.assertIn("Failed to load tuxbuild json due to a missing kconfig value: list index out of range", proc.err)
-
-    def test_submit_results_tuxbuild_missing_kconfig(self):
-        proc = self.manage_submit(results="tests/data/submit/tuxbuild/missing_kconfig.json", results_layout="tuxbuild")
-        self.assertFalse(proc.ok)
-        self.assertIn("Failed to load tuxbuild json due to a missing variable: 'kconfig'", proc.err)
 
     def test_submit_results_yaml(self):
         proc = self.manage_submit(results='tests/submit_results/sample_results.yaml')
