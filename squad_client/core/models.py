@@ -442,11 +442,11 @@ class MetricSuite:
 
 class Metric(SquadObject):
     endpoint = '/api/metrics/'
-    attrs = ['id', 'name', 'short_name', 'measurement_list', 'result', 'is_outlier', 'test_run', 'suite', 'metadata']
+    attrs = ['url', 'id', 'name', 'short_name', 'measurement_list', 'result', 'is_outlier', 'test_run', 'suite', 'metadata']
 
 
 class TestRunStatus(SquadObject):
-    attrs = ['id', 'tests_pass', 'tests_fail', 'tests_xfail',
+    attrs = ['url', 'id', 'tests_pass', 'tests_fail', 'tests_xfail',
              'tests_skip', 'metrics_summary', 'has_metrics',
              'suite', 'suite_version']
 
@@ -547,14 +547,14 @@ class TestRun(SquadObject):
 class Test(SquadObject):
 
     endpoint = '/api/tests/'
-    attrs = ['id', 'name', 'short_name', 'status', 'result', 'test_run', 'log', 'has_known_issues',
+    attrs = ['url', 'id', 'name', 'short_name', 'status', 'result', 'test_run', 'log', 'has_known_issues',
              'suite', 'known_issues']
 
 
 class Suite(SquadObject):
 
     endpoint = '/api/suites/'
-    attrs = ['id', 'slug', 'name', 'project']
+    attrs = ['url', 'id', 'slug', 'name', 'project']
 
     __tests__ = None
 
@@ -598,13 +598,13 @@ class KnownIssue(SquadObject):
 class SuiteMetadata(SquadObject):
 
     endpoint = '/api/suitemetadata/'
-    attrs = ['id', 'name', 'suite', 'kind', 'description', 'instructions_to_reproduce']
+    attrs = ['url', 'id', 'name', 'suite', 'kind', 'description', 'instructions_to_reproduce']
 
 
 class Annotation(SquadObject):
 
     endpoint = '/api/annotations/'
-    attrs = ['id', 'description', 'build']
+    attrs = ['url', 'id', 'description', 'build']
 
 
 class MetricThreshold(SquadObject):
