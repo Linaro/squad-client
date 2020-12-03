@@ -78,7 +78,7 @@ class SquadObject:
         class_name = get_class_name(self)
         attrs_str = []
         for attr in self.attrs:
-            attrs_str.append('%s: "%s"' % (attr, getattr(self, attr)))
+            attrs_str.append('%s: "%s"' % (attr, getattr(self, attr) if hasattr(self, attr) else None))
 
         return '%s(%s)' % (class_name, ', '.join(attrs_str))
 
