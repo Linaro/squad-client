@@ -8,35 +8,39 @@ from squad_client.core.command import SquadClientCommand
 logger = logging.getLogger()
 
 tuxbuild_schema = {
-    "type": "object",
-    "properties": {
-        "build_status": {
-            "type": "string",
-            "enum": ["fail", "pass"],
+    "type": "array",
+    "minItems": 1,
+    "items": [{
+        "type": "object",
+        "properties": {
+            "build_status": {
+                "type": "string",
+                "enum": ["fail", "pass"],
+            },
+            "git_describe": {
+                "type": "string",
+            },
+            "kconfig": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": True,
+                "items": [{"type": "string"}],
+            },
+            "target_arch": {
+                "type": "string",
+            },
+            "toolchain": {
+                "type": "string",
+            },
         },
-        "git_describe": {
-            "type": "string",
-        },
-        "kconfig": {
-            "type": "array",
-            "minItems": 1,
-            "uniqueItems": True,
-            "items": [{"type": "string"}],
-        },
-        "target_arch": {
-            "type": "string",
-        },
-        "toolchain": {
-            "type": "string",
-        },
-    },
-    "required": [
-        "build_status",
-        "git_describe",
-        "kconfig",
-        "target_arch",
-        "toolchain",
-    ],
+        "required": [
+            "build_status",
+            "git_describe",
+            "kconfig",
+            "target_arch",
+            "toolchain",
+        ],
+    }],
 }
 
 
@@ -89,27 +93,26 @@ class SubmitTuxbuildCommand(SquadClientCommand):
         if builds is None:
             return False
 
+        try:
+            jsonschema.validate(instance=builds, schema=tuxbuild_schema)
+        except jsonschema.exceptions.ValidationError as ve:
+            logger.error("Failed to validate tuxbuild data: %s", ve)
+            return False
+
         data = {}
         for build in builds:
-            try:
-                jsonschema.validate(instance=build, schema=tuxbuild_schema)
+            arch = build["target_arch"]
+            description = build["git_describe"]
+            kconfig = build["kconfig"]
+            status = build["build_status"]
+            toolchain = build["toolchain"]
+            test = self._get_test_name(kconfig, toolchain)
 
-                arch = build["target_arch"]
-                description = build["git_describe"]
-                kconfig = build["kconfig"]
-                status = build["build_status"]
-                toolchain = build["toolchain"]
-                test = self._get_test_name(kconfig, toolchain)
+            multi_key = "%s.%s" % (description, arch)
+            if multi_key not in data:
+                data[multi_key] = {}
 
-                multi_key = "%s.%s" % (description, arch)
-                if multi_key not in data:
-                    data[multi_key] = {}
-
-                data[multi_key].update({test: status})
-
-            except jsonschema.exceptions.ValidationError as ve:
-                logger.error("Failed to validate tuxbuild data: %s", ve)
-                return False
+            data[multi_key].update({test: status})
 
         for key, result in data.items():
             description, arch = key.split(".", 1)
@@ -118,9 +121,6 @@ class SubmitTuxbuildCommand(SquadClientCommand):
                 build_version=description,
                 env_slug=arch,
                 tests=result,
-                metrics={},
-                log={},
-                metadata={},
             )
 
         return True

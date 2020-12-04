@@ -133,7 +133,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             proc.err,
         )
         self.assertIn(
-            "Failed validating 'enum' in schema['properties']['build_status']", proc.err
+            "Failed validating 'enum' in schema['items'][0]['properties']['build_status']", proc.err
         )
 
     def test_submit_tuxbuild_malformed_build_status(self):
@@ -146,7 +146,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             proc.err,
         )
         self.assertIn(
-            "Failed validating 'type' in schema['properties']['build_status']", proc.err
+            "Failed validating 'type' in schema['items'][0]['properties']['build_status']", proc.err
         )
 
     def test_submit_tuxbuild_missing_build_status(self):
@@ -164,7 +164,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         self.assertFalse(proc.ok, msg=proc.err)
         self.assertIn("Failed to validate tuxbuild data: [] is too short", proc.err)
         self.assertIn(
-            "Failed validating 'minItems' in schema['properties']['kconfig']", proc.err
+            "Failed validating 'minItems' in schema['items'][0]['properties']['kconfig']", proc.err
         )
 
     def test_submit_tuxbuild_malformed_kconfig(self):
@@ -175,7 +175,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             proc.err,
         )
         self.assertIn(
-            "Failed validating 'type' in schema['properties']['kconfig']['items'][0]",
+            "Failed validating 'type' in schema['items'][0]['properties']['kconfig']['items'][0]",
             proc.err,
         )
 
