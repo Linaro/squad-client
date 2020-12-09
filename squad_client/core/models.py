@@ -383,6 +383,14 @@ class Build(SquadObject):
 
         return testruns
 
+    __tests__ = None
+
+    def tests(self, count=ALL, **filters):
+        if self.__tests__ is None:
+            endpoint = '%s%d/tests/' % (self.endpoint, self.id)
+            self.__tests__ = self.__fetch__(Test, filters, count, endpoint=endpoint)
+        return self.__tests__
+
     __metadata__ = None
     __status__ = None
 

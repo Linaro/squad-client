@@ -97,7 +97,7 @@ class SquadTest(unittest.TestCase):
 class BuildTest(unittest.TestCase):
 
     def setUp(self):
-        self.build = first(Squad().builds(count=1))
+        self.build = first(Squad().builds(version='my_build'))
 
     def test_basic(self):
         self.assertTrue(self.build is not None)
@@ -105,6 +105,18 @@ class BuildTest(unittest.TestCase):
     def test_build_metadata(self):
         metadata = self.build.metadata
         self.assertTrue(metadata.__id__ != '')
+
+    def test_build_tests(self):
+        tests = self.build.tests().values()
+        self.assertEqual(4, len(tests))
+
+    def test_build_tests_per_environment(self):
+        tests = self.build.tests(environment__slug='my_env').values()
+        self.assertEqual(4, len(tests))
+
+    def test_build_tests_per_environment_not_found(self):
+        tests = self.build.tests(environment__slug='mynonexistentenv').values()
+        self.assertEqual(0, len(tests))
 
 
 class TestRunTest(unittest.TestCase):
