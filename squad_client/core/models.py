@@ -556,7 +556,7 @@ class Test(SquadObject):
 
     endpoint = '/api/tests/'
     attrs = ['url', 'id', 'name', 'short_name', 'status', 'result', 'test_run', 'log', 'has_known_issues',
-             'suite', 'known_issues']
+             'suite', 'known_issues', 'build', 'environment']
 
 
 class Suite(SquadObject):
