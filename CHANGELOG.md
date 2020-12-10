@@ -1,3 +1,20 @@
+# 0.10
+
+This 0.10 release adds an significant improvement when fetching
+tests of a build. Now there's no need to go through Build's
+testruns in order to get tests, it can be done directly just by
+calling `build.tests()`. It's supposed to be much quicker than legacy
+code.
+
+Complete list of changes going in:
+
+* core: models: add tests endpoint to build
+* core: models: do not crash in str() if attribute is missing
+* core: models: add missing url attribute
+* rename redundant json: tuxbuild_json to tuxbuild only
+* squad_client: commands: submit: metadata: allow more types
+* squad_client: commands: submit: metadata: update error message
+
 # 0.9.1
 
 This 0.9.1 release fixes a small bug and changes tuxbuild submission
