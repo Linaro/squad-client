@@ -1,3 +1,12 @@
+# 0.10.1
+
+This 0.10.1 release is a bugfix of previous one, where environment
+and build references were missing from Test model
+
+Complete list of changes going in:
+
+* core: models: add environment and build to Test
+
 # 0.10
 
 This 0.10 release adds an significant improvement when fetching
