@@ -59,6 +59,7 @@ squad_suites = Squad().suites(project=project.id, count=-1)
 envs = {}
 envs_summaries = {}
 testruns = {}
+
 for env in squad_envs.values():
     suites = {}
     test_runs = set()
@@ -69,9 +70,9 @@ for env in squad_envs.values():
 
     for test in tests.values():
         if test.test_run not in test_runs:
-            test_runs.add(test.test_run)
+            test_runs.add(int(test.test_run.split('/')[-2]))
 
-        suite_name = squad_suites[test.suite].slug
+        suite_name = squad_suites[int(test.suite.split('/')[-2])].slug
         if suite_name in suites.keys():
             suites[suite_name].append(test)
         else:
