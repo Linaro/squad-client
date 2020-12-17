@@ -1,5 +1,7 @@
-from .core.models import Squad, Group, Project, Build, Environment, Test, Metric, TestRun, SquadObjectException
-from .utils import split_build_url, first, split_group_project_slug
+from collections import defaultdict
+
+from .core.models import ALL, Squad, Group, Project, Build, Environment, Test, Metric, TestRun, SquadObjectException
+from .utils import split_build_url, first, split_group_project_slug, getid
 
 
 squad = Squad()
@@ -15,27 +17,30 @@ def retrieve_latest_builds(project_full_name, count=10):
 
 def retrieve_build_results(build_url):
     group_slug, project_slug, build_version = split_build_url(build_url)
-    project_full_name = '%s/%s' % (group_slug, project_slug)
-    builds = squad.builds(count=1, project__full_name=project_full_name, version=build_version)
-    build = first(builds)
+    group = squad.group(group_slug)
+    project = group.project(project_slug)
+    environments = project.environments(count=ALL)
+    suites = project.suites(count=ALL)
+    build = project.build(build_version)
 
     if not build:
         return None
 
-    results = {}
-    testruns = build.testruns(bucket_suites=True)
-    if len(testruns):
-        for _id in testruns.keys():
-            testrun = testruns[_id]
-            test_suites = {}
-            for suite in testrun.test_suites:
-                test_suites[suite.name] = {t.short_name: t.status for t in suite.tests().values()}
+    results = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(dict))))
 
-            metric_suites = {}
-            for suite in testrun.metric_suites:
-                metric_suites[suite.name] = {m.name: m.result for m in suite.metrics.values()}
+    tests = build.tests(fields='id,short_name,status,suite,environment').values()
+    for test in tests:
+        env = environments[getid(test.environment)]
+        suite = suites[getid(test.suite)]
+        results[env]['tests'][suite][test.short_name] = test.status
 
-            results[testrun.environment.slug] = {'tests': test_suites, 'metrics': metric_suites}
+    metrics = squad.metrics(test_run__build_id=build.id, fields='id,short_name,result,suite,test_run').values()
+    testruns = build.testruns(fields='id,environment')
+    for metric in metrics:
+        testrun = testruns[getid(metric.test_run)]
+        env = environments[getid(testrun.environment)]
+        suite = suites[getid(metric.suite)]
+        results[env]['metrics'][suite][metric.short_name] = metric.results
 
     return results
 
