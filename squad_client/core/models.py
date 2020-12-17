@@ -471,13 +471,6 @@ class TestRun(SquadObject):
     attachments = None
     log = None
 
-    def __setattr__(self, attr, value):
-        if attr == 'environment' and type(value) is str and value.startswith('http'):
-            response = SquadApi.get(value)
-            objs = self.__fill__(Environment, [response.json()])
-            value = first(objs)
-        super(TestRun, self).__setattr__(attr, value)
-
     __tests__ = None
 
     def add_test(self, test):

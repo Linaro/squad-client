@@ -127,10 +127,6 @@ class TestRunTest(unittest.TestCase):
     def test_basic(self):
         self.assertTrue(self.testrun is not None)
 
-    def test_testrun_environment(self):
-        environment = self.testrun.environment
-        self.assertTrue(environment.__id__ != '')
-
     def test_testrun_status(self):
         status = self.testrun.summary()
         self.assertEqual(1, status.tests_fail)
