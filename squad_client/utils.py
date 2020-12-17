@@ -1,4 +1,5 @@
 import json
+import re
 
 
 def first(_dict):
@@ -32,3 +33,12 @@ def to_json(thing):
 
 def get_class_name(obj):
     return obj.__class__.__name__
+
+
+def getid(url):
+    matches = re.search(r'^.*/(\d+)/$', url)
+    try:
+        _id = int(matches.group(1))
+        return _id
+    except ValueError:
+        return -1
