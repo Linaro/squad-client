@@ -35,7 +35,7 @@ def main():
         parser.print_help()
         return -1
 
-    if args.command != 'test':
+    if args.command not in ['test', 'version']:
         squad_host = args.squad_host or os.getenv('SQUAD_HOST')
         squad_token = args.squad_token or os.getenv('SQUAD_TOKEN')
         if squad_host is None:

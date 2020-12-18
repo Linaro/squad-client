@@ -47,6 +47,7 @@ class SquadApi:
     token = None
     headers = None
     schema_nested_eps = set()
+    version = None
 
     @staticmethod
     def configure(url, token=None):
@@ -68,6 +69,7 @@ class SquadApi:
         if squad_server_version.status_code == 404:
             logger.warning('Could not identify squad server version!')
         else:
+            SquadApi.version = squad_server_version.text
             if squad_server_version.text.split('.') < min_squad_version.split('.'):
                 logger.warning('You are running squad-client against and old (< %s) version of squad server, somethings might not work as expected!' % min_squad_version)
 
