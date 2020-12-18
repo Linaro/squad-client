@@ -1,3 +1,23 @@
+# 0.11
+
+This 0.11 release improves `build_report` in the example
+folder and it should run much faster now.
+
+The release also moves tuxbuild submissions to its own
+subcommand.
+
+Complete list of changes going in:
+
+* commands: add a new command for submiting tuxbuild data to squad
+* commands: validate a full tuxbuild file instead of just individual builds
+* core: add "unit" to Metric attributes
+* core: models: avoid loading testrun environment
+* examples: build report: fix objects keys
+* examples: build_report: improve load time
+* shortcuts: improve 'retrieve_build_results' response time
+* squad_service: define squad storage folder in /tmp
+* utils: add getid utility
+
 # 0.10.1
 
 This 0.10.1 release is a bugfix of previous one, where environment
