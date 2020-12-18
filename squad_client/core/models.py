@@ -450,7 +450,7 @@ class MetricSuite:
 
 class Metric(SquadObject):
     endpoint = '/api/metrics/'
-    attrs = ['url', 'id', 'name', 'short_name', 'measurement_list', 'result', 'is_outlier', 'test_run', 'suite', 'metadata']
+    attrs = ['url', 'id', 'name', 'short_name', 'measurement_list', 'result', 'unit', 'is_outlier', 'test_run', 'suite', 'metadata']
 
 
 class TestRunStatus(SquadObject):
