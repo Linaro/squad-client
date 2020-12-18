@@ -3,6 +3,8 @@ import logging
 import urllib
 import re
 
+from squad_client.version import __min_squad_version__ as min_squad_version
+
 
 url_validator_regex = re.compile(
     r'^(?:http|ftp)s?://'  # http:// or https://
@@ -61,6 +63,13 @@ class SquadApi:
         for ep in nested_ep_list:
             splitted = ep.split('/')
             SquadApi.schema_nested_eps.add((splitted[1][:-1], splitted[3]))
+
+        squad_server_version = SquadApi.get('/api/version/')
+        if squad_server_version.status_code == 404:
+            logger.warning('Could not identify squad server version!')
+        else:
+            if squad_server_version.text.split('.') < min_squad_version.split('.'):
+                logger.warning('You are running squad-client against and old (< %s) version of squad server, somethings might not work as expected!' % min_squad_version)
 
     @staticmethod
     def get(endpoint, params={}):
