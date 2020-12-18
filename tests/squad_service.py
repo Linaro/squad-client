@@ -21,7 +21,7 @@ squad_settings_file_path = os.path.join(base_path, 'squad_settings.py')
 
 
 class SquadAdmin:
-    def __init__(self, env={'DATABASE': settings.DEFAULT_SQUAD_DATABASE_CONFIG, 'SQUAD_EXTRA_SETTINGS': squad_settings_file_path}):
+    def __init__(self, env={'DATABASE': settings.DEFAULT_SQUAD_DATABASE_CONFIG, 'SQUAD_EXTRA_SETTINGS': squad_settings_file_path, 'SQUAD_STORAGE_DIR': '/tmp/squad_storage'}):
         self.cmd = ['squad-admin']
         self.env = os.environ.copy()
         self.env.update(env)
