@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import argparse
+from collections import defaultdict
 import jinja2
 import sys
+import re
 sys.path.append('..')
 
-from itertools import groupby
 from squad_client.core.api import SquadApi
-from squad_client.core.models import Squad, SquadObject, TestRun, ALL
+from squad_client.core.models import Squad, SquadObject, ALL
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--debug',
@@ -50,52 +51,50 @@ parser.add_argument('--squad-host',
 args = parser.parse_args()
 
 SquadApi.configure(url=args.server, token=args.token)
+
+def getid(url):
+    matches = re.search('^.*/(\d+)/$', url)
+    try:
+        _id = int(matches.group(1))
+        return _id
+    except ValueError:
+        print('Could not get id for %s' % url)
+        return -1
+
 group = Squad().group(args.group)
 project = group.project(args.project)
+environments = project.environments(count=ALL)
+suites = project.suites(count=ALL)
 build = project.build(args.build)
+testruns = build.testruns(fields='id,environment')
+tests = build.tests(fields='id,short_name,status,environment,suite,test_run').values()
+metrics = Squad().metrics(fields='id,short_name,result,test_run,suite', count=ALL, test_run__build=build.id).values()
 
-squad_envs = Squad().environments(project=project.id)
-squad_suites = Squad().suites(project=project.id, count=-1)
-envs = {}
-envs_summaries = {}
-testruns = {}
+env_summaries = {e.slug: {'pass': 0, 'fail': 0, 'xfail': 0, 'skip': 0} for e in environments.values()}
+overall_summary = {'pass': 0, 'fail': 0, 'xfail': 0, 'skip': 0}
+table = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+for test in sorted(tests, key=lambda obj: obj.short_name):
+    env = environments[getid(test.environment)].slug
+    suite = suites[getid(test.suite)].slug
+    table[env]['tests'][suite].append(test)
 
-for env in squad_envs.values():
-    suites = {}
-    test_runs = set()
-    envs.update({env.slug: suites})
-    envs_summaries.update({env.slug: {'pass': 0, 'fail': 0, 'xfail': 0, 'skip': 0}})
-    tests = Squad().tests(count=ALL, test_run__environment=env.id, test_run__build=build.id)
-    metrics = Squad().metrics(count=ALL, test_run__environment=env.id, test_run__build=build.id)
+    env_summaries[env][test.status] += 1
+    overall_summary[test.status] += 1
 
-    for test in tests.values():
-        if test.test_run not in test_runs:
-            test_runs.add(int(test.test_run.split('/')[-2]))
+# Sort suites
+for env in table.keys():
+    __suites = table[env]['tests']
+    table[env]['tests'] = {s: __suites[s] for s in sorted(__suites)}
 
-        suite_name = squad_suites[int(test.suite.split('/')[-2])].slug
-        if suite_name in suites.keys():
-            suites[suite_name].append(test)
-        else:
-            suites.update({suite_name: [test]})
 
-    for metric in metrics.values():
-        if metric.test_run not in test_runs:
-            test_runs.add(metric.test_run)
 
-        suite_name = squad_suites[metric.suite].slug
-        if suite_name in suites.keys():
-            suites[suite_name].append(metric)
-        else:
-            suites.update({suite_name: [metric]})
+# TODO: add build and env to metrics table as well
+for metric in metrics:
+    testrun = testruns[getid(metric.test_run)]
+    env = environments[getid(testrun.environment)].slug
+    suite = suites[getid(metric.suite)].slug
 
-    for tr in test_runs:
-        testrun = TestRun(tr)
-        testrun_summary = testrun.summary()
-        envs_summaries[env.slug]['pass'] += testrun_summary.tests_pass
-        envs_summaries[env.slug]['fail'] += testrun_summary.tests_fail
-        envs_summaries[env.slug]['xfail'] += testrun_summary.tests_xfail
-        envs_summaries[env.slug]['skip'] += testrun_summary.tests_skip
-        testruns[tr] = testrun.id
+    table[env]['metrics'][suite].append(metric)
 
 intro = None
 if args.intro:
@@ -103,11 +102,11 @@ if args.intro:
         intro = f.read()
 
 templateLoader = jinja2.FileSystemLoader(searchpath="./")
-templateEnv = jinja2.Environment(loader=templateLoader)
+templateEnv = jinja2.Environment(loader=templateLoader, trim_blocks=True, lstrip_blocks=True)
+templateEnv.filters['getid'] = getid
 template = templateEnv.get_template(args.template)
-outputText = template.render(group=group, project=project,
-                             build=build, environments=envs,
+outputText = template.render(group=group, project=project, build=build,
                              intro=intro, server=args.server,
-                             testruns=testruns, envs_summaries=envs_summaries)
+                             env_summaries=env_summaries, table=table)
 with open(args.output, 'w') as reportFile:
     reportFile.write(outputText)
