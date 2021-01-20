@@ -551,6 +551,9 @@ class Test(SquadObject):
     attrs = ['url', 'id', 'name', 'short_name', 'status', 'result', 'test_run', 'log', 'has_known_issues',
              'suite', 'known_issues', 'build', 'environment']
 
+    def __repr__(self):
+        return self.short_name
+
 
 class Suite(SquadObject):
 
@@ -570,11 +573,17 @@ class Suite(SquadObject):
             self.__tests__ = self.__fetch__(Test, filters, count, endpoint=endpoint)
         return self.__tests__
 
+    def __repr__(self):
+        return self.slug
+
 
 class Environment(SquadObject):
 
     endpoint = '/api/environments/'
     attrs = ['url', 'id', 'slug', 'name', 'expected_test_runs', 'description', 'project']
+
+    def __repr__(self):
+        return self.slug
 
 
 class Backend(SquadObject):
