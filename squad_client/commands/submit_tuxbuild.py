@@ -108,14 +108,14 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             toolchain = build["toolchain"]
             test = self._get_test_name(kconfig, toolchain)
 
-            multi_key = "%s.%s" % (description, arch)
+            multi_key = (description, arch)
             if multi_key not in data:
                 data[multi_key] = {}
 
             data[multi_key].update({test: status})
 
         for key, result in data.items():
-            description, arch = key.split(".", 1)
+            description, arch = key
             submit_results(
                 group_project_slug="%s/%s" % (args.group, args.project),
                 build_version=description,
