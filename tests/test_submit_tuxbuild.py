@@ -51,10 +51,15 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
     def test_submit_tuxbuild_build(self):
         proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/build.json")
         self.assertTrue(proc.ok, msg=proc.err)
-        self.assertTrue(proc.err.count("Submitting 1 tests") == 2)
+        self.assertTrue(proc.err.count("Submitting 1 tests") == 3)
 
         build = (
             self.squad.group("my_group").project("my_project").build("next-20201021")
+        )
+        self.assertIsNotNone(build)
+
+        build = (
+            self.squad.group("my_group").project("my_project").build("v4.4.4")
         )
         self.assertIsNotNone(build)
 
