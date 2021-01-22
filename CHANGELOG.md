@@ -1,3 +1,13 @@
+# 0.12
+
+This 0.12 release fixes a bug in submit_tuxbuild command.
+
+Complete list of changes going in:
+
+* tests: test_shortcuts: remove test against project_settings
+* commands: submit_tuxbuild: fix key in case of builds with dotted version
+* Add some printable representations for a few classes
+
 # 0.11
 
 This 0.11 release improves `build_report` in the example
