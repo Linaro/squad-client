@@ -344,7 +344,7 @@ class Project(SquadObject):
         return self.slug
 
     @staticmethod
-    def compare_builds(baseline_id, build_id):
+    def compare_builds(baseline_id, build_id, force=False):
         try:
             int(baseline_id)
             int(build_id)
@@ -358,6 +358,8 @@ class Project(SquadObject):
                 raise InvalidSquadLookup("Argument builds must belong to same project")
             url = ''.join([Project.endpoint, str(proj_id), '/compare_builds'])
             params = {'baseline': baseline_id, 'to_compare': build_id}
+            if force:
+                params['force'] = '1'
             return SquadApi.get(url, params).json()
 
     def pre_save(self):
