@@ -1,3 +1,7 @@
+# 0.13
+
+This 0.13 release allows comparison on builds that are unfinished
+
 # 0.12
 
 This 0.12 release fixes a bug in submit_tuxbuild command.
