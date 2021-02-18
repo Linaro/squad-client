@@ -1,3 +1,11 @@
+# 0.14
+
+This 0.14 release makes sure to save project settings. 
+
+SQUAD stopped displaying "project_settings" column because
+it contained sensitive information. We removed this attribute
+in project class and prevented that saving it as consequence.
+
 # 0.13
 
 This 0.13 release allows comparison on builds that are unfinished
