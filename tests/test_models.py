@@ -181,6 +181,13 @@ class ProjectTest(unittest.TestCase):
 
         new_project.delete()
 
+    def test_save_project_settings(self):
+        settings = 'SETTING: value'
+        self.project.project_settings = settings
+        self.project.save()
+        project = first(Squad().projects(slug=self.project.slug))
+        self.assertTrue(project is not None)
+
 
 class GroupTest(unittest.TestCase):
 

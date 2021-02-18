@@ -363,6 +363,8 @@ class Project(SquadObject):
             return SquadApi.get(url, params).json()
 
     def pre_save(self):
+        self.attrs.append('project_settings')
+
         if not hasattr(self, 'enabled_plugins_list'):
             # TODO: make enabled_plugins_list optional
             self.enabled_plugins_list = ['linux-log-parser']
