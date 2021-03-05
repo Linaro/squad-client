@@ -118,6 +118,13 @@ class BuildTest(unittest.TestCase):
         tests = self.build.tests(environment__slug='mynonexistentenv').values()
         self.assertEqual(0, len(tests))
 
+    def test_build_tests_change_cache_on_different_filters(self):
+        tests = self.build.tests(environment__slug='my_env').values()
+        self.assertEqual(4, len(tests))
+
+        tests = self.build.tests(environment__slug='mynonexistentenv').values()
+        self.assertEqual(0, len(tests))
+
 
 class TestRunTest(unittest.TestCase):
 

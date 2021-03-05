@@ -1,6 +1,7 @@
 import logging
 import uuid
 from itertools import groupby
+from collections import OrderedDict
 
 
 from .api import SquadApi, ApiException
@@ -387,13 +388,15 @@ class Build(SquadObject):
 
         return testruns
 
-    __tests__ = None
+    __tests__ = {}
 
     def tests(self, count=ALL, **filters):
-        if self.__tests__ is None:
+        filters['count'] = count
+        filters_str = str(OrderedDict(filters))
+        if self.__tests__.get(filters_str) is None:
             endpoint = '%s%d/tests/' % (self.endpoint, self.id)
-            self.__tests__ = self.__fetch__(Test, filters, count, endpoint=endpoint)
-        return self.__tests__
+            self.__tests__[filters_str] = self.__fetch__(Test, filters, count, endpoint=endpoint)
+        return self.__tests__[filters_str]
 
     __metadata__ = None
     __status__ = None
