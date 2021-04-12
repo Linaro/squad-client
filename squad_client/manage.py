@@ -12,7 +12,7 @@ from squad_client.core.command import SquadClientCommand
 from squad_client.commands import *  # noqa
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter('[%(levelname)s] %(message)s')
 ch = logging.StreamHandler()

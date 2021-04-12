@@ -5,7 +5,7 @@ from squad_client.core.command import SquadClientCommand
 INCLUDE_TESTS_CMD = True
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 try:

@@ -12,7 +12,7 @@ from squad_client.core.models import SquadObject, Squad
 from squad_client.exceptions import InvalidReportOutput, InvalidReportTemplate
 
 
-logger = logging.getLogger('reporting')
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 

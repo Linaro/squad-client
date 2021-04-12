@@ -9,7 +9,7 @@ from squad_client.core.command import SquadClientCommand
 from squad_client.report import ReportGenerator
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class ReportCommand(SquadClientCommand):

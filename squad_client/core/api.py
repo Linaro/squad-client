@@ -13,7 +13,7 @@ url_validator_regex = re.compile(
     r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 # ref: https://git.linaro.org/lava/lava-lab.git/tree/shared/lab-scripts/rerun_health_check.py#n13
