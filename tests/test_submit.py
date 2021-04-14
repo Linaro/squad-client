@@ -1,5 +1,6 @@
 import unittest
 import subprocess as sp
+import os
 
 from . import settings
 from squad_client.core.api import SquadApi
@@ -91,7 +92,9 @@ class SubmitCommandTest(unittest.TestCase):
         if result_value:
             argv += ['--result-value', result_value]
 
-        proc = sp.Popen(argv, stdout=sp.PIPE, stderr=sp.PIPE)
+        env = os.environ.copy()
+        env['LOG_LEVEL'] = 'INFO'
+        proc = sp.Popen(argv, stdout=sp.PIPE, stderr=sp.PIPE, env=env)
         proc.ok = False
 
         try:

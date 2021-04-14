@@ -1,5 +1,5 @@
 import subprocess as sp
-
+import os
 
 from .squad_service import SquadService
 
@@ -24,7 +24,9 @@ def run(coverage=False, tests=['discover'], verbose=False):
     else:
         argv = ['python3'] + argv
 
-    proc = sp.Popen(argv)
+    env = os.environ.copy()
+    env['LOG_LEVEL'] = 'ERROR'
+    proc = sp.Popen(argv, env=env)
     proc.wait()
 
     squad_service.stop()
