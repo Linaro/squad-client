@@ -10,7 +10,7 @@ import sys
 from squad_client.core.api import SquadApi, ApiException
 from squad_client.core.command import SquadClientCommand
 from squad_client.commands import *  # noqa
-
+from squad_client.version import __version__ as squad_client_version
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -26,16 +26,14 @@ def main():
     parser.add_argument('--squad-host', help='SQUAD host, example: https://qa-reports.linaro.org')
     parser.add_argument('--squad-token', help='SQUAD authentication token')
     parser.add_argument('--cache', default=0, help='Cache API results for N number of seconds. Disabled by default.')
+    parser.add_argument('--version', action='store_true', help='Display versions of squad-client and server')
     subparser = parser.add_subparsers(help='available subcommands', dest='command')
 
     SquadClientCommand.add_commands(subparser)
 
     args = parser.parse_args()
-    if args.command is None:
-        parser.print_help()
-        return -1
 
-    if args.command not in ['test', 'version']:
+    if args.command not in ['test']:
         squad_host = args.squad_host or os.getenv('SQUAD_HOST')
         squad_token = args.squad_token or os.getenv('SQUAD_TOKEN')
         if squad_host is None:
@@ -47,6 +45,15 @@ def main():
         except ApiException as e:
             logger.error('Failed to configure squad api: %s' % e)
             return -1
+
+    if args.version:
+        print('squad-client: %s' % squad_client_version)
+        print('squad server: %s' % SquadApi.version)
+        return 0
+
+    if args.command is None:
+        parser.print_help()
+        return -1
 
     if args.cache > 0:
         logger.debug('Caching results in "squad_client_cache.sqlite" for %d seconds' % args.cache)
