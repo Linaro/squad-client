@@ -1,3 +1,20 @@
+# 0.15
+
+This 0.15 release replaces the `version` command by a flag, which
+is simpler. The release also improved logging.
+
+Complete list of changes going in:
+
+* commands: add version command
+* core:
+  * api: check for squad server version
+  * api: remove nested endpoints
+  * models: cache build tests depending on filters
+* logging: centralize all logging config
+* manage: remove version command, make it a flag
+* misc: use module name for the logger name
+* tests: fix tests that need output from manage.py
+
 # 0.14
 
 This 0.14 release makes sure to save project settings. 

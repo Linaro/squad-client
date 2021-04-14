@@ -1,2 +1,2 @@
-__version__ = '0.14'
+__version__ = '0.15'
 __min_squad_version__ = '1.33'
