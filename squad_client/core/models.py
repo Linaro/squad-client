@@ -56,10 +56,6 @@ class SquadObject:
         if obj is None:
             obj = self
 
-        nested_endpoints = [x[1] for x in SquadApi.schema_nested_eps if x[0].lower() == get_class_name(obj).lower()]
-        if nested_endpoints:
-            setattr(obj, 'nested_endpoints', nested_endpoints)
-
         attrs = obj.attrs if len(obj.attrs) else [attr for attr in result.keys()]
         for attr in attrs:
             if attr in result.keys():
