@@ -1,4 +1,3 @@
-import logging
 import uuid
 from itertools import groupby
 from collections import OrderedDict
@@ -8,6 +7,7 @@ from .api import SquadApi, ApiException
 from squad_client.exceptions import InvalidSquadObject, InvalidSquadLookup
 from squad_client.utils import first, parse_test_name, parse_metric_name, to_json, get_class_name
 from squad_client import settings
+from squad_client import logging
 
 
 logger = logging.getLogger(__name__)

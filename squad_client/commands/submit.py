@@ -1,7 +1,8 @@
 import json
-import logging
 import os
 import yaml
+
+from squad_client import logging
 from squad_client.shortcuts import submit_results
 from squad_client.core.command import SquadClientCommand
 

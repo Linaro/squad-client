@@ -1,8 +1,7 @@
 import IPython
-import logging
 import sys
 
-
+from squad_client import logging
 from squad_client.core.command import SquadClientCommand
 
 

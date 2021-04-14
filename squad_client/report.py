@@ -1,19 +1,16 @@
 import jinja2
-import logging
 import uuid
-
 
 from os import path
 from io import StringIO
 
-
+from squad_client import logging
 from squad_client.core.api import SquadApi
 from squad_client.core.models import SquadObject, Squad
 from squad_client.exceptions import InvalidReportOutput, InvalidReportTemplate
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 
 class Report:

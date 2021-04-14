@@ -1,8 +1,8 @@
 import requests
-import logging
 import urllib
 import re
 
+from squad_client import logging
 from squad_client.version import __min_squad_version__ as min_squad_version
 
 

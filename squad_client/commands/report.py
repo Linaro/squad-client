@@ -1,10 +1,8 @@
-import logging
 import yaml
-
 
 from os import path, chdir
 
-
+from squad_client import logging
 from squad_client.core.command import SquadClientCommand
 from squad_client.report import ReportGenerator
 

@@ -1,4 +1,3 @@
-import logging
 import os
 import sys
 import subprocess as sp
@@ -8,7 +7,7 @@ import socket
 
 
 from . import settings
-
+from squad_client import logging
 
 # Possible outcomes of running squad-admin process
 OK = 0  # all good, exited with 0

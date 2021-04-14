@@ -1,23 +1,18 @@
 #!/usr/bin/env python3
 
 import argparse
-import logging
 import os
 import requests_cache
 import sys
 
 
+from squad_client import logging
 from squad_client.core.api import SquadApi, ApiException
 from squad_client.core.command import SquadClientCommand
 from squad_client.commands import *  # noqa
 from squad_client.version import __version__ as squad_client_version
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-formatter = logging.Formatter('[%(levelname)s] %(message)s')
-ch = logging.StreamHandler()
-ch.setFormatter(formatter)
-logger.addHandler(ch)
 
 
 def main():
@@ -32,6 +27,9 @@ def main():
     SquadClientCommand.add_commands(subparser)
 
     args = parser.parse_args()
+
+    if args.debug:
+        logging.setLevel(logging.DEBUG)
 
     if args.command not in ['test']:
         squad_host = args.squad_host or os.getenv('SQUAD_HOST')

@@ -1,11 +1,14 @@
 import hashlib
 import json
 import jsonschema
-import logging
+
+from squad_client import logging
 from squad_client.shortcuts import submit_results
 from squad_client.core.command import SquadClientCommand
 
+
 logger = logging.getLogger(__name__)
+
 
 tuxbuild_schema = {
     "type": "array",

@@ -1,5 +1,6 @@
-import logging
 import sys
+
+from squad_client import logging
 from squad_client.shortcuts import create_or_update_project
 from squad_client.core.command import SquadClientCommand
 

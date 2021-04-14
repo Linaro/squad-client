@@ -1,4 +1,4 @@
-import logging
+from squad_client import logging
 from squad_client.core.command import SquadClientCommand
 
 
