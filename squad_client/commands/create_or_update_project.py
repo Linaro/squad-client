@@ -4,7 +4,7 @@ from squad_client.shortcuts import create_or_update_project
 from squad_client.core.command import SquadClientCommand
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class CreateOrUpdateProjectCommand(SquadClientCommand):

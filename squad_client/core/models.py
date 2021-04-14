@@ -10,7 +10,7 @@ from squad_client.utils import first, parse_test_name, parse_metric_name, to_jso
 from squad_client import settings
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 DEFAULT_COUNT = settings.DEFAULT_NUM_OF_OBJECTS
 ALL = -1
