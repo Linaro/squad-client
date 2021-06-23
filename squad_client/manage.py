@@ -2,7 +2,6 @@
 
 import argparse
 import os
-import requests_cache
 import sys
 
 
@@ -39,7 +38,7 @@ def main():
             return -1
 
         try:
-            SquadApi.configure(squad_host, token=squad_token)
+            SquadApi.configure(squad_host, token=squad_token, cache=args.cache)
         except ApiException as e:
             logger.error('Failed to configure squad api: %s' % e)
             return -1
@@ -52,10 +51,6 @@ def main():
     if args.command is None:
         parser.print_help()
         return -1
-
-    if args.cache > 0:
-        logger.debug('Caching results in "squad_client_cache.sqlite" for %d seconds' % args.cache)
-        requests_cache.install_cache('squad_client_cache', expire_after=args.cache)
 
     rc = SquadClientCommand.process(args)
     return 1 if rc is False else 0 if rc is True else -1

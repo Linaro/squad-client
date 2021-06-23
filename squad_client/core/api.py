@@ -1,4 +1,5 @@
 import requests
+import requests_cache
 import urllib
 import re
 
@@ -49,7 +50,7 @@ class SquadApi:
     version = None
 
     @staticmethod
-    def configure(url, token=None):
+    def configure(url, token=None, cache=0):
         if url is None or url_validator_regex.match(url) is None:
             raise ApiException('Malformed url: "%s"' % url)
 
@@ -67,6 +68,10 @@ class SquadApi:
             SquadApi.version = squad_server_version.text
             if squad_server_version.text.split('.') < min_squad_version.split('.'):
                 logger.warning('You are running squad-client against and old (< %s) version of squad server, somethings might not work as expected!' % min_squad_version)
+
+        if cache > 0:
+            logger.debug('Caching results in "squad_client_cache.sqlite" for %d seconds' % cache)
+            requests_cache.install_cache('squad_client_cache', expire_after=cache)
 
     @staticmethod
     def get(endpoint, params={}):
