@@ -1,3 +1,13 @@
+# 0.16
+
+This 0.16 release moves request cache activation to
+inside SquadApi.configure() so other libs using squad-client
+can toggle it on/off.
+
+Complete list of changes going in:
+
+* core: api: configure cache in SquadApi.configure()
+
 # 0.15
 
 This 0.15 release replaces the `version` command by a flag, which
