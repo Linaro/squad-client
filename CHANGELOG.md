@@ -1,3 +1,12 @@
+# 0.17
+
+This 0.17 release changes the base docker image to Alpine, thus
+cutting the image size in half.
+
+Complete list of changes going in:
+
+* Dockerfile: refactor and switch to Alpine based image
+
 # 0.16
 
 This 0.16 release moves request cache activation to
