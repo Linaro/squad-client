@@ -1,19 +1,28 @@
-FROM debian:buster-slim
+FROM docker.io/library/python:3.9-alpine
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV BUILD_DEPS="\
+    build-base \
+    yaml-dev \
+"
 
-RUN apt-get update -q=2 && \
-    apt-get install -q=2 --no-install-recommends \
-        python3 \
-        python3-pip \
-        python3-setuptools \
-        python3-wheel \
-        python3-yaml \
-        wkhtmltopdf
+ENV RUNTIME_DEPS="\
+    wkhtmltopdf \
+    yaml \
+"
 
 WORKDIR /squad_client
 COPY . ./
 
-RUN SQUAD_CLIENT_RELEASE=1 pip3 install .
+RUN set -e ;\
+    apk update ;\
+    apk add --no-cache --virtual .build-deps ${BUILD_DEPS} ;\
+    apk add --no-cache ${RUNTIME_DEPS} ;\
+    SQUAD_CLIENT_RELEASE=1 pip install --no-cache-dir . ;\
+    # List packages and python modules installed
+    apk info -vv | sort ;\
+    pip freeze ;\
+    # Cleanup
+    apk del --no-cache --purge .build-deps ;\
+    rm -rf /var/cache/apk/* /tmp/* /squad_client
 
 WORKDIR /reports
