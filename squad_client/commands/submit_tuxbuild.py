@@ -1,6 +1,7 @@
 import hashlib
 import json
 import jsonschema
+import os
 
 from squad_client import logging
 from squad_client.shortcuts import submit_results
@@ -46,6 +47,10 @@ tuxbuild_schema = {
     }],
 }
 
+ALLOWED_METADATA = [
+    "git_branch", "git_commit", "git_describe", "git_ref", "git_repo", "git_sha", "git_short_log", "kernel_version", "make_kernelversion",
+]
+
 
 class SubmitTuxbuildCommand(SquadClientCommand):
     command = "submit-tuxbuild"
@@ -63,6 +68,19 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             "tuxbuild",
             help="File with tuxbuild results to submit",
         )
+
+    def _build_metadata(self, builds):
+        metadata = {k: v for k, v in builds[0].items() if k in ALLOWED_METADATA}
+
+        metadata.update({"git_commit": metadata.get("git_sha")})
+
+        metadata.update({"git_branch": metadata.get("git_ref")})
+        if metadata.get("git_branch") is None:
+            metadata.update({"git_branch": os.getenv("KERNEL_BRANCH")})
+
+        metadata.update({"make_kernelversion": metadata.get("kernel_version")})
+
+        return metadata
 
     def _load_builds(self, path):
         builds = None
@@ -124,6 +142,7 @@ class SubmitTuxbuildCommand(SquadClientCommand):
                 build_version=description,
                 env_slug=arch,
                 tests=result,
+                metadata=self._build_metadata(builds),
             )
 
         return True

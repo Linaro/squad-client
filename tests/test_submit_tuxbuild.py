@@ -7,6 +7,8 @@ from squad_client.core.api import SquadApi
 from squad_client.core.models import Squad
 from squad_client.utils import first
 
+import squad_client.commands.submit_tuxbuild
+
 
 class SubmitTuxbuildCommandTest(unittest.TestCase):
 
@@ -60,11 +62,19 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             self.squad.group("my_group").project("my_project").build("next-20201021")
         )
         self.assertIsNotNone(build)
+        self.assertEqual(
+            sorted(squad_client.commands.submit_tuxbuild.ALLOWED_METADATA + ["id"]),
+            sorted(list(build.metadata.__dict__.keys())),
+        )
 
         build = (
             self.squad.group("my_group").project("my_project").build("v4.4.4")
         )
         self.assertIsNotNone(build)
+        self.assertEqual(
+            sorted(squad_client.commands.submit_tuxbuild.ALLOWED_METADATA + ["id"]),
+            sorted(list(build.metadata.__dict__.keys())),
+        )
 
         for arch in ["arm64", "x86"]:
             environment = (
@@ -92,6 +102,10 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             self.squad.group("my_group").project("my_project").build("next-20201030")
         )
         self.assertIsNotNone(build)
+        self.assertEqual(
+            sorted(squad_client.commands.submit_tuxbuild.ALLOWED_METADATA + ["id"]),
+            sorted(list(build.metadata.__dict__.keys())),
+        )
 
         environment = (
             self.squad.group("my_group").project("my_project").environment("x86")
