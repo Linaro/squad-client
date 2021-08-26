@@ -66,6 +66,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             sorted(squad_client.commands.submit_tuxbuild.ALLOWED_METADATA + ["id"]),
             sorted(list(build.metadata.__dict__.keys())),
         )
+        self.assertIsNone(build.metadata.git_branch)
 
         build = (
             self.squad.group("my_group").project("my_project").build("v4.4.4")
@@ -75,6 +76,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             sorted(squad_client.commands.submit_tuxbuild.ALLOWED_METADATA + ["id"]),
             sorted(list(build.metadata.__dict__.keys())),
         )
+        self.assertIsNone(build.metadata.git_branch)
 
         for arch in ["arm64", "x86"]:
             environment = (
@@ -94,6 +96,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         self.assertEqual("fail", test.status)
 
     def test_submit_tuxbuild_buildset(self):
+        os.environ["KERNEL_BRANCH"] = "master"
         proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/buildset.json")
         self.assertTrue(proc.ok, msg=proc.out)
         self.assertIn("Submitting 3 tests", proc.err)
@@ -106,6 +109,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             sorted(squad_client.commands.submit_tuxbuild.ALLOWED_METADATA + ["id"]),
             sorted(list(build.metadata.__dict__.keys())),
         )
+        self.assertEqual(build.metadata.git_branch, os.environ.get("KERNEL_BRANCH"))
 
         environment = (
             self.squad.group("my_group").project("my_project").environment("x86")

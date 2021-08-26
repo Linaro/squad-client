@@ -72,12 +72,18 @@ class SubmitTuxbuildCommand(SquadClientCommand):
     def _build_metadata(self, builds):
         metadata = {k: v for k, v in builds[0].items() if k in ALLOWED_METADATA}
 
+        # We expect git_commit, but tuxmake calls it git_sha
         metadata.update({"git_commit": metadata.get("git_sha")})
 
+        # We expect `git_branch`, but tuxmake calls it `git_ref`
+        # `git_ref` will sometimes be null
         metadata.update({"git_branch": metadata.get("git_ref")})
+
+        # If `git_ref` is null, use `KERNEL_BRANCH` from the CI environment
         if metadata.get("git_branch") is None:
             metadata.update({"git_branch": os.getenv("KERNEL_BRANCH")})
 
+        # We expect `make_kernelversion`, but tuxmake calls it `kernel_version`
         metadata.update({"make_kernelversion": metadata.get("kernel_version")})
 
         return metadata
