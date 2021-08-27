@@ -6,6 +6,7 @@ ENV BUILD_DEPS="\
 "
 
 ENV RUNTIME_DEPS="\
+    bash \
     wkhtmltopdf \
     yaml \
 "
