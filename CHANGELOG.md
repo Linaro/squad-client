@@ -1,3 +1,11 @@
+# 0.18
+
+This 0.18 release makes TuxBuild submissions send
+build metadata along with build results.
+
+Complete list of changes going in:
+* submit_tuxbuild: submit build metadata
+
 # 0.17
 
 This 0.17 release changes the base docker image to Alpine, thus
