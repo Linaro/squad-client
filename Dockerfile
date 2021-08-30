@@ -27,3 +27,5 @@ RUN set -e ;\
     rm -rf /var/cache/apk/* /tmp/* /squad_client
 
 WORKDIR /reports
+
+ENTRYPOINT ["/bin/bash"]
