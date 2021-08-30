@@ -1,3 +1,9 @@
+# 0.18.1
+
+This 0.18.1 release is a quick release on the Docker
+image to restore the original entry point to bash
+(it was python's console after)
+
 # 0.18
 
 This 0.18 release makes TuxBuild submissions send
