@@ -1,3 +1,11 @@
+# 0.18.2
+
+This 0.18.2 release fixes an issue in Docker that prevented
+running containers by calling out /bin/bash
+
+Complete list of changes going in:
+* Dockerfile: remove entrypoint to allow /bin/bash to be called out
+
 # 0.18.1
 
 This 0.18.1 release is a quick release on the Docker
