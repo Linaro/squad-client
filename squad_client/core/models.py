@@ -306,6 +306,23 @@ class Squad(SquadObject):
             logger.error('Failed to submit job request: %s' % response.text)
         return response.ok
 
+    def watchjob(self, group=None, project=None, build=None, environment=None, backend=None, testjob_id=None):
+
+        path = '/api/watchjob/%s/%s/%s/%s' % (group.slug, project.slug, build.version, environment.slug)
+
+        data = {
+            'backend': backend.name,
+            'testjob_id': testjob_id,
+        }
+
+        logger.info('Watching job %s' % testjob_id)
+
+        response = SquadApi.post(path, data=data)
+        status_code = response.status_code
+        if status_code not in [200, 201, 500]:
+            logger.error('Failed to watch job: %s' % response.text)
+        return response.ok
+
 
 class Group(SquadObject):
 
@@ -511,6 +528,16 @@ class TestJob(SquadObject):
             environment=self.environment,
             backend=self.backend,
             definition=self.definition,)
+
+    def watch(self):
+        squad = Squad()
+        return squad.watchjob(
+            group=self.target.group,
+            project=self.target,
+            build=self.target_build,
+            environment=self.environment,
+            backend=self.backend,
+            testjob_id=self.job_id,)
 
 
 class MetricSuite:
