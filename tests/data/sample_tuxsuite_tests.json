@@ -1,0 +1,36 @@
+[
+    {
+            "boot_args": null,
+            "device": "qemu-ppc64",
+            "finished_time": null,
+            "kernel": null,
+            "mcp_fw": null,
+            "mcp_romfw": null,
+            "modules": null,
+            "parameters": {},
+            "plan": "1yPYDsKqAtxplNqXIg6shMtrDvj",
+            "project": "linaro/lkft",
+            "provisioning_time": null,
+            "result": "unknown",
+            "results": {},
+            "rootfs": null,
+            "running_time": null,
+            "scp_fw": null,
+            "scp_romfw": null,
+            "state": "waiting",
+            "tests": [
+                "boot",
+                "ltp-fcntl-locktests",
+                "ltp-fs_bind",
+                "ltp-fs_perms_simple",
+                "ltp-fsx",
+                "ltp-nptl",
+                "ltp-smoke"
+            ],
+            "uefi": null,
+            "uid": "1yPYGuuaUxuH42KrjEiokDrGRSQ",
+            "user": "anders.roxell@linaro.org",
+            "user_agent": "tuxsuite/0.34.2",
+            "waiting_for": "1yPYFzmqqQ7WViC3cdPUSnZXg6L"
+    }
+]

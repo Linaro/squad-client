@@ -1,0 +1,175 @@
+[
+    {
+        "auto_retry": true,
+        "build_name": "clang-12-lkftconfig",
+        "build_status": "pass",
+        "client_token": "f4e6dcd5-d8e0-4da4-b3f9-0729923322c1",
+        "download_url": "https://builds.tuxbuild.com/2843VDPeVhg4yaTkgTur0T3ykmq/",
+        "duration": 1069,
+        "environment": {},
+        "errors_count": 0,
+        "finished_time": "2022-04-20T14:00:26.865387",
+        "git_describe": "v5.17.4",
+        "git_ref": null,
+        "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/stable/linux-stable-rc",
+        "git_sha": "7ec6d8ae728e2f3b91a4cfac5e664ca32eb213da",
+        "git_short_log": "7ec6d8ae728e (\"Linux 5.17.4\")",
+        "image_sha": "",
+        "kconfig": [
+            "defconfig",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/lkft.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/lkft-crypto.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/distro-overrides.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/systemd.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/virtio.config",
+            "CONFIG_ARM64_MODULE_PLTS=y",
+            "CONFIG_SYN_COOKIES=y",
+            "CONFIG_SCHEDSTATS=y"
+        ],
+        "kernel_image": "",
+        "kernel_image_name": "Image.gz",
+        "kernel_patch_file": "",
+        "kernel_version": "5.17.4",
+        "make_variables": {
+            "LLVM": "1",
+            "LLVM_IAS": "1"
+        },
+        "modules": true,
+        "no_cache": false,
+        "plan": "2843VENTuwTvVRSWk9LGmZ8EvTt",
+        "project": "linaro/lkft",
+        "provisioning_time": "2022-04-20T13:40:51.503285",
+        "result": "pass",
+        "retry": 0,
+        "retry_message": "",
+        "running_time": "2022-04-20T13:42:37.604992",
+        "sccache_hits": 6995,
+        "sccache_misses": 902,
+        "state": "finished",
+        "status_message": "build completed",
+        "target_arch": "arm64",
+        "targets": [],
+        "toolchain": "clang-12",
+        "tuxbuild_status": "complete",
+        "tuxmake_metadata": {
+            "compiler": {
+                "name": "clang",
+                "version": "12.0.1",
+                "version_full": "Debian clang version 12.0.1-++20211027092659+fed41342a82f-1~exp1~20211027213207.7"
+            },
+            "results": {
+                "artifacts": {
+                    "config": [
+                        "config"
+                    ],
+                    "debugkernel": [
+                        "vmlinux.xz",
+                        "System.map"
+                    ],
+                    "default": [],
+                    "dtbs": [
+                        "dtbs.tar.xz"
+                    ],
+                    "dtbs-legacy": [
+                        "dtbs.tar.xz"
+                    ],
+                    "headers": [
+                        "headers.tar.xz"
+                    ],
+                    "kernel": [
+                        "Image.gz"
+                    ],
+                    "log": [
+                        "build.log",
+                        "build-debug.log"
+                    ],
+                    "modules": [
+                        "modules.tar.xz"
+                    ],
+                    "xipkernel": []
+                },
+                "duration": {
+                    "build": 790.3359227180481,
+                    "cleanup": 1.7626926898956299,
+                    "copy": 0.04466605186462402,
+                    "metadata": 2.023331642150879,
+                    "prepare": 224.84718894958496,
+                    "validate": 0.00028514862060546875
+                },
+                "errors": 0,
+                "status": "PASS",
+                "targets": {
+                    "config": {
+                        "duration": 14.94137454032898,
+                        "status": "PASS"
+                    },
+                    "debugkernel": {
+                        "duration": 13.838847875595093,
+                        "status": "PASS"
+                    },
+                    "default": {
+                        "duration": 696.2680366039276,
+                        "status": "PASS"
+                    },
+                    "dtbs": {
+                        "duration": 10.676923036575317,
+                        "status": "PASS"
+                    },
+                    "dtbs-legacy": {
+                        "duration": 0.6766235828399658,
+                        "status": "SKIP"
+                    },
+                    "headers": {
+                        "duration": 5.1988465785980225,
+                        "status": "PASS"
+                    },
+                    "kernel": {
+                        "duration": 9.11332106590271,
+                        "status": "PASS"
+                    },
+                    "modules": {
+                        "duration": 39.33427858352661,
+                        "status": "PASS"
+                    },
+                    "xipkernel": {
+                        "duration": 0.28751111030578613,
+                        "status": "SKIP"
+                    }
+                },
+                "warnings": 1
+            },
+            "runtime": {
+                "image_digest": "855116176053.dkr.ecr.us-east-1.amazonaws.com/tuxmake/arm64_clang-12@sha256:64ea8346024a2603ab964e5274f2b4617c7c8b82e30c26dee26a5e51dc5ce788",
+                "image_name": "855116176053.dkr.ecr.us-east-1.amazonaws.com/tuxmake/arm64_clang-12",
+                "version": "podman version 3.3.1"
+            },
+            "tools": {
+                "ar": "GNU ar (GNU Binutils for Debian) 2.35.2",
+                "as": "GNU assembler (GNU Binutils for Debian) 2.35.2",
+                "bc": "bc 1.07.1",
+                "bison": "bison (GNU Bison) 3.7.5",
+                "ccache": "ccache version 4.2",
+                "clang": "Debian clang version 12.0.1-++20211027092659+fed41342a82f-1~exp1~20211027213207.7",
+                "depmod": "kmod version 28",
+                "fdformat": "fdformat from util-linux 2.36.1",
+                "flex": "flex 2.6.4",
+                "gcc": "gcc (Debian 10.2.1-6) 10.2.1 20210110",
+                "ld": "GNU ld (GNU Binutils for Debian) 2.35.2",
+                "lld": "Debian LLD 12.0.1 (compatible with GNU linkers)",
+                "make": "GNU Make 4.3",
+                "openssl": "OpenSSL 1.1.1n  15 Mar 2022",
+                "pahole": "v1.22",
+                "ps": "ps from procps-ng 3.3.17",
+                "sccache": "sccache 0.2.9"
+            },
+            "tuxmake": {
+                "version": "1.0.1"
+            }
+        },
+        "uid": "2843VDPeVhg4yaTkgTur0T3ykmq",
+        "user": "lkft@linaro.org",
+        "user_agent": "tuxsuite/0.43.8",
+        "waited_by": [],
+        "warnings_count": 1
+    }
+]

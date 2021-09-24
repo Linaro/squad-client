@@ -1,0 +1,81 @@
+{
+    "builds": {
+        "1yPYDyGoF449fDc374OsaWJVVzl": {
+            "build_name": "armv7-gcc-11",
+            "client_token": "a4ae4ef4-a363-4fa0-83c2-499828692482",
+            "download_url": "https://builds.tuxbuild.com/1yPYDyGoF449fDc374OsaWJVVzl/",
+            "environment": {},
+            "errors_count": 0,
+            "finished_time": null,
+            "git_ref": "master",
+            "git_repo": "https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/",
+            "git_sha": "1f77990c4b7960a82d599567c586ceb8289f71ed",
+            "kconfig": [
+                "defconfig",
+                "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/lkft.config",
+                "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/lkft-crypto.config",
+                "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/distro-overrides.config",
+                "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/systemd.config",
+                "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/virtio.config",
+                "CONFIG_ARM_TI_CPUFREQ=y",
+                "CONFIG_SERIAL_8250_OMAP=y",
+                "CONFIG_POSIX_MQUEUE=y",
+                "CONFIG_OF=y",
+                "CONFIG_SYN_COOKIES=y"
+            ],
+            "kernel_image": "",
+            "kernel_patch_file": "",
+            "make_variables": {},
+            "plan": "1yPYDsKqAtxplNqXIg6shMtrDvj",
+            "project": "linaro/lkft",
+            "provisioning_time": "2021-09-20T16:16:14.950674",
+            "result": "unknown",
+            "running_time": null,
+            "state": "provisioning",
+            "target_arch": "arm",
+            "targets": [],
+            "toolchain": "gcc-11",
+            "uid": "1yPYDyGoF449fDc374OsaWJVVzl",
+            "user": "anders.roxell@linaro.org",
+            "user_agent": "tuxsuite/0.34.2",
+            "waited_by": [],
+            "warnings_count": 0
+        }
+    },
+    "tests": {
+        "1yPYGaOEPNwr2pCqBgONY43zORp": {
+            "boot_args": null,
+            "device": "qemu-i386",
+            "finished_time": null,
+            "kernel": null,
+            "mcp_fw": null,
+            "mcp_romfw": null,
+            "modules": null,
+            "parameters": {},
+            "plan": "1yPYDsKqAtxplNqXIg6shMtrDvj",
+            "project": "linaro/lkft",
+            "provisioning_time": null,
+            "result": "unknown",
+            "results": {},
+            "rootfs": null,
+            "running_time": null,
+            "scp_fw": null,
+            "scp_romfw": null,
+            "state": "waiting",
+            "tests": [
+                "boot",
+                "ltp-fcntl-locktests",
+                "ltp-fs_bind",
+                "ltp-fs_perms_simple",
+                "ltp-fsx",
+                "ltp-nptl",
+                "ltp-smoke"
+            ],
+            "uefi": null,
+            "uid": "1yPYGaOEPNwr2pCqBgONY43zORp",
+            "user": "anders.roxell@linaro.org",
+            "user_agent": "tuxsuite/0.34.2",
+            "waiting_for": "1yPYFArSa1GUmMmrpwZq6KyU9T0"
+        }
+    }
+}
