@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 tuxbuild_schema = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "array",
     "minItems": 1,
     "items": [{
