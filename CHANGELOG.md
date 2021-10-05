@@ -1,3 +1,11 @@
+# 0.18.3
+
+This 0.18.3 release fixes a bug submitting TuxBuild results
+due to an upstream dependency (jsonschema) update.
+
+Complete list of changes going in:
+* submit_tuxbuild: set schema version
+
 # 0.18.2
 
 This 0.18.2 release fixes an issue in Docker that prevented
