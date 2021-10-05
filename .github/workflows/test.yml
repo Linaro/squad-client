@@ -1,0 +1,50 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+
+  lint:
+    name: Lint with flake8 and reuse
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Run Flake8
+        run: |
+          python -m pip install flake8
+          flake8
+
+  unittest:
+    name: Unittest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        python: [3.6, 3.7]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+      - name: Run tests using unittest
+        run: |
+	  ./manage.py --squad-host http://localhost:9000 test -v
+
+  docker-test:
+    name: Run tests in docker and build release image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Build docker image
+        run: |
+          git fetch --unshallow
+          docker build -t squad-client .
