@@ -35,8 +35,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
       - name: Run tests using unittest
-        run: |
-	  ./manage.py --squad-host http://localhost:9000 test -v
+        run: "./manage.py --squad-host http://localhost:9000 test -v"
 
   docker-test:
     name: Run tests in docker and build release image
