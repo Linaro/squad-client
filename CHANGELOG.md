@@ -1,3 +1,11 @@
+# 0.19
+
+This 0.19 release adds a command that allow users to
+send job requests to SQUAD.
+
+Complete list of changes going in:
+* commands: submit-job: submit job requests command
+
 # 0.18.3
 
 This 0.18.3 release fixes a bug submitting TuxBuild results
