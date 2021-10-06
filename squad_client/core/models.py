@@ -276,6 +276,24 @@ class Squad(SquadObject):
             logger.error('Failed to submit results: %s' % response.text)
         return response.ok
 
+    def submitjob(self, group=None, project=None, build=None, environment=None,
+                  backend=None, definition=None):
+
+        path = '/api/submitjob/%s/%s/%s/%s' % (group.slug, project.slug, build.version, environment.slug)
+
+        data = {
+            'backend': backend.name,
+            'definition': definition,
+        }
+
+        logger.info('Submitting job request %s' % (path))
+
+        response = SquadApi.post(path, data=data)
+        status_code = response.status_code
+        if status_code not in [200, 201, 500]:
+            logger.error('Failed to submit job request: %s' % response.text)
+        return response.ok
+
 
 class Group(SquadObject):
 
@@ -435,6 +453,16 @@ class TestJob(SquadObject):
              'last_fetch_attempt', 'failure', 'can_resubmit', 'resubmitted_count',
              'job_id', 'job_status', 'backend', 'testrun', 'target', 'target_build',
              'parent_job']
+
+    def submit(self):
+        squad = Squad()
+        return squad.submitjob(
+            group=self.target.group,
+            project=self.target,
+            build=self.target_build,
+            environment=self.environment,
+            backend=self.backend,
+            definition=self.definition,)
 
 
 class MetricSuite:

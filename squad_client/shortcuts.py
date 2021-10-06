@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from .core.models import ALL, Squad, Group, Project, Build, Environment, Test, Metric, TestRun, SquadObjectException
+from .core.models import ALL, Squad, Group, Project, Backend, Build, Environment, Test, Metric, TestRun, TestJob, SquadObjectException
 from .utils import split_build_url, first, split_group_project_slug, getid
 
 
@@ -88,6 +88,32 @@ def submit_results(group_project_slug=None, build_version=None, env_slug=None, t
         testrun.add_metric(metric)
 
     return testrun.submit_results()
+
+
+def submit_job(group_project_slug=None, build_version=None, env_slug=None, backend_name=None, definition=None):
+    group_slug, project_slug = split_group_project_slug(group_project_slug)
+
+    group = Group()
+    project = Project()
+    build = Build()
+    testjob = TestJob()
+    environment = Environment()
+    backend = Backend()
+
+    group.slug = group_slug
+    project.group = group
+    project.slug = project_slug
+    backend.name = backend_name
+    environment.slug = env_slug
+    build.version = build_version
+
+    testjob.target_build = build
+    testjob.target = project
+    testjob.backend = backend
+    testjob.definition = definition
+    testjob.environment = environment
+
+    return testjob.submit()
 
 
 def create_or_update_project(group_slug=None, slug=None, name=None, description=None, settings=None,
