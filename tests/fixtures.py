@@ -45,7 +45,7 @@ skipped_test = testrun.tests.create(suite=suite, result=None, metadata=metadata_
 
 RecordTestRunStatus()(testrun)
 
-backend = mci.Backend.objects.create()
+backend = mci.Backend.objects.create(name='my_backend', implementation_type='lava')
 testjob = testrun.test_jobs.create(backend=backend, target=project, target_build=build)
 
 emailtemplate = m.EmailTemplate.objects.create(name='my_emailtemplate')
