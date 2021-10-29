@@ -1,3 +1,11 @@
+# 0.20
+
+This 0.20 release used warnings_count of tuxbuild result
+file to send as metric to SQUAD.
+
+Complete list of changes going in:
+* commands: submit_tuxbuild: send metrics
+
 # 0.19
 
 This 0.19 release adds a command that allow users to
