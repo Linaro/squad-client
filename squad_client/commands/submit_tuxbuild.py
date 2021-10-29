@@ -3,6 +3,8 @@ import json
 import jsonschema
 import os
 
+from collections import defaultdict
+
 from squad_client import logging
 from squad_client.shortcuts import submit_results
 from squad_client.core.command import SquadClientCommand
@@ -36,6 +38,9 @@ tuxbuild_schema = {
             },
             "toolchain": {
                 "type": "string",
+            },
+            "warnings_count": {
+                "type": "integer",
             },
         },
         "required": [
@@ -127,20 +132,18 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             logger.error("Failed to validate tuxbuild data: %s", ve)
             return False
 
-        data = {}
+        data = defaultdict(lambda: {'tests': {}, 'metrics': {}})
         for build in builds:
             arch = build["target_arch"]
             description = build["git_describe"]
             kconfig = build["kconfig"]
             status = build["build_status"]
             toolchain = build["toolchain"]
+            warnings_count = build["warnings_count"]
             test = self._get_test_name(kconfig, toolchain)
 
-            multi_key = (description, arch)
-            if multi_key not in data:
-                data[multi_key] = {}
-
-            data[multi_key].update({test: status})
+            data[(description, arch)]['tests'][test] = status
+            data[(description, arch)]['metrics'][test + '-warnings'] = warnings_count
 
         for key, result in data.items():
             description, arch = key
@@ -148,7 +151,8 @@ class SubmitTuxbuildCommand(SquadClientCommand):
                 group_project_slug="%s/%s" % (args.group, args.project),
                 build_version=description,
                 env_slug=arch,
-                tests=result,
+                tests=result['tests'],
+                metrics=result['metrics'],
                 metadata=self._build_metadata(builds),
             )
 
