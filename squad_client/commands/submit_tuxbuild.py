@@ -54,6 +54,7 @@ tuxbuild_schema = {
 }
 
 ALLOWED_METADATA = [
+    "download_url",
     "git_branch",
     "git_commit",
     "git_describe",
