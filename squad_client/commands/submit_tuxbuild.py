@@ -54,7 +54,16 @@ tuxbuild_schema = {
 }
 
 ALLOWED_METADATA = [
-    "git_branch", "git_commit", "git_describe", "git_ref", "git_repo", "git_sha", "git_short_log", "kernel_version", "make_kernelversion",
+    "download_url",
+    "git_branch",
+    "git_commit",
+    "git_describe",
+    "git_ref",
+    "git_repo",
+    "git_sha",
+    "git_short_log",
+    "kernel_version",
+    "make_kernelversion",
 ]
 
 
