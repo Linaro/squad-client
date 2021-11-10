@@ -1,3 +1,26 @@
+# 0.21
+
+This 0.21 release sends download_url to TuxBuild build
+test results. It also fixed differences when dealing with
+backend MetricThreshold objects.
+
+A nice feature added in this release is an extra arg
+in create-or-update-project command: --thresholds.
+That allows users/CI to automatically create necessary
+thresholds per project.
+
+Complete list of changes going in:
+* commands:
+  * create_or_update_project: add --thresholds arg
+  * submit_tuxbuild: add downlaod_url to ALLOWED_METADATA
+  * submit_tuxbuild: splitup ALLOWED_METADATA
+* core: models:
+  * add metrics to build
+  * add relation between project and metric thresholds
+* tests:
+  * fixtures: fix fixtures for new versions of squad
+  * test_models: fix typo fixed in SQUAD
+
 # 0.20
 
 This 0.20 release used warnings_count of tuxbuild result
