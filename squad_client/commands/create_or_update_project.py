@@ -96,6 +96,11 @@ class CreateOrUpdateProjectCommand(SquadClientCommand):
             default=False,
             help="Return with exit code only, do not print errors whatsoever",
         )
+        parser.add_argument(
+            "--thresholds",
+            nargs="*",
+            help='Metric thresholds of the project. Exaple "build/*-warnings"',
+        )
 
     def resolve_boolean_flag(self, flag, no_flag):
         if flag:
@@ -110,6 +115,7 @@ class CreateOrUpdateProjectCommand(SquadClientCommand):
         moderate_notifications = self.resolve_boolean_flag(args.moderate_notifications, args.no_moderate_notifications)
         plugins = args.plugins.split(',') if args.plugins else None
         important_metadata_keys = args.important_metadata_keys.split(',') if args.important_metadata_keys else None
+        thresholds = args.thresholds
 
         project, errors = create_or_update_project(
             group_slug=args.group,
@@ -127,6 +133,7 @@ class CreateOrUpdateProjectCommand(SquadClientCommand):
             important_metadata_keys=important_metadata_keys,
             wait_before_notification_timeout=args.wait_before_notification_timeout,
             overwrite=(not args.no_overwrite),
+            thresholds=thresholds,
         )
 
         if project is None:
@@ -137,4 +144,7 @@ class CreateOrUpdateProjectCommand(SquadClientCommand):
         else:
             if not args.silent:
                 print('Project saved: %s' % project.url)
+                if len(errors):
+                    print('But some errors were found: %s' % errors, file=sys.stderr)
+                    return False
             return True

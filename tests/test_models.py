@@ -125,6 +125,25 @@ class BuildTest(unittest.TestCase):
         tests = self.build.tests(environment__slug='mynonexistentenv').values()
         self.assertEqual(0, len(tests))
 
+    def test_build_metrics(self):
+        tests = self.build.metrics().values()
+        self.assertEqual(1, len(tests))
+
+    def test_build_metrics_per_environment(self):
+        tests = self.build.metrics(environment__slug='my_env').values()
+        self.assertEqual(1, len(tests))
+
+    def test_build_metrics_per_environment_not_found(self):
+        tests = self.build.metrics(environment__slug='mynonexistentenv').values()
+        self.assertEqual(0, len(tests))
+
+    def test_build_metrics_change_cache_on_different_filters(self):
+        tests = self.build.metrics(environment__slug='my_env').values()
+        self.assertEqual(1, len(tests))
+
+        tests = self.build.metrics(environment__slug='mynonexistentenv').values()
+        self.assertEqual(0, len(tests))
+
 
 class TestRunTest(unittest.TestCase):
 
@@ -165,9 +184,15 @@ class ProjectTest(unittest.TestCase):
         suite = self.project.suite('my_suite')
         self.assertEqual(suite.slug, 'my_suite')
 
+    def test_project_thresholds(self):
+        thresholds = self.project.thresholds()
+        self.assertEqual(1, len(thresholds))
+        threshold = first(thresholds)
+        self.assertEqual(threshold.name, 'my-threshold')
+
     def test_compare_builds_from_same_project(self):
         comparison = self.project.compare_builds(self.build2.id, self.build.id)
-        self.assertEqual('Cannot report regressions/fixes on a non-finished builds', comparison[0])
+        self.assertEqual('Cannot report regressions/fixes on non-finished builds', comparison[0])
 
     def test_compare_builds_from_same_project_force(self):
         comparison = self.project.compare_builds(self.build2.id, self.build.id, force=True)

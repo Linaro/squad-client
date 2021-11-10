@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from .core.models import ALL, Squad, Group, Project, Backend, Build, Environment, Test, Metric, TestRun, TestJob, SquadObjectException
+from .core.models import ALL, Squad, Group, Project, Backend, Build, Environment, Test, Metric, MetricThreshold, TestRun, TestJob, SquadObjectException
 from .utils import split_build_url, first, split_group_project_slug, getid
 
 
@@ -34,13 +34,11 @@ def retrieve_build_results(build_url):
         suite = suites[getid(test.suite)]
         results[env]['tests'][suite][test.short_name] = test.status
 
-    metrics = squad.metrics(test_run__build_id=build.id, fields='id,short_name,result,suite,test_run').values()
-    testruns = build.testruns(fields='id,environment')
+    metrics = build.metrics(fields='id,short_name,result,suite,environment').values()
     for metric in metrics:
-        testrun = testruns[getid(metric.test_run)]
-        env = environments[getid(testrun.environment)]
+        env = environments[getid(metric.environment)]
         suite = suites[getid(metric.suite)]
-        results[env]['metrics'][suite][metric.short_name] = metric.results
+        results[env]['metrics'][suite][metric.short_name] = metric.result
 
     return results
 
@@ -120,7 +118,7 @@ def create_or_update_project(group_slug=None, slug=None, name=None, description=
                              is_public=None, html_mail=None, moderate_notifications=None, is_archived=None,
                              email_template=None, plugins=None, important_metadata_keys=None,
                              wait_before_notification_timeout=None, notification_timeout=None,
-                             data_retention=None, overwrite=False):
+                             data_retention=None, overwrite=False, thresholds=None):
     errors = []
     group = None
     project = None
@@ -180,4 +178,25 @@ def create_or_update_project(group_slug=None, slug=None, name=None, description=
 
     if len(errors):
         return None, errors
-    return project, []
+
+    # For now, this function only support project-wide, null-valued, lower-is-better metric thresholds
+    if thresholds:
+        project_thresholds = project.thresholds().values()
+        existing_thresholds = [t.name for t in project_thresholds if [t.environment, t.value, t.is_higher_better] == [None, None, False]]
+        for threshold in thresholds:
+            if threshold in existing_thresholds:
+                print('Threshold "%s" already exists, skip adding it' % threshold)
+                continue
+
+            # Create a metric threshold
+            new_threshold = MetricThreshold()
+            new_threshold.name = threshold
+            new_threshold.project = project
+
+            try:
+                new_threshold.save()
+                print('MetricThreshold saved: %s' % new_threshold.url)
+            except SquadObjectException as e:
+                errors.append(str(e))
+
+    return project, errors
