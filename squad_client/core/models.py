@@ -355,6 +355,10 @@ class Project(SquadObject):
         objects = self.suites(count=1, **filters)
         return first(objects)
 
+    def thresholds(self, count=DEFAULT_COUNT, **filters):
+        filters.update({'project': self.id})
+        return self.__fetch__(MetricThreshold, filters, count)
+
     def __repr__(self):
         return self.slug
 
@@ -661,7 +665,7 @@ class Annotation(SquadObject):
 class MetricThreshold(SquadObject):
 
     endpoint = '/api/metricthresholds/'
-    attrs = ['url', 'id', 'name', 'value', 'is_higher_better', 'environment']
+    attrs = ['url', 'id', 'name', 'value', 'is_higher_better', 'environment', 'project']
 
 
 class Report(SquadObject):
