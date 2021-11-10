@@ -186,7 +186,7 @@ class ProjectTest(unittest.TestCase):
 
     def test_compare_builds_from_same_project(self):
         comparison = self.project.compare_builds(self.build2.id, self.build.id)
-        self.assertEqual('Cannot report regressions/fixes on a non-finished builds', comparison[0])
+        self.assertEqual('Cannot report regressions/fixes on non-finished builds', comparison[0])
 
     def test_compare_builds_from_same_project_force(self):
         comparison = self.project.compare_builds(self.build2.id, self.build.id, force=True)
