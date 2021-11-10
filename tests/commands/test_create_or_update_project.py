@@ -22,7 +22,7 @@ class CreateOrUpdateProjectTest(TestCase):
     def manage_create_or_update_project(self, group=None, slug=None, name=None, description=None, settings=None, is_public=None, html_mail=None,
                                         moderate_notifications=None, is_archived=None, email_template=None,
                                         plugins=None, important_metadata_keys=None, wait_before_notification_timeout=None,
-                                        notification_timeout=None, data_retention=None, no_overwrite=False):
+                                        notification_timeout=None, data_retention=None, no_overwrite=False, thresholds=None):
         argv = ['./manage.py', '--squad-host', self.testing_server, '--squad-token', self.testing_token,
                 'create-or-update-project']
 
@@ -58,6 +58,8 @@ class CreateOrUpdateProjectTest(TestCase):
             argv += ['--data-retention', str(data_retention)]
         if no_overwrite:
             argv += ['--no-overwrite']
+        if thresholds:
+            argv += ['--thresholds'] + thresholds
 
         proc = sp.Popen(argv, stdout=sp.PIPE, stderr=sp.PIPE)
         proc.ok = False
@@ -108,6 +110,7 @@ class CreateOrUpdateProjectTest(TestCase):
         wait_before_notification_timeout = 60
         notification_timeout = 120
         data_retention = 1
+        thresholds = ["my-threshold"]
 
         proc = self.manage_create_or_update_project(
             group=self.group,
@@ -124,12 +127,14 @@ class CreateOrUpdateProjectTest(TestCase):
             wait_before_notification_timeout=wait_before_notification_timeout,
             notification_timeout=notification_timeout,
             data_retention=data_retention,
+            thresholds=thresholds,
         )
         self.assertTrue(proc.ok)
 
         project = first(self.squad.projects(group__slug=self.group, slug=self.slug))
         self.assertIsNotNone(project)
         self.assertIn('Project saved', proc.out)
+        self.assertIn('MetricThreshold saved', proc.out)
 
         self.assertEqual(description, project.description)
         self.assertEqual(settings, project.project_settings)
@@ -142,3 +147,6 @@ class CreateOrUpdateProjectTest(TestCase):
         self.assertEqual(wait_before_notification_timeout, project.wait_before_notification)
         self.assertEqual(notification_timeout, project.notification_timeout)
         self.assertEqual(data_retention, project.data_retention_days)
+        self.assertEqual(1, len(project.thresholds().values()))
+        threshold = first(project.thresholds())
+        self.assertEqual(thresholds[0], threshold.name)
