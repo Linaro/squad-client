@@ -125,6 +125,25 @@ class BuildTest(unittest.TestCase):
         tests = self.build.tests(environment__slug='mynonexistentenv').values()
         self.assertEqual(0, len(tests))
 
+    def test_build_metrics(self):
+        tests = self.build.metrics().values()
+        self.assertEqual(1, len(tests))
+
+    def test_build_metrics_per_environment(self):
+        tests = self.build.metrics(environment__slug='my_env').values()
+        self.assertEqual(1, len(tests))
+
+    def test_build_metrics_per_environment_not_found(self):
+        tests = self.build.metrics(environment__slug='mynonexistentenv').values()
+        self.assertEqual(0, len(tests))
+
+    def test_build_metrics_change_cache_on_different_filters(self):
+        tests = self.build.metrics(environment__slug='my_env').values()
+        self.assertEqual(1, len(tests))
+
+        tests = self.build.metrics(environment__slug='mynonexistentenv').values()
+        self.assertEqual(0, len(tests))
+
 
 class TestRunTest(unittest.TestCase):
 

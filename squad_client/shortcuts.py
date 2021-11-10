@@ -34,13 +34,11 @@ def retrieve_build_results(build_url):
         suite = suites[getid(test.suite)]
         results[env]['tests'][suite][test.short_name] = test.status
 
-    metrics = squad.metrics(test_run__build_id=build.id, fields='id,short_name,result,suite,test_run').values()
-    testruns = build.testruns(fields='id,environment')
+    metrics = build.metrics(fields='id,short_name,result,suite,environment').values()
     for metric in metrics:
-        testrun = testruns[getid(metric.test_run)]
-        env = environments[getid(testrun.environment)]
+        env = environments[getid(metric.environment)]
         suite = suites[getid(metric.suite)]
-        results[env]['metrics'][suite][metric.short_name] = metric.results
+        results[env]['metrics'][suite][metric.short_name] = metric.result
 
     return results
 

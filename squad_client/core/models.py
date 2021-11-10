@@ -412,6 +412,16 @@ class Build(SquadObject):
             self.__tests__[filters_str] = self.__fetch__(Test, filters, count, endpoint=endpoint)
         return self.__tests__[filters_str]
 
+    __metrics__ = {}
+
+    def metrics(self, count=ALL, **filters):
+        filters['count'] = count
+        filters_str = str(OrderedDict(filters))
+        if self.__metrics__.get(filters_str) is None:
+            endpoint = '%s%d/metrics/' % (self.endpoint, self.id)
+            self.__metrics__[filters_str] = self.__fetch__(Metric, filters, count, endpoint=endpoint)
+        return self.__metrics__[filters_str]
+
     __metadata__ = None
     __status__ = None
 
@@ -481,7 +491,7 @@ class MetricSuite:
 
 class Metric(SquadObject):
     endpoint = '/api/metrics/'
-    attrs = ['url', 'id', 'name', 'short_name', 'measurement_list', 'result', 'unit', 'is_outlier', 'test_run', 'suite', 'metadata']
+    attrs = ['url', 'id', 'name', 'short_name', 'measurement_list', 'result', 'unit', 'is_outlier', 'test_run', 'suite', 'metadata', 'build', 'environment']
 
 
 class TestRunStatus(SquadObject):
