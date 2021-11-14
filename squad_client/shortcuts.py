@@ -7,8 +7,8 @@ from .utils import split_build_url, first, split_group_project_slug, getid
 squad = Squad()
 
 
-def compare_builds(baseline_id, build_id):
-    return Project.compare_builds(baseline_id, build_id)
+def compare_builds(baseline_id, build_id, by="tests", force=False):
+    return Project.compare_builds(baseline_id, build_id, by, force)
 
 
 def retrieve_latest_builds(project_full_name, count=10):
