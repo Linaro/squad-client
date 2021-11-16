@@ -191,11 +191,20 @@ class ProjectTest(unittest.TestCase):
         self.assertEqual(threshold.name, 'my-threshold')
 
     def test_compare_builds_from_same_project(self):
+        # tests
         comparison = self.project.compare_builds(self.build2.id, self.build.id)
+        self.assertEqual('Cannot report regressions/fixes on non-finished builds', comparison[0])
+
+        # metrics
+        comparison = self.project.compare_builds(self.build2.id, self.build.id, by="metrics")
         self.assertEqual('Cannot report regressions/fixes on non-finished builds', comparison[0])
 
     def test_compare_builds_from_same_project_force(self):
         comparison = self.project.compare_builds(self.build2.id, self.build.id, force=True)
+        self.assertEqual({}, comparison['regressions'])
+        self.assertEqual({}, comparison['fixes'])
+
+        comparison = self.project.compare_builds(self.build2.id, self.build.id, by="metrics", force=True)
         self.assertEqual({}, comparison['regressions'])
         self.assertEqual({}, comparison['fixes'])
 
