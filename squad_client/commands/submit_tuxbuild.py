@@ -84,8 +84,8 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             help="File with tuxbuild results to submit",
         )
 
-    def _build_metadata(self, builds):
-        metadata = {k: v for k, v in builds[0].items() if k in ALLOWED_METADATA}
+    def _build_metadata(self, build):
+        metadata = {k: v for k, v in build.items() if k in ALLOWED_METADATA}
 
         # We expect git_commit, but tuxmake calls it git_sha
         metadata.update({"git_commit": metadata.get("git_sha")})
@@ -141,7 +141,7 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             logger.error("Failed to validate tuxbuild data: %s", ve)
             return False
 
-        data = defaultdict(lambda: {'tests': {}, 'metrics': {}})
+        data = defaultdict(lambda: {'tests': {}, 'metrics': {}, 'metadata': {}})
         for build in builds:
             arch = build["target_arch"]
             description = build["git_describe"]
@@ -153,6 +153,7 @@ class SubmitTuxbuildCommand(SquadClientCommand):
 
             data[(description, arch)]['tests'][test] = status
             data[(description, arch)]['metrics'][test + '-warnings'] = warnings_count
+            data[(description, arch)]['metadata'] = self._build_metadata(build)
 
         for key, result in data.items():
             description, arch = key
@@ -162,7 +163,7 @@ class SubmitTuxbuildCommand(SquadClientCommand):
                 env_slug=arch,
                 tests=result['tests'],
                 metrics=result['metrics'],
-                metadata=self._build_metadata(builds),
+                metadata=result['metadata'],
             )
 
         return True
