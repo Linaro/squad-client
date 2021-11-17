@@ -1,3 +1,12 @@
+# 0.22
+
+This 0.22 release makes Project.compare_builds use metrics comparison.
+
+Complete list of changes going in:
+* test_shortcuts: assert an error was logged
+* shortcuts: make sure the shortcut args match
+* all: fetch build comparisons based on metrics
+
 # 0.21
 
 This 0.21 release sends download_url to TuxBuild build
