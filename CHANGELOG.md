@@ -1,3 +1,11 @@
+# 0.22.1
+
+This 0.22.1 release fixes a bug when adding download_url
+into tuxbuild submission.
+
+Complete list of changes going in:
+* commands: submit_tuxbuild: use metadata from iterating builds
+
 # 0.22
 
 This 0.22 release makes Project.compare_builds use metrics comparison.
