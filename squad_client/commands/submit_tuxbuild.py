@@ -62,6 +62,7 @@ ALLOWED_METADATA = [
     "git_repo",
     "git_sha",
     "git_short_log",
+    "kconfig",
     "kernel_version",
     "make_kernelversion",
 ]
