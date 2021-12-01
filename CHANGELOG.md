@@ -1,3 +1,13 @@
+# 0.23
+
+This 0.23 release changes submit_tuxbuild command so
+that it sends kconfig of builds along with other
+metadata fields.
+
+Complete list of changes going in:
+* submit_tuxbuild: add kconfig as metadata
+* dockerfile: remove wkhtmltopdf
+
 # 0.22.1
 
 This 0.22.1 release fixes a bug when adding download_url
