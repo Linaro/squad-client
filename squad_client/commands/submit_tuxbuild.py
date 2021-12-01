@@ -4,6 +4,7 @@ import jsonschema
 import os
 
 from collections import defaultdict
+from urllib import parse as urlparse
 
 from squad_client import logging
 from squad_client.shortcuts import submit_results
@@ -104,7 +105,7 @@ class SubmitTuxbuildCommand(SquadClientCommand):
         metadata.update({"make_kernelversion": metadata.get("kernel_version")})
 
         # add config file to the metadata
-        metadata["config"] = f"{metadata.get('download_url')}/config"
+        metadata["config"] = urlparse.urljoin(metadata.get('download_url'), "config")
 
         return metadata
 
