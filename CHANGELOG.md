@@ -1,3 +1,14 @@
+# 0.23.1
+
+This 0.23.1 release fixes a long-running bug that was overwriting
+kconfig and download_url metadata, causing lots of confusion when
+people tried to cross down info regarding tuxbuilds.
+
+Complete list of changes going in:
+* commands: submit_tuxbuild: require download_url in schema
+* commands: submit_tuxbuild: avoid extra slash
+* submit_tuxbuild: add config file url to the metadata
+
 # 0.23
 
 This 0.23 release changes submit_tuxbuild command so
