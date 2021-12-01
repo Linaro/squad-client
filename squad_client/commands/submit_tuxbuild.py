@@ -3,7 +3,6 @@ import json
 import jsonschema
 import os
 
-from collections import defaultdict
 from urllib import parse as urlparse
 
 from squad_client import logging
@@ -40,11 +39,15 @@ tuxbuild_schema = {
             "toolchain": {
                 "type": "string",
             },
+            "download_url": {
+                "type": "string",
+            },
             "warnings_count": {
                 "type": "integer",
             },
         },
         "required": [
+            "download_url",
             "build_status",
             "git_describe",
             "kconfig",
@@ -55,7 +58,6 @@ tuxbuild_schema = {
 }
 
 ALLOWED_METADATA = [
-    "config",
     "download_url",
     "git_branch",
     "git_commit",
@@ -147,29 +149,25 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             logger.error("Failed to validate tuxbuild data: %s", ve)
             return False
 
-        data = defaultdict(lambda: {'tests': {}, 'metrics': {}, 'metadata': {}})
         for build in builds:
             arch = build["target_arch"]
             description = build["git_describe"]
             kconfig = build["kconfig"]
-            status = build["build_status"]
             toolchain = build["toolchain"]
             warnings_count = build["warnings_count"]
-            test = self._get_test_name(kconfig, toolchain)
+            test_name = self._get_test_name(kconfig, toolchain)
+            test_status = build["build_status"]
 
-            data[(description, arch)]['tests'][test] = status
-            data[(description, arch)]['metrics'][test + '-warnings'] = warnings_count
-            data[(description, arch)]['metadata'] = self._build_metadata(build)
+            tests = {test_name: test_status}
+            metrics = {test_name + '-warnings': warnings_count}
 
-        for key, result in data.items():
-            description, arch = key
             submit_results(
                 group_project_slug="%s/%s" % (args.group, args.project),
                 build_version=description,
                 env_slug=arch,
-                tests=result['tests'],
-                metrics=result['metrics'],
-                metadata=result['metadata'],
+                tests=tests,
+                metrics=metrics,
+                metadata=self._build_metadata(build)
             )
 
         return True
