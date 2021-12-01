@@ -54,6 +54,7 @@ tuxbuild_schema = {
 }
 
 ALLOWED_METADATA = [
+    "config",
     "download_url",
     "git_branch",
     "git_commit",
@@ -101,6 +102,9 @@ class SubmitTuxbuildCommand(SquadClientCommand):
 
         # We expect `make_kernelversion`, but tuxmake calls it `kernel_version`
         metadata.update({"make_kernelversion": metadata.get("kernel_version")})
+
+        # add config file to the metadata
+        metadata["config"] = f"{metadata.get('download_url')}/config"
 
         return metadata
 
