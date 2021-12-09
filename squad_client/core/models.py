@@ -542,6 +542,14 @@ class TestRun(SquadObject):
             self.__metrics__ = self.__fetch__(Metric, filters, count)
         return self.__metrics__
 
+    def metadata_file_content(self):
+        response = SquadApi.get(self.metadata_file)
+
+        if response.text == "None":
+            return None
+
+        return response.json()
+
     test_suites = []
     metric_suites = []
 

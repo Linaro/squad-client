@@ -157,6 +157,10 @@ class TestRunTest(unittest.TestCase):
         status = self.testrun.summary()
         self.assertEqual(1, status.tests_fail)
 
+    def test_testrun_metadata_file(self):
+        self.assertTrue(self.testrun.metadata_file is not None)
+        self.assertEqual(self.testrun.metadata_file_content(), {"foo": "bar"})
+
 
 class ProjectTest(unittest.TestCase):
 
