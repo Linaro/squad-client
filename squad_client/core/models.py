@@ -563,8 +563,13 @@ class TestRun(SquadObject):
     def metadata(self):
         if self.__metadata__ is None:
             response = SquadApi.get(self.metadata_file)
-            objects = self.__fill__(TestRunMetadata, [response.json()])
-            self.__metadata__ = first(objects)
+
+            if response.text == "None":
+                self.__metadata__ = None
+            else:
+                objects = self.__fill__(TestRunMetadata, [response.json()])
+                self.__metadata__ = first(objects)
+
         return self.__metadata__
 
     @metadata.setter

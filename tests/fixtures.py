@@ -47,6 +47,9 @@ my_metric = testrun.metrics.create(suite=suite, result=1, metadata=metadata_my_m
 
 RecordTestRunStatus()(testrun)
 
+testrun_no_metadata = build.test_runs.create(environment=environment)
+RecordTestRunStatus()(testrun_no_metadata)
+
 backend = mci.Backend.objects.create(name='my_backend', implementation_type='lava')
 testjob = testrun.test_jobs.create(backend=backend, target=project, target_build=build)
 
