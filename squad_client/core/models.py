@@ -1,3 +1,4 @@
+import json
 import uuid
 from itertools import groupby
 from collections import OrderedDict
@@ -18,6 +19,17 @@ ALL = -1
 
 class SquadObjectException(Exception):
     pass
+
+
+class SquadObjectJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, uuid.UUID):
+            return str(o)
+        elif isinstance(o, TestRunMetadata):
+            d = {k: v for k, v in o.__dict__.items() if k != "id"}
+            return d
+        else:
+            return json.JSONEncoder.default(self, o)
 
 
 class SquadObject:
@@ -263,7 +275,7 @@ class Squad(SquadObject):
             num_metrics = len(metrics_dict)
             data['metrics'] = to_json(metrics_dict)
         if metadata:
-            data['metadata'] = to_json(metadata)
+            data['metadata'] = json.dumps(metadata, cls=SquadObjectJSONEncoder)
         if log:
             data['log'] = log
 
@@ -504,6 +516,10 @@ class TestRunStatus(SquadObject):
              'suite', 'suite_version']
 
 
+class TestRunMetadata(SquadObject):
+    pass
+
+
 class TestRun(SquadObject):
 
     endpoint = '/api/testruns/'
@@ -512,7 +528,6 @@ class TestRun(SquadObject):
              'job_id', 'job_status', 'job_url', 'resubmit_url',
              'data_processed', 'status_recorded', 'build',
              'environment']
-    metadata = None
     attachments = None
     log = None
 
@@ -541,6 +556,26 @@ class TestRun(SquadObject):
             filters.update({'test_run': self.id})
             self.__metrics__ = self.__fetch__(Metric, filters, count)
         return self.__metrics__
+
+    __metadata__ = None
+
+    @property
+    def metadata(self):
+        if self.__metadata__ is None:
+            response = SquadApi.get(self.metadata_file)
+
+            if response.text == "None":
+                self.__metadata__ = None
+            else:
+                objects = self.__fill__(TestRunMetadata, [response.json()])
+                self.__metadata__ = first(objects)
+
+        return self.__metadata__
+
+    @metadata.setter
+    def metadata(self, new_metadata):
+        objects = self.__fill__(TestRunMetadata, [new_metadata])
+        self.__metadata__ = first(objects)
 
     test_suites = []
     metric_suites = []

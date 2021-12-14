@@ -43,7 +43,7 @@ def retrieve_build_results(build_url):
     return results
 
 
-def submit_results(group_project_slug=None, build_version=None, env_slug=None, tests={}, metrics={}, log=None, metadata=None, attachments=None):
+def submit_results(group_project_slug=None, build_version=None, env_slug=None, tests={}, metrics={}, log=None, metadata={}, attachments=None):
     group_slug, project_slug = split_group_project_slug(group_project_slug)
 
     # TODO: validate input

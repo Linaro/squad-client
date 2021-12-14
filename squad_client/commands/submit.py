@@ -93,7 +93,7 @@ class SubmitCommand(SquadClientCommand):
     def run(self, args):
         results_dict = {}
         metrics_dict = {}
-        metadata_dict = None
+        metadata_dict = {}
         logs_file = None
         if args.result_name:
             if not args.result_value:

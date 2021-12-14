@@ -148,10 +148,20 @@ class BuildTest(unittest.TestCase):
 class TestRunTest(unittest.TestCase):
 
     def setUp(self):
-        self.testrun = first(Squad().testruns(count=1))
+        self.testruns = Squad().testruns(count=2)
+        self.testrun = self.testruns[1]
+        self.testrun_no_metadata = self.testruns[2]
 
     def test_basic(self):
         self.assertTrue(self.testrun is not None)
+
+    def test_testrun_metadata(self):
+        self.assertTrue(self.testrun.metadata_file is not None)
+        self.assertTrue(self.testrun.metadata is not None)
+        self.assertEqual(self.testrun.metadata.foo, "bar")
+
+        self.assertTrue(self.testrun_no_metadata.metadata_file is not None)
+        self.assertTrue(self.testrun_no_metadata.metadata is None)
 
     def test_testrun_status(self):
         status = self.testrun.summary()

@@ -38,7 +38,7 @@ metadata_my_xfailed_test, _ = m.SuiteMetadata.objects.get_or_create(kind='test',
 metadata_my_skipped_test, _ = m.SuiteMetadata.objects.get_or_create(kind='test', suite=suite.slug, name='my_skipped_test')
 metadata_my_metric, _ = m.SuiteMetadata.objects.get_or_create(kind='metric', suite=suite.slug, name='my_metric')
 
-testrun = build.test_runs.create(environment=environment)
+testrun = build.test_runs.create(environment=environment, metadata_file='{"foo": "bar"}')
 passed_test = testrun.tests.create(suite=suite, result=True, metadata=metadata_my_passed_test, build=testrun.build, environment=testrun.environment)
 failed_test = testrun.tests.create(suite=suite, result=False, metadata=metadata_my_failed_test, build=testrun.build, environment=testrun.environment)
 xfailed_test = testrun.tests.create(suite=suite, result=True, metadata=metadata_my_xfailed_test, has_known_issues=True, build=testrun.build, environment=testrun.environment)
@@ -46,6 +46,9 @@ skipped_test = testrun.tests.create(suite=suite, result=None, metadata=metadata_
 my_metric = testrun.metrics.create(suite=suite, result=1, metadata=metadata_my_metric, build=testrun.build, environment=testrun.environment)
 
 RecordTestRunStatus()(testrun)
+
+testrun_no_metadata = build.test_runs.create(environment=environment)
+RecordTestRunStatus()(testrun_no_metadata)
 
 backend = mci.Backend.objects.create(name='my_backend', implementation_type='lava')
 testjob = testrun.test_jobs.create(backend=backend, target=project, target_build=build)
