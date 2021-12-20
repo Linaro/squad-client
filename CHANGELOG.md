@@ -1,3 +1,12 @@
+# 0.24
+
+This 0.23 release allows squad to fetch and push TestRun
+metadata.
+
+Complete list of changes going in:
+* core/models: handle fetching testrun metadata if there is none
+* core/models: fetch testrun metadata from squad
+
 # 0.23.1
 
 This 0.23.1 release fixes a long-running bug that was overwriting
