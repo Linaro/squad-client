@@ -68,6 +68,11 @@ class CreateOrUpdateProjectCommand(SquadClientCommand):
             type=int,
         )
         parser.add_argument(
+            "--force-finishing-builds-on-timeout",
+            help='Forces builds to finish when "Notification timeout" is reached but it does not kill any pending job',
+            choices=["True", "true", "False", "false"],
+        )
+        parser.add_argument(
             "--notification-timeout",
             help="Force sending build notifications after this many seconds",
             type=int,
@@ -117,6 +122,10 @@ class CreateOrUpdateProjectCommand(SquadClientCommand):
         important_metadata_keys = args.important_metadata_keys.split(',') if args.important_metadata_keys else None
         thresholds = args.thresholds
 
+        force_finishing_builds_on_timeout = None
+        if args.force_finishing_builds_on_timeout:
+            force_finishing_builds_on_timeout = args.force_finishing_builds_on_timeout.endswith("rue")
+
         project, errors = create_or_update_project(
             group_slug=args.group,
             slug=args.slug,
@@ -132,6 +141,7 @@ class CreateOrUpdateProjectCommand(SquadClientCommand):
             moderate_notifications=moderate_notifications,
             important_metadata_keys=important_metadata_keys,
             wait_before_notification_timeout=args.wait_before_notification_timeout,
+            force_finishing_builds_on_timeout=force_finishing_builds_on_timeout,
             overwrite=(not args.no_overwrite),
             thresholds=thresholds,
         )
