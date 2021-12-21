@@ -167,6 +167,7 @@ class CreateOrUpdateShortcutTest(TestCase):
             wait_before_notification_timeout=60,
             notification_timeout=120,
             data_retention=1,
+            force_finishing_builds_on_timeout=True,
         )
 
         self.assertIsNotNone(project)

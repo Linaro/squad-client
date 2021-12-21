@@ -118,7 +118,8 @@ def create_or_update_project(group_slug=None, slug=None, name=None, description=
                              is_public=None, html_mail=None, moderate_notifications=None, is_archived=None,
                              email_template=None, plugins=None, important_metadata_keys=None,
                              wait_before_notification_timeout=None, notification_timeout=None,
-                             data_retention=None, overwrite=False, thresholds=None):
+                             data_retention=None, overwrite=False, thresholds=None,
+                             force_finishing_builds_on_timeout=None):
     errors = []
     group = None
     project = None
@@ -170,6 +171,8 @@ def create_or_update_project(group_slug=None, slug=None, name=None, description=
         project.important_metadata_keys = '\n'.join(important_metadata_keys) if type(important_metadata_keys) == list else important_metadata_keys
     if wait_before_notification_timeout is not None:
         project.wait_before_notification = wait_before_notification_timeout
+    if force_finishing_builds_on_timeout is not None:
+        project.force_finishing_builds_on_timeout = force_finishing_builds_on_timeout
 
     try:
         project.save()
