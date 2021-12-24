@@ -338,7 +338,8 @@ class Project(SquadObject):
     attrs = ['id', 'custom_email_template', 'data_retention_days', 'description',
              'enabled_plugins_list', 'full_name', 'group', 'html_mail', 'important_metadata_keys',
              'is_archived', 'is_public', 'moderate_notifications', 'name', 'notification_timeout',
-             'slug', 'url', 'wait_before_notification', 'force_finishing_builds_on_timeout']
+             'slug', 'url', 'wait_before_notification', 'force_finishing_builds_on_timeout',
+             'build_confidence_count', 'build_confidence_threshold']
 
     def builds(self, count=DEFAULT_COUNT, **filters):
         filters.update({'project': self.id})
