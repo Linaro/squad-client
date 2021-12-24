@@ -64,12 +64,12 @@ class CreateOrUpdateProjectCommand(SquadClientCommand):
         )
         parser.add_argument(
             "--build-confidence-count",
-            help="",
+            help="Number of previous builds to compare to",
             type=int,
         )
         parser.add_argument(
             "--build-confidence-threshold",
-            help="",
+            help="Percentage of previous builds that built successfully",
             type=int,
         )
         parser.add_argument(

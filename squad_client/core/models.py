@@ -401,6 +401,21 @@ class Project(SquadObject):
             # TODO: make enabled_plugins_list optional
             self.enabled_plugins_list = ['linux-log-parser']
 
+    __basic_settings__ = None
+
+    @property
+    def basic_settings(self):
+        if self.__basic_settings__ is None:
+            endpoint = '%s%d/basic_settings' % (self.endpoint, self.id)
+            response = SquadApi.get(endpoint)
+            objects = self.__fill__(ProjectBasicSettings, [response.json()])
+            self.__basic_settings__ = first(objects)
+        return self.__basic_settings__
+
+
+class ProjectBasicSettings(SquadObject):
+    pass
+
 
 class Build(SquadObject):
 
