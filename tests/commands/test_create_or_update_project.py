@@ -22,7 +22,8 @@ class CreateOrUpdateProjectTest(TestCase):
     def manage_create_or_update_project(self, group=None, slug=None, name=None, description=None, settings=None, is_public=None, html_mail=None,
                                         moderate_notifications=None, is_archived=None, email_template=None,
                                         plugins=None, important_metadata_keys=None, wait_before_notification_timeout=None,
-                                        notification_timeout=None, data_retention=None, no_overwrite=False, thresholds=None):
+                                        notification_timeout=None, data_retention=None, no_overwrite=False, thresholds=None,
+                                        build_confidence_count=None, build_confidence_threshold=None):
         argv = ['./manage.py', '--squad-host', self.testing_server, '--squad-token', self.testing_token,
                 'create-or-update-project']
 
@@ -60,6 +61,10 @@ class CreateOrUpdateProjectTest(TestCase):
             argv += ['--no-overwrite']
         if thresholds:
             argv += ['--thresholds'] + thresholds
+        if build_confidence_count:
+            argv += ['--build_confidence_count', str(build_confidence_count)]
+        if build_confidence_threshold:
+            argv += ['build_confidence_threshold', str(build_confidence_threshold)]
 
         proc = sp.Popen(argv, stdout=sp.PIPE, stderr=sp.PIPE)
         proc.ok = False
@@ -111,6 +116,8 @@ class CreateOrUpdateProjectTest(TestCase):
         notification_timeout = 120
         data_retention = 1
         thresholds = ["my-threshold"]
+        build_confidence_count = 25
+        build_confidence_threshold = 95
 
         proc = self.manage_create_or_update_project(
             group=self.group,
@@ -128,6 +135,8 @@ class CreateOrUpdateProjectTest(TestCase):
             notification_timeout=notification_timeout,
             data_retention=data_retention,
             thresholds=thresholds,
+            build_confidence_count=build_confidence_count,
+            build_confidence_threshold=build_confidence_threshold,
         )
         self.assertTrue(proc.ok)
 
@@ -150,3 +159,5 @@ class CreateOrUpdateProjectTest(TestCase):
         self.assertEqual(1, len(project.thresholds().values()))
         threshold = first(project.thresholds())
         self.assertEqual(thresholds[0], threshold.name)
+        self.assertEqual(build_confidence_count, project.build_confidence_count)
+        self.assertEqual(build_confidence_threshold, project.build_confidence_threshold)
