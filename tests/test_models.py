@@ -239,6 +239,13 @@ class ProjectTest(unittest.TestCase):
         project = first(Squad().projects(slug=self.project.slug))
         self.assertTrue(project is not None)
 
+    def test_project_basic_settings(self):
+        self.assertTrue(hasattr(self.project, "basic_settings"))
+        self.assertTrue(self.project.basic_settings is not None)
+        # These are default values from squad
+        self.assertEqual(self.project.basic_settings.build_confidence_count, 20)
+        self.assertEqual(self.project.basic_settings.build_confidence_threshold, 90)
+
 
 class GroupTest(unittest.TestCase):
 

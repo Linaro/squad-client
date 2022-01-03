@@ -134,6 +134,8 @@ class CreateOrUpdateShortcutTest(TestCase):
         self.assertEqual(project1.wait_before_notification, project2.wait_before_notification)
         self.assertEqual(project1.notification_timeout, project2.notification_timeout)
         self.assertEqual(project1.data_retention_days, project2.data_retention_days)
+        self.assertEqual(project1.build_confidence_count, project2.build_confidence_count)
+        self.assertEqual(project1.build_confidence_threshold, project2.build_confidence_threshold)
 
     def test_minimum_parameters(self):
         project_slug = 'project-with-minimum-parameteres'
@@ -168,6 +170,8 @@ class CreateOrUpdateShortcutTest(TestCase):
             notification_timeout=120,
             data_retention=1,
             force_finishing_builds_on_timeout=True,
+            build_confidence_count=25,
+            build_confidence_threshold=95,
         )
 
         self.assertIsNotNone(project)

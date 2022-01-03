@@ -63,6 +63,16 @@ class CreateOrUpdateProjectCommand(SquadClientCommand):
             help="Important metadata keys separated by comma",
         )
         parser.add_argument(
+            "--build-confidence-count",
+            help="Number of previous builds to compare to",
+            type=int,
+        )
+        parser.add_argument(
+            "--build-confidence-threshold",
+            help="Percentage of previous builds that built successfully",
+            type=int,
+        )
+        parser.add_argument(
             "--wait-before-notification-timeout",
             help="Wait this many seconds before sending notifications",
             type=int,
@@ -144,6 +154,8 @@ class CreateOrUpdateProjectCommand(SquadClientCommand):
             force_finishing_builds_on_timeout=force_finishing_builds_on_timeout,
             overwrite=(not args.no_overwrite),
             thresholds=thresholds,
+            build_confidence_count=args.build_confidence_count,
+            build_confidence_threshold=args.build_confidence_threshold,
         )
 
         if project is None:
