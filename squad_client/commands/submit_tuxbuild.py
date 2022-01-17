@@ -42,6 +42,9 @@ tuxbuild_schema = {
             "download_url": {
                 "type": "string",
             },
+            "duration": {
+                "type": "integer",
+            },
             "warnings_count": {
                 "type": "integer",
             },
@@ -59,6 +62,7 @@ tuxbuild_schema = {
 
 ALLOWED_METADATA = [
     "download_url",
+    "duration",
     "git_branch",
     "git_commit",
     "git_describe",
@@ -157,9 +161,11 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             warnings_count = build["warnings_count"]
             test_name = self._get_test_name(kconfig, toolchain)
             test_status = build["build_status"]
+            duration = build["duration"]
 
             tests = {test_name: test_status}
             metrics = {test_name + '-warnings': warnings_count}
+            metrics.update({test_name + '-duration': duration})
 
             submit_results(
                 group_project_slug="%s/%s" % (args.group, args.project),
