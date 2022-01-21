@@ -1,6 +1,22 @@
+# 0.25
+
+This 0.25 release adds support to create build confidence settings
+via the update-or-create-project command. The release also
+starts using "duration" of tuxbuild results.
+
+Complete list of changes going in:
+
+* commands: submit_tuxbuild: enable duration data in ALLOWED_METADATA
+* core:
+  *  fetch the basic settings from squad
+  *  add build confidence settings to the create-or-update-project command
+  *  models: add field for forcing builds finishing on timeout
+* models: add the build confidence project attributes
+* tests: test_submit_tuxbuild: fix tests
+
 # 0.24
 
-This 0.23 release allows squad to fetch and push TestRun
+This 0.24 release allows squad to fetch and push TestRun
 metadata.
 
 Complete list of changes going in:
