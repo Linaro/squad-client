@@ -54,7 +54,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
     def test_submit_tuxbuild_build(self):
         proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/build.json")
         self.assertTrue(proc.ok, msg=proc.err)
-        self.assertTrue(proc.err.count("Submitting 1 tests, 1 metrics") == 3)
+        self.assertTrue(proc.err.count("Submitting 1 tests, 2 metrics") == 3)
         project = self.squad.group("my_group").project("my_project")
 
         # Check results for next-20201021, which has 2 instances in build.json
@@ -148,11 +148,15 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         self.assertEqual("build/gcc-9-defconfig-5b09568e-warnings", metric.name)
         self.assertEqual(2, metric.result)
 
+        metric = first(self.squad.metrics(name="gcc-9-defconfig-5b09568e-duration"))
+        self.assertEqual("build/gcc-9-defconfig-5b09568e-duration", metric.name)
+        self.assertEqual(541, metric.result)
+
     def test_submit_tuxbuild_buildset(self):
         os.environ["KERNEL_BRANCH"] = "master"
         proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/buildset.json")
         self.assertTrue(proc.ok, msg=proc.out)
-        self.assertTrue(proc.err.count("Submitting 1 tests, 1 metrics") == 3)
+        self.assertTrue(proc.err.count("Submitting 1 tests, 2 metrics") == 3)
 
         build = self.squad.group("my_group").project("my_project").build("next-20201030")
 
@@ -213,6 +217,10 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         metric = first(self.squad.metrics(name="gcc-8-x86_64_defconfig-warnings"))
         self.assertEqual("build/gcc-8-x86_64_defconfig-warnings", metric.name)
         self.assertEqual(0, metric.result)
+
+        metric = first(self.squad.metrics(name="gcc-8-x86_64_defconfig-duration"))
+        self.assertEqual("build/gcc-8-x86_64_defconfig-duration", metric.name)
+        self.assertEqual(541, metric.result)
 
     def test_submit_tuxbuild_empty(self):
         proc = self.submit_tuxbuild("")
