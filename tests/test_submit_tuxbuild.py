@@ -85,6 +85,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             'kernel_version': "5.9.0",
             'config': configs,
             'download_url': urls,
+            'duration': 541,
         }
         for expected_key in expected_metadata.keys():
             self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))
@@ -112,6 +113,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             'kernel_version': "5.9.0",
             'config': config,
             'download_url': url,
+            'duration': 541,
         }
         for expected_key in expected_metadata.keys():
             self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))
@@ -170,6 +172,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             'kernel_version': "5.10.0-rc1",
             'config': configs,
             'download_url': urls,
+            'duration': 541,
         }
         for expected_key in expected_metadata.keys():
             self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))
