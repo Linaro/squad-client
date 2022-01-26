@@ -1,5 +1,3 @@
-import hashlib
-import json
 import jsonschema
 import squad_client.tux as sct
 
@@ -76,17 +74,6 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             help="File with tuxbuild results to submit",
         )
 
-    def _get_test_name(self, kconfig, toolchain):
-        if len(kconfig[1:]):
-            kconfig_hash = "%s-%s" % (
-                kconfig[0],
-                hashlib.sha1(json.dumps(kconfig[1:]).encode()).hexdigest()[0:8],
-            )
-        else:
-            kconfig_hash = kconfig[0]
-
-        return "build/%s-%s" % (toolchain, kconfig_hash)
-
     def run(self, args):
         builds = sct.load_builds(args.tuxbuild)
 
@@ -103,12 +90,14 @@ class SubmitTuxbuildCommand(SquadClientCommand):
         for build in builds:
             arch = build["target_arch"]
             description = build["git_describe"]
-            kconfig = build["kconfig"]
-            toolchain = build["toolchain"]
             warnings_count = build["warnings_count"]
-            test_name = self._get_test_name(kconfig, toolchain)
-            test_status = build["build_status"]
             duration = build["duration"]
+
+            test_status = build["build_status"]
+            if len(builds) > 1:
+                test_name = sct.buildset_test_name(build)
+            else:
+                test_name = sct.build_test_name(build)
 
             tests = {test_name: test_status}
             metrics = {test_name + '-warnings': warnings_count}
