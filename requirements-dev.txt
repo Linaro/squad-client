@@ -2,3 +2,4 @@
 squad
 coverage
 flake8
+responses

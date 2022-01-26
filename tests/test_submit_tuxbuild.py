@@ -1,4 +1,5 @@
 import unittest
+import unittest.mock
 import subprocess as sp
 import os
 
@@ -152,8 +153,8 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         self.assertEqual("build/gcc-9-defconfig-5b09568e-duration", metric.name)
         self.assertEqual(541, metric.result)
 
+    @unittest.mock.patch.dict(os.environ, {"KERNEL_BRANCH": "master"})
     def test_submit_tuxbuild_buildset(self):
-        os.environ["KERNEL_BRANCH"] = "master"
         proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/buildset.json")
         self.assertTrue(proc.ok, msg=proc.out)
         self.assertTrue(proc.err.count("Submitting 1 tests, 2 metrics") == 3)
