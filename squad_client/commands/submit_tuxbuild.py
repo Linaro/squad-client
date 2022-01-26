@@ -2,6 +2,7 @@ import hashlib
 import json
 import jsonschema
 import os
+import squad_client.tux as sct
 
 from urllib import parse as urlparse
 
@@ -115,20 +116,6 @@ class SubmitTuxbuildCommand(SquadClientCommand):
 
         return metadata
 
-    def _load_builds(self, path):
-        builds = None
-        try:
-            with open(path) as f:
-                builds = json.load(f)
-
-        except json.JSONDecodeError as jde:
-            logger.error("Failed to load json: %s", jde)
-
-        except OSError as ose:
-            logger.error("Failed to open file: %s", ose)
-
-        return builds
-
     def _get_test_name(self, kconfig, toolchain):
         if len(kconfig[1:]):
             kconfig_hash = "%s-%s" % (
@@ -141,7 +128,7 @@ class SubmitTuxbuildCommand(SquadClientCommand):
         return "build/%s-%s" % (toolchain, kconfig_hash)
 
     def run(self, args):
-        builds = self._load_builds(args.tuxbuild)
+        builds = sct.load_builds(args.tuxbuild)
 
         # log
         if builds is None:
