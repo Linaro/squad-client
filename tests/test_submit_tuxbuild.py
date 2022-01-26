@@ -1,7 +1,9 @@
+import os
+import subprocess as sp
 import unittest
 import unittest.mock
-import subprocess as sp
-import os
+
+import squad_client.tux as sct
 
 from . import settings
 from squad_client.core.api import SquadApi
@@ -17,6 +19,15 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
     def setUp(self):
         self.squad = Squad()
         SquadApi.configure(url=self.testing_server, token=self.testing_token)
+
+        self.root_dir = os.path.join("tests", "data", "tux")
+        self.assertTrue(os.path.exists(self.root_dir))
+
+        self.build_dir = os.path.join(self.root_dir, "build-x86-gcc")
+        self.assertTrue(os.path.exists(self.build_dir))
+
+        self.buildset_dir = os.path.join(self.root_dir, "buildset-x86")
+        self.assertTrue(os.path.exists(self.buildset_dir))
 
     def submit_tuxbuild(self, tuxbuild):
         argv = [
@@ -52,13 +63,22 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         proc.err = err.decode("utf-8")
         return proc
 
+    @unittest.mock.patch.dict(os.environ, {"KERNEL_BRANCH": "master"})
     def test_submit_tuxbuild_build(self):
-        proc = self.submit_tuxbuild("tests/data/tux/build-x86-gcc/build.json")
+        proc = self.submit_tuxbuild(os.path.join(self.build_dir, "build.json"))
         self.assertTrue(proc.ok, msg=proc.err)
         self.assertTrue(proc.err.count("Submitting 1 tests, 2 metrics") == 1)
         project = self.squad.group("my_group").project("my_project")
 
         build = project.build("next-20211224")
+        self.assertIsNotNone(build)
+
+        testrun = first(build.testruns())
+        self.assertIsNotNone(testrun)
+
+        # Make sure there's no extra attributes in the testrun metadata object
+        # all objects fetched from squad have an id attribute, but the metadata does not use it
+        self.assertEqual(sorted(testrun.metadata.__dict__.keys()), sorted(["id"] + sct.ALLOWED_METADATA))
 
         base_kconfig = [
             'defconfig',
@@ -72,7 +92,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         # Make sure metadata values match expected values
         expected_metadata = {
             'git_repo': "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
-            'git_ref': None,
+            'git_ref': os.environ.get("KERNEL_BRANCH"),
             'git_commit': "ea586a076e8aa606c59b66d86660590f18354b11",
             'git_sha': "ea586a076e8aa606c59b66d86660590f18354b11",
             'git_short_log': "ea586a076e8a (\"Add linux-next specific files for 20211224\")",
@@ -85,18 +105,15 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             'download_url': "https://builds.tuxbuild.com/22j6EntJ5Zvge15BqZdxWSJllti/",
             'duration': 273,
         }
-        for expected_key in expected_metadata.keys():
-            self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key), msg=expected_key)
 
-        # Make sure there's no extra attributes in the metadata object
-        metadata_attrs = build.metadata.__dict__
-        del metadata_attrs["id"]
-        self.assertEqual(sorted(expected_metadata.keys()), sorted(metadata_attrs.keys()))
+        for k in sct.ALLOWED_METADATA:
+            self.assertTrue(getattr(testrun.metadata, k), msg=k)
+            self.assertEqual(getattr(testrun.metadata, k), expected_metadata[k], msg=k)
 
-        environment = self.squad.group("my_group").project("my_project").environment("x86_64")
+        environment = project.environment("x86_64")
         self.assertIsNotNone(environment)
 
-        suite = self.squad.group("my_group").project("my_project").suite("build")
+        suite = project.suite("build")
         self.assertIsNotNone(suite)
 
         test = first(self.squad.tests(name="build-x86-gcc-defconfig-1f07a874"))
@@ -113,43 +130,64 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
 
     @unittest.mock.patch.dict(os.environ, {"KERNEL_BRANCH": "master"})
     def test_submit_tuxbuild_buildset(self):
-        proc = self.submit_tuxbuild("tests/data/tux/buildset-x86/build.json")
+        proc = self.submit_tuxbuild(os.path.join(self.buildset_dir, "build.json"))
         self.assertTrue(proc.ok, msg=proc.out)
         self.assertTrue(proc.err.count("Submitting 1 tests, 2 metrics") == 3)
+        project = self.squad.group("my_group").project("my_project")
 
-        build = self.squad.group("my_group").project("my_project").build("next-20211225")
+        build = project.build("next-20211225")
+        self.assertIsNotNone(build)
 
-        # Make sure metadata values match expected values
-        urls = ['https://builds.tuxbuild.com/%s/' % _id for _id in ['22j6CiFwHyguAAMiJCFbJOr9KRw', '22j6CjIqvbdDMVUVrumx3inbHFX', '22j6ClgZS7KogYSjiW86y3djh1q']]
-        configs = [url + "config" for url in urls]
-        expected_metadata = {
+        testruns = build.testruns()
+        self.assertIsNotNone(testruns)
+
+        base_metadata = {
             'git_repo': "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
             'git_ref': os.environ.get("KERNEL_BRANCH"),
             'git_commit': "ea586a076e8aa606c59b66d86660590f18354b11",
             'git_sha': "ea586a076e8aa606c59b66d86660590f18354b11",
             'git_short_log': "ea586a076e8a (\"Add linux-next specific files for 20211225\")",
             'git_describe': "next-20211225",
-            'kconfig': [['allnoconfig'], ['tinyconfig'], ['x86_64_defconfig']],
             'git_branch': os.environ.get("KERNEL_BRANCH"),
             'make_kernelversion': "5.16.0-rc6",
             'kernel_version': "5.16.0-rc6",
-            'config': configs,
-            'download_url': urls,
-            'duration': [121, 125, 347],
         }
 
-        for expected_key in expected_metadata.keys():
-            self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key), msg=expected_key)
+        expected_metadata = [
+            dict(base_metadata, **{
+                "config": "https://builds.tuxbuild.com/22j6CjIqvbdDMVUVrumx3inbHFX/config",
+                "download_url": "https://builds.tuxbuild.com/22j6CjIqvbdDMVUVrumx3inbHFX/",
+                "duration": 121,
+                "kconfig": ["allnoconfig"],
+            }),
+            dict(base_metadata, **{
+                "config": "https://builds.tuxbuild.com/22j6CiFwHyguAAMiJCFbJOr9KRw/config",
+                "download_url": "https://builds.tuxbuild.com/22j6CiFwHyguAAMiJCFbJOr9KRw/",
+                "duration": 125,
+                "kconfig": ["tinyconfig"],
+            }),
+            dict(base_metadata, **{
+                "config": "https://builds.tuxbuild.com/22j6ClgZS7KogYSjiW86y3djh1q/config",
+                "download_url": "https://builds.tuxbuild.com/22j6ClgZS7KogYSjiW86y3djh1q/",
+                "duration": 347,
+                "kconfig": ["x86_64_defconfig"],
+            }),
+        ]
 
-        # Make sure there's no extra attributes in the metadata object
-        metadata_attrs = build.metadata.__dict__
-        del metadata_attrs["id"]
-        self.assertEqual(sorted(expected_metadata.keys()), sorted(metadata_attrs.keys()))
+        for tr in testruns.values():
+            # Make sure there's no extra attributes in the metadata object
+            # all objects fetched from squad have an id attribute, but the metadata does not use it
+            self.assertEqual(sorted(tr.metadata.__dict__.keys()), sorted(["id"] + sct.ALLOWED_METADATA))
 
-        environment = self.squad.group("my_group").project("my_project").environment("x86_64")
+            metadata = expected_metadata.pop(0)
+            for k in sct.ALLOWED_METADATA:
+                self.assertTrue(getattr(tr.metadata, k), msg=k)
+                self.assertEqual(getattr(tr.metadata, k), metadata[k])
+
+        environment = project.environment("x86_64")
         self.assertIsNotNone(environment)
 
-        suite = self.squad.group("my_group").project("my_project").suite("build")
+        suite = project.suite("build")
         self.assertIsNotNone(suite)
 
         test = first(self.squad.tests(name="buildset-x86-x86_64-gcc-8-allnoconfig"))

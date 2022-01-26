@@ -88,25 +88,19 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             return False
 
         for build in builds:
-            arch = build["target_arch"]
-            description = build["git_describe"]
-            warnings_count = build["warnings_count"]
-            duration = build["duration"]
-
-            test_status = build["build_status"]
             if len(builds) > 1:
                 test_name = sct.buildset_test_name(build)
             else:
                 test_name = sct.build_test_name(build)
 
-            tests = {test_name: test_status}
-            metrics = {test_name + '-warnings': warnings_count}
-            metrics.update({test_name + '-duration': duration})
+            tests = {test_name: build["build_status"]}
+            metrics = {test_name + '-warnings': build["warnings_count"]}
+            metrics.update({test_name + '-duration': build["duration"]})
 
             submit_results(
                 group_project_slug="%s/%s" % (args.group, args.project),
-                build_version=description,
-                env_slug=arch,
+                build_version=build["git_describe"],
+                env_slug=build["target_arch"],
                 tests=tests,
                 metrics=metrics,
                 metadata=sct.build_metadata(build),
