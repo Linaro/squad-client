@@ -1,10 +1,7 @@
 import hashlib
 import json
 import jsonschema
-import os
 import squad_client.tux as sct
-
-from urllib import parse as urlparse
 
 from squad_client import logging
 from squad_client.shortcuts import submit_results
@@ -61,21 +58,6 @@ tuxbuild_schema = {
     }],
 }
 
-ALLOWED_METADATA = [
-    "download_url",
-    "duration",
-    "git_branch",
-    "git_commit",
-    "git_describe",
-    "git_ref",
-    "git_repo",
-    "git_sha",
-    "git_short_log",
-    "kconfig",
-    "kernel_version",
-    "make_kernelversion",
-]
-
 
 class SubmitTuxbuildCommand(SquadClientCommand):
     command = "submit-tuxbuild"
@@ -93,28 +75,6 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             "tuxbuild",
             help="File with tuxbuild results to submit",
         )
-
-    def _build_metadata(self, build):
-        metadata = {k: v for k, v in build.items() if k in ALLOWED_METADATA}
-
-        # We expect git_commit, but tuxmake calls it git_sha
-        metadata.update({"git_commit": metadata.get("git_sha")})
-
-        # We expect `git_branch`, but tuxmake calls it `git_ref`
-        # `git_ref` will sometimes be null
-        metadata.update({"git_branch": metadata.get("git_ref")})
-
-        # If `git_ref` is null, use `KERNEL_BRANCH` from the CI environment
-        if metadata.get("git_branch") is None:
-            metadata.update({"git_branch": os.getenv("KERNEL_BRANCH")})
-
-        # We expect `make_kernelversion`, but tuxmake calls it `kernel_version`
-        metadata.update({"make_kernelversion": metadata.get("kernel_version")})
-
-        # add config file to the metadata
-        metadata["config"] = urlparse.urljoin(metadata.get('download_url'), "config")
-
-        return metadata
 
     def _get_test_name(self, kconfig, toolchain):
         if len(kconfig[1:]):
@@ -160,7 +120,7 @@ class SubmitTuxbuildCommand(SquadClientCommand):
                 env_slug=arch,
                 tests=tests,
                 metrics=metrics,
-                metadata=self._build_metadata(build)
+                metadata=sct.build_metadata(build),
             )
 
         return True

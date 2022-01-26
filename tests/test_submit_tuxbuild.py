@@ -166,7 +166,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         configs = [url + "config" for url in urls]
         expected_metadata = {
             'git_repo': "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
-            'git_ref': None,
+            'git_ref': os.environ.get("KERNEL_BRANCH"),
             'git_commit': "4e78c578cb987725eef1cec7d11b6437109e9a49",
             'git_sha': "4e78c578cb987725eef1cec7d11b6437109e9a49",
             'git_short_log': '4e78c578cb98 ("Add linux-next specific files for 20201030")',
@@ -180,7 +180,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             'duration': 541,
         }
         for expected_key in expected_metadata.keys():
-            self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))
+            self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key), msg=expected_key)
 
         # Make sure there's no extra attributes in the metadata object
         metadata_attrs = build.metadata.__dict__
