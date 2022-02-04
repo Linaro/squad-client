@@ -84,6 +84,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             'download_url': urls,
             'duration': 541,
             'toolchain': 'gcc-9',
+            'build_name': "gcc-9-lkftconfig",
         }
         for expected_key in expected_metadata.keys():
             self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))
@@ -110,6 +111,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             'download_url': url,
             'duration': 541,
             'toolchain': 'gcc-9',
+            'build_name': "gcc-9-lkftconfig",
         }
         for expected_key in expected_metadata.keys():
             self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))

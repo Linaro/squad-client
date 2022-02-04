@@ -50,6 +50,7 @@ tuxbuild_schema = {
             },
         },
         "required": [
+            "build_name",
             "download_url",
             "build_status",
             "git_describe",
@@ -61,6 +62,7 @@ tuxbuild_schema = {
 }
 
 ALLOWED_METADATA = [
+    "build_name",
     "download_url",
     "duration",
     "git_describe",
@@ -117,8 +119,10 @@ class SubmitTuxbuildCommand(SquadClientCommand):
 
         return builds
 
-    def _get_test_name(self, kconfig, toolchain):
-        if len(kconfig[1:]):
+    def _get_test_name(self, kconfig, toolchain, build_name):
+        if build_name:
+            kconfig_hash = build_name
+        elif len(kconfig[1:]):
             kconfig_hash = "%s-%s" % (
                 kconfig[0],
                 hashlib.sha1(json.dumps(kconfig[1:]).encode()).hexdigest()[0:8],
@@ -146,8 +150,9 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             description = build["git_describe"]
             kconfig = build["kconfig"]
             toolchain = build["toolchain"]
+            build_name = build["build_name"]
             warnings_count = build["warnings_count"]
-            test_name = self._get_test_name(kconfig, toolchain)
+            test_name = self._get_test_name(kconfig, toolchain, build_name)
             test_status = build["build_status"]
             duration = build["duration"]
 
