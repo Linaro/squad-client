@@ -2,10 +2,12 @@ import hashlib
 import json
 import jsonschema
 import os
+import urllib
 
 from urllib import parse as urlparse
 
 from squad_client import logging
+from squad_client.exceptions import InvalidBuildJson
 from squad_client.shortcuts import submit_results
 from squad_client.core.command import SquadClientCommand
 
@@ -60,7 +62,46 @@ tuxbuild_schema = {
     }],
 }
 
+
+def load_builds(build_json):
+    try:
+        with open(build_json) as f:
+            return json.load(f)
+    except json.JSONDecodeError as jde:
+        raise InvalidBuildJson(f"Invalid build json: {jde}")
+
+
+def create_name(build):
+    suite = "build/"
+    name = ""
+
+    if build["build_name"]:
+        name = build["build_name"]
+    else:
+        name += "%s-%s-%s" % (
+            build["target_arch"],
+            build["toolchain"],
+            build["kconfig"][0],
+        )
+
+        if len(build["kconfig"]) > 1:
+            name += "-" + create_sha(build)
+
+    return suite + name
+
+
+def create_sha(build):
+    sha = hashlib.sha1()
+
+    # log?
+    for k in build["kconfig"][1:]:
+        sha.update(f"{k}".encode())
+
+    return sha.hexdigest()[0:8]
+
+
 ALLOWED_METADATA = [
+    "config",
     "download_url",
     "duration",
     "git_describe",
@@ -72,6 +113,29 @@ ALLOWED_METADATA = [
     "kernel_version",
     "toolchain",
 ]
+
+
+def create_metadata(build):
+    metadata = {k: v for k, v in build.items() if k in ALLOWED_METADATA}
+
+    # We expect git_commit, but tuxmake calls it git_sha
+    metadata.update({"git_commit": metadata.get("git_sha")})
+
+    # If `git_ref` is null, use `KERNEL_BRANCH` from the CI environment
+    # TODO: Default?
+    if metadata.get("git_ref") is None:
+        metadata.update({"git_ref": os.getenv("KERNEL_BRANCH")})
+
+    # We expect `git_branch`, but tuxmake calls it `git_ref`
+    metadata.update({"git_branch": metadata.get("git_ref")})
+
+    # We expect `make_kernelversion`, but tuxmake calls it `kernel_version`
+    metadata.update({"make_kernelversion": metadata.get("kernel_version")})
+
+    # add config file to the metadata
+    metadata["config"] = urllib.parse.urljoin(metadata.get('download_url'), "config")
+
+    return metadata
 
 
 class SubmitTuxbuildCommand(SquadClientCommand):

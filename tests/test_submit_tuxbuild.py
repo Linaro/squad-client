@@ -1,14 +1,95 @@
 import unittest
+import unittest.mock
 import subprocess as sp
 import os
 
 from . import settings
+from squad_client.commands.submit_tuxbuild import ALLOWED_METADATA, load_builds, create_name, create_metadata
 from squad_client.core.api import SquadApi
 from squad_client.core.models import Squad
+from squad_client.exceptions import InvalidBuildJson
 from squad_client.utils import first
 
 
 class SubmitTuxbuildCommandTest(unittest.TestCase):
+
+    def setUp(self):
+        self.root_dir = os.path.join("tests", "data", "submit_tuxbuild")
+        self.assertTrue(os.path.exists(self.root_dir))
+
+        self.build_dir = os.path.join(self.root_dir, "build-x86-gcc")
+        self.assertTrue(os.path.exists(self.build_dir))
+
+        self.buildset_dir = os.path.join(self.root_dir, "buildset-x86")
+        self.assertTrue(os.path.exists(self.buildset_dir))
+
+    def test_load_builds_with_build(self):
+        builds = load_builds(os.path.join(self.build_dir, "build.json"))
+        self.assertEqual(len(builds), 1)
+
+    def test_load_builds_with_buildset(self):
+        builds = load_builds(os.path.join(self.buildset_dir, "build.json"))
+        self.assertEqual(len(builds), 3)
+
+    def test_load_builds_missing_json(self):
+        with self.assertRaises(FileNotFoundError):
+            load_builds(os.path.join(self.root_dir, "missing.json"))
+
+    def test_load_builds_empty_json(self):
+        with self.assertRaises(InvalidBuildJson):
+            load_builds(os.path.join(self.root_dir, "empty.json"))
+
+    def test_create_name_with_build(self):
+        build = load_builds(os.path.join(self.build_dir, "build.json")).pop()
+        self.assertEqual(create_name(build), "build/lkft-build-x86-gcc")
+
+    def test_create_name_with_buildset(self):
+        builds = load_builds(os.path.join(self.buildset_dir, "build.json"))
+
+        tests = [
+            "build/x86_64-gcc-8-allnoconfig",
+            "build/x86_64-gcc-8-tinyconfig",
+            "build/x86_64-gcc-8-x86_64_defconfig",
+        ]
+
+        self.assertEqual([create_name(build) for build in builds], tests)
+
+    @unittest.mock.patch.dict(os.environ, {"KERNEL_BRANCH": "master"})
+    def check_metadata(self, build):
+        metadata = create_metadata(build)
+
+        self.assertEqual(sorted(metadata.keys()), ALLOWED_METADATA)
+
+        for key in metadata:
+            self.assertTrue(metadata[key], msg=key)
+
+            if key == "config":
+                self.assertTrue(metadata["config"].startswith(build["download_url"]))
+                self.assertTrue(metadata["config"].endswith("config"))
+            elif key == "git_branch":
+                self.assertEqual(metadata["git_branch"], os.environ["KERNEL_BRANCH"])
+            elif key == "git_commit":
+                self.assertEqual(metadata["git_commit"], build["git_sha"])
+            elif key == "git_ref":
+                self.assertEqual(metadata["git_ref"], os.environ["KERNEL_BRANCH"])
+            elif key == "make_kernelversion":
+                self.assertEqual(metadata["make_kernelversion"], build["kernel_version"])
+            else:
+                self.assertEqual(metadata[key], build[key], msg=key)
+
+    def test_create_metadata_with_build(self):
+        build = load_builds(os.path.join(self.build_dir, "build.json")).pop()
+
+        self.check_metadata(build)
+
+    def test_create_metadata_with_buildset(self):
+        builds = load_builds(os.path.join(self.buildset_dir, "build.json"))
+
+        for build in builds:
+            self.check_metadata(build)
+
+
+class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
 
     testing_server = "http://localhost:%s" % settings.DEFAULT_SQUAD_PORT
     testing_token = "193cd8bb41ab9217714515954e8724f651ef8601"
