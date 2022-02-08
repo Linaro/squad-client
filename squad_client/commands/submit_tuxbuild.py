@@ -4,8 +4,6 @@ import jsonschema
 import os
 import urllib
 
-from urllib import parse as urlparse
-
 from squad_client import logging
 from squad_client.exceptions import InvalidBuildJson
 from squad_client.shortcuts import submit_results
@@ -118,19 +116,9 @@ ALLOWED_METADATA = [
 def create_metadata(build):
     metadata = {k: v for k, v in build.items() if k in ALLOWED_METADATA}
 
-    # We expect git_commit, but tuxmake calls it git_sha
-    metadata.update({"git_commit": metadata.get("git_sha")})
-
     # If `git_ref` is null, use `KERNEL_BRANCH` from the CI environment
-    # TODO: Default?
     if metadata.get("git_ref") is None:
         metadata.update({"git_ref": os.getenv("KERNEL_BRANCH")})
-
-    # We expect `git_branch`, but tuxmake calls it `git_ref`
-    metadata.update({"git_branch": metadata.get("git_ref")})
-
-    # We expect `make_kernelversion`, but tuxmake calls it `kernel_version`
-    metadata.update({"make_kernelversion": metadata.get("kernel_version")})
 
     # add config file to the metadata
     metadata["config"] = urllib.parse.urljoin(metadata.get('download_url'), "config")
@@ -155,48 +143,14 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             help="File with tuxbuild results to submit",
         )
 
-    def _build_metadata(self, build):
-        metadata = {k: v for k, v in build.items() if k in ALLOWED_METADATA}
-
-        # If `git_ref` is null, use `KERNEL_BRANCH` from the CI environment
-        if metadata.get("git_ref") is None:
-            metadata.update({"git_ref": os.getenv("KERNEL_BRANCH")})
-
-        # add config file to the metadata
-        metadata["config"] = urlparse.urljoin(metadata.get('download_url'), "config")
-
-        return metadata
-
-    def _load_builds(self, path):
-        builds = None
-        try:
-            with open(path) as f:
-                builds = json.load(f)
-
-        except json.JSONDecodeError as jde:
-            logger.error("Failed to load json: %s", jde)
-
-        except OSError as ose:
-            logger.error("Failed to open file: %s", ose)
-
-        return builds
-
-    def _get_test_name(self, kconfig, toolchain):
-        if len(kconfig[1:]):
-            kconfig_hash = "%s-%s" % (
-                kconfig[0],
-                hashlib.sha1(json.dumps(kconfig[1:]).encode()).hexdigest()[0:8],
-            )
-        else:
-            kconfig_hash = kconfig[0]
-
-        return "build/%s-%s" % (toolchain, kconfig_hash)
-
     def run(self, args):
-        builds = self._load_builds(args.tuxbuild)
-
-        # log
-        if builds is None:
+        try:
+            builds = load_builds(args.tuxbuild)
+        except InvalidBuildJson as ibj:
+            logger.error("Failed to load build json: %s", ibj)
+            return False
+        except OSError as ose:
+            logger.error("Failed to load build json: %s", ose)
             return False
 
         try:
@@ -208,10 +162,8 @@ class SubmitTuxbuildCommand(SquadClientCommand):
         for build in builds:
             arch = build["target_arch"]
             description = build["git_describe"]
-            kconfig = build["kconfig"]
-            toolchain = build["toolchain"]
             warnings_count = build["warnings_count"]
-            test_name = self._get_test_name(kconfig, toolchain)
+            test_name = create_name(build)
             test_status = build["build_status"]
             duration = build["duration"]
 
@@ -225,7 +177,7 @@ class SubmitTuxbuildCommand(SquadClientCommand):
                 env_slug=arch,
                 tests=tests,
                 metrics=metrics,
-                metadata=self._build_metadata(build)
+                metadata=create_metadata(build),
             )
 
         return True

@@ -169,7 +169,7 @@ class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
 
         expected_metadata = {
             "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
-            "git_ref": None,
+            "git_ref": os.environ.get("KERNEL_BRANCH"),
             "git_commit": "ea586a076e8aa606c59b66d86660590f18354b11",
             "git_sha": "ea586a076e8aa606c59b66d86660590f18354b11",
             "git_short_log": "ea586a076e8a (\"Add linux-next specific files for 20211224\")",
@@ -193,16 +193,16 @@ class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
         suite = project.suite("build")
         self.assertIsNotNone(suite)
 
-        test = first(self.squad.tests(name="gcc-11-defconfig-ec3ad359"))
-        self.assertEqual("build/gcc-11-defconfig-ec3ad359", test.name)
+        test = first(self.squad.tests(name="lkft-build-x86-gcc"))
+        self.assertEqual("build/lkft-build-x86-gcc", test.name)
         self.assertEqual("pass", test.status)
 
-        metric = first(self.squad.metrics(name="gcc-11-defconfig-ec3ad359-warnings"))
-        self.assertEqual("build/gcc-11-defconfig-ec3ad359-warnings", metric.name)
+        metric = first(self.squad.metrics(name="lkft-build-x86-gcc-warnings"))
+        self.assertEqual("build/lkft-build-x86-gcc-warnings", metric.name)
         self.assertEqual(1, metric.result)
 
-        metric = first(self.squad.metrics(name="gcc-11-defconfig-ec3ad359-duration"))
-        self.assertEqual("build/gcc-11-defconfig-ec3ad359-duration", metric.name)
+        metric = first(self.squad.metrics(name="lkft-build-x86-gcc-duration"))
+        self.assertEqual("build/lkft-build-x86-gcc-duration", metric.name)
         self.assertEqual(273, metric.result)
 
     @unittest.mock.patch.dict(os.environ, {"KERNEL_BRANCH": "master"})
@@ -220,7 +220,7 @@ class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
 
         base_metadata = {
             "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
-            "git_ref": None,
+            "git_ref": os.environ.get("KERNEL_BRANCH"),
             "git_commit": "ea586a076e8aa606c59b66d86660590f18354b11",
             "git_sha": "ea586a076e8aa606c59b66d86660590f18354b11",
             "git_short_log": "ea586a076e8a (\"Add linux-next specific files for 20211225\")",
@@ -267,46 +267,46 @@ class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
         suite = project.suite("build")
         self.assertIsNotNone(suite)
 
-        test = first(self.squad.tests(name="gcc-8-allnoconfig"))
-        self.assertEqual("build/gcc-8-allnoconfig", test.name)
+        test = first(self.squad.tests(name="x86_64-gcc-8-allnoconfig"))
+        self.assertEqual("build/x86_64-gcc-8-allnoconfig", test.name)
         self.assertEqual("pass", test.status)
 
-        test = first(self.squad.tests(name="gcc-8-tinyconfig"))
-        self.assertEqual("build/gcc-8-tinyconfig", test.name)
+        test = first(self.squad.tests(name="x86_64-gcc-8-tinyconfig"))
+        self.assertEqual("build/x86_64-gcc-8-tinyconfig", test.name)
         self.assertEqual("pass", test.status)
 
-        test = first(self.squad.tests(name="gcc-8-x86_64_defconfig"))
-        self.assertEqual("build/gcc-8-x86_64_defconfig", test.name)
+        test = first(self.squad.tests(name="x86_64-gcc-8-x86_64_defconfig"))
+        self.assertEqual("build/x86_64-gcc-8-x86_64_defconfig", test.name)
         self.assertEqual("pass", test.status)
 
-        metric = first(self.squad.metrics(name="gcc-8-allnoconfig-warnings"))
-        self.assertEqual("build/gcc-8-allnoconfig-warnings", metric.name)
+        metric = first(self.squad.metrics(name="x86_64-gcc-8-allnoconfig-warnings"))
+        self.assertEqual("build/x86_64-gcc-8-allnoconfig-warnings", metric.name)
         self.assertEqual(0, metric.result)
 
-        metric = first(self.squad.metrics(name="gcc-8-tinyconfig-warnings"))
-        self.assertEqual("build/gcc-8-tinyconfig-warnings", metric.name)
+        metric = first(self.squad.metrics(name="x86_64-gcc-8-tinyconfig-warnings"))
+        self.assertEqual("build/x86_64-gcc-8-tinyconfig-warnings", metric.name)
         self.assertEqual(1, metric.result)
 
-        metric = first(self.squad.metrics(name="gcc-8-x86_64_defconfig-warnings"))
-        self.assertEqual("build/gcc-8-x86_64_defconfig-warnings", metric.name)
+        metric = first(self.squad.metrics(name="x86_64-gcc-8-x86_64_defconfig-warnings"))
+        self.assertEqual("build/x86_64-gcc-8-x86_64_defconfig-warnings", metric.name)
         self.assertEqual(0, metric.result)
 
-        metric = first(self.squad.metrics(name="gcc-8-allnoconfig-duration"))
-        self.assertEqual("build/gcc-8-allnoconfig-duration", metric.name)
+        metric = first(self.squad.metrics(name="x86_64-gcc-8-allnoconfig-duration"))
+        self.assertEqual("build/x86_64-gcc-8-allnoconfig-duration", metric.name)
         self.assertEqual(121, metric.result)
 
-        metric = first(self.squad.metrics(name="gcc-8-tinyconfig-duration"))
-        self.assertEqual("build/gcc-8-tinyconfig-duration", metric.name)
+        metric = first(self.squad.metrics(name="x86_64-gcc-8-tinyconfig-duration"))
+        self.assertEqual("build/x86_64-gcc-8-tinyconfig-duration", metric.name)
         self.assertEqual(125, metric.result)
 
-        metric = first(self.squad.metrics(name="gcc-8-x86_64_defconfig-duration"))
-        self.assertEqual("build/gcc-8-x86_64_defconfig-duration", metric.name)
+        metric = first(self.squad.metrics(name="x86_64-gcc-8-x86_64_defconfig-duration"))
+        self.assertEqual("build/x86_64-gcc-8-x86_64_defconfig-duration", metric.name)
         self.assertEqual(347, metric.result)
 
     def test_submit_tuxbuild_empty(self):
         proc = self.submit_tuxbuild(os.path.join(self.root_dir, "empty.json"))
         self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn("Failed to load json", proc.err)
+        self.assertIn("Invalid build json", proc.err)
 
     def test_submit_tuxbuild_missing(self):
         proc = self.submit_tuxbuild(os.path.join(self.root_dir, "missing.json"))
