@@ -98,6 +98,15 @@ class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
         self.squad = Squad()
         SquadApi.configure(url=self.testing_server, token=self.testing_token)
 
+        self.root_dir = os.path.join("tests", "data", "submit_tuxbuild")
+        self.assertTrue(os.path.exists(self.root_dir))
+
+        self.build_dir = os.path.join(self.root_dir, "build-x86-gcc")
+        self.assertTrue(os.path.exists(self.build_dir))
+
+        self.buildset_dir = os.path.join(self.root_dir, "buildset-x86")
+        self.assertTrue(os.path.exists(self.buildset_dir))
+
     def submit_tuxbuild(self, tuxbuild):
         argv = [
             "./manage.py",
@@ -132,141 +141,130 @@ class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
         proc.err = err.decode("utf-8")
         return proc
 
+    @unittest.mock.patch.dict(os.environ, {"KERNEL_BRANCH": "master"})
     def test_submit_tuxbuild_build(self):
-        proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/build.json")
+        proc = self.submit_tuxbuild(os.path.join(self.build_dir, "build.json"))
         self.assertTrue(proc.ok, msg=proc.err)
+        self.assertTrue(proc.err.count("Submitting 1 tests, 2 metrics") == 1)
+        project = self.squad.group("my_group").project("my_project")
+
+        build = project.build("next-20211224")
+        self.assertIsNotNone(build)
+
+        testrun = first(build.testruns())
+        self.assertIsNotNone(testrun)
+
+        # Make sure there's no extra attributes in the testrun metadata object
+        # all objects fetched from squad have an id attribute, but the metadata does not use it
+        self.assertEqual(sorted(testrun.metadata.__dict__.keys()), sorted(["id"] + ALLOWED_METADATA))
+
+        base_kconfig = [
+            "defconfig",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/lkft.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/lkft-crypto.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/distro-overrides.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/systemd.config",
+            "https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/virtio.config",
+        ]
+
+        expected_metadata = {
+            "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
+            "git_ref": None,
+            "git_commit": "ea586a076e8aa606c59b66d86660590f18354b11",
+            "git_sha": "ea586a076e8aa606c59b66d86660590f18354b11",
+            "git_short_log": "ea586a076e8a (\"Add linux-next specific files for 20211224\")",
+            "git_describe": "next-20211224",
+            "kconfig": base_kconfig + ["CONFIG_IGB=y", "CONFIG_UNWINDER_FRAME_POINTER=y", "CONFIG_SYN_COOKIES=y"],
+            "git_branch": os.environ.get("KERNEL_BRANCH"),
+            "make_kernelversion": "5.16.0-rc6",
+            "kernel_version": "5.16.0-rc6",
+            "config": "https://builds.tuxbuild.com/22j6EntJ5Zvge15BqZdxWSJllti/config",
+            "download_url": "https://builds.tuxbuild.com/22j6EntJ5Zvge15BqZdxWSJllti/",
+            "duration": 273,
+            "toolchain": "gcc-11"
+        }
+
+        for k in ALLOWED_METADATA:
+            self.assertEqual(getattr(testrun.metadata, k), expected_metadata[k], msg=k)
+
+        environment = project.environment("x86_64")
+        self.assertIsNotNone(environment)
+
+        suite = project.suite("build")
+        self.assertIsNotNone(suite)
+
+        test = first(self.squad.tests(name="gcc-11-defconfig-ec3ad359"))
+        self.assertEqual("build/gcc-11-defconfig-ec3ad359", test.name)
+        self.assertEqual("pass", test.status)
+
+        metric = first(self.squad.metrics(name="gcc-11-defconfig-ec3ad359-warnings"))
+        self.assertEqual("build/gcc-11-defconfig-ec3ad359-warnings", metric.name)
+        self.assertEqual(1, metric.result)
+
+        metric = first(self.squad.metrics(name="gcc-11-defconfig-ec3ad359-duration"))
+        self.assertEqual("build/gcc-11-defconfig-ec3ad359-duration", metric.name)
+        self.assertEqual(273, metric.result)
+
+    @unittest.mock.patch.dict(os.environ, {"KERNEL_BRANCH": "master"})
+    def test_submit_tuxbuild_buildset(self):
+        proc = self.submit_tuxbuild(os.path.join(self.buildset_dir, "build.json"))
+        self.assertTrue(proc.ok, msg=proc.out)
         self.assertTrue(proc.err.count("Submitting 1 tests, 2 metrics") == 3)
         project = self.squad.group("my_group").project("my_project")
 
-        # Check results for next-20201021, which has 2 instances in build.json
-        build = project.build("next-20201021")
+        build = project.build("next-20211225")
+        self.assertIsNotNone(build)
 
-        base_kconfig = [
-            'defconfig',
-            'https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/lkft.config',
-            'https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/lkft-crypto.config',
-            'https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/distro-overrides.config',
-            'https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/systemd.config',
-            'https://raw.githubusercontent.com/Linaro/meta-lkft/sumo/recipes-kernel/linux/files/virtio.config',
+        testruns = build.testruns()
+        self.assertIsNotNone(testruns)
+
+        base_metadata = {
+            "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
+            "git_ref": None,
+            "git_commit": "ea586a076e8aa606c59b66d86660590f18354b11",
+            "git_sha": "ea586a076e8aa606c59b66d86660590f18354b11",
+            "git_short_log": "ea586a076e8a (\"Add linux-next specific files for 20211225\")",
+            "git_describe": "next-20211225",
+            "git_branch": os.environ.get("KERNEL_BRANCH"),
+            "make_kernelversion": "5.16.0-rc6",
+            "kernel_version": "5.16.0-rc6",
+            "toolchain": "gcc-8",
+        }
+
+        expected_metadata = [
+            dict(base_metadata, **{
+                "config": "https://builds.tuxbuild.com/22j6CjIqvbdDMVUVrumx3inbHFX/config",
+                "download_url": "https://builds.tuxbuild.com/22j6CjIqvbdDMVUVrumx3inbHFX/",
+                "duration": 121,
+                "kconfig": ["allnoconfig"],
+            }),
+            dict(base_metadata, **{
+                "config": "https://builds.tuxbuild.com/22j6CiFwHyguAAMiJCFbJOr9KRw/config",
+                "download_url": "https://builds.tuxbuild.com/22j6CiFwHyguAAMiJCFbJOr9KRw/",
+                "duration": 125,
+                "kconfig": ["tinyconfig"],
+            }),
+            dict(base_metadata, **{
+                "config": "https://builds.tuxbuild.com/22j6ClgZS7KogYSjiW86y3djh1q/config",
+                "download_url": "https://builds.tuxbuild.com/22j6ClgZS7KogYSjiW86y3djh1q/",
+                "duration": 347,
+                "kconfig": ["x86_64_defconfig"],
+            }),
         ]
 
-        # Make sure metadata values match expected values
-        urls = ['https://builds.tuxbuild.com/%s/' % _id for _id in ['B3TECkH4_1X9yKoWOPIhew', 't8NSUfTBZiSPbBVaXLH7kw']]
-        configs = [url + "config" for url in urls]
-        expected_metadata = {
-            'git_repo': "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
-            'git_ref': "master",
-            'git_sha': "5302568121ba345f5c22528aefd72d775f25221e",
-            'git_short_log': '5302568121ba ("Add linux-next specific files for 20201021")',
-            'git_describe': "next-20201021",
-            'kconfig': [base_kconfig + ["CONFIG_ARM64_MODULE_PLTS=y"], base_kconfig + ["CONFIG_IGB=y", "CONFIG_UNWINDER_FRAME_POINTER=y"]],
-            'kernel_version': "5.9.0",
-            'config': configs,
-            'download_url': urls,
-            'duration': 541,
-            'toolchain': 'gcc-9',
-        }
-        for expected_key in expected_metadata.keys():
-            self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))
+        for tr in testruns.values():
+            # Make sure there's no extra attributes in the metadata object
+            # all objects fetched from squad have an id attribute, but the metadata does not use it
+            self.assertEqual(sorted(tr.metadata.__dict__.keys()), sorted(["id"] + ALLOWED_METADATA))
 
-        # Make sure there's no extra attributes in the metadata object
-        metadata_attrs = build.metadata.__dict__
-        del metadata_attrs["id"]
-        self.assertEqual(sorted(expected_metadata.keys()), sorted(metadata_attrs.keys()))
+            metadata = expected_metadata.pop(0)
+            for k in ALLOWED_METADATA:
+                self.assertEqual(getattr(tr.metadata, k), metadata[k])
 
-        # Check results for v4.4.4, which has 1 instance in build.json
-        build = project.build("v4.4.4")
-        # Make sure metadata values match expected values
-        url = 'https://builds.tuxbuild.com/%s/' % 'B3TECkH4_1X9yKoWOPIhew'
-        config = url + "config"
-        expected_metadata = {
-            'git_repo': "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
-            'git_ref': "master",
-            'git_sha': "5302568121ba345f5c22528aefd72d775f25221e",
-            'git_short_log': '5302568121ba ("Add linux-next specific files for 20201021")',
-            'git_describe': "v4.4.4",
-            'kconfig': base_kconfig + ["CONFIG_ARM64_MODULE_PLTS=y"],
-            'kernel_version': "5.9.0",
-            'config': config,
-            'download_url': url,
-            'duration': 541,
-            'toolchain': 'gcc-9',
-        }
-        for expected_key in expected_metadata.keys():
-            self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))
-
-        # Make sure there's no extra attributes in the metadata object
-        metadata_attrs = build.metadata.__dict__
-        del metadata_attrs["id"]
-        self.assertEqual(sorted(expected_metadata.keys()), sorted(metadata_attrs.keys()))
-
-        for arch in ["arm64", "x86"]:
-            environment = (
-                self.squad.group("my_group").project("my_project").environment(arch)
-            )
-            self.assertIsNotNone(environment, "environment %s does not exist" % (arch))
-
-        suite = self.squad.group("my_group").project("my_project").suite("build")
-        self.assertIsNotNone(suite)
-
-        test = first(self.squad.tests(name="gcc-9-defconfig-b9979cfa"))
-        self.assertEqual("build/gcc-9-defconfig-b9979cfa", test.name)
-        self.assertEqual("pass", test.status)
-
-        test = first(self.squad.tests(name="gcc-9-defconfig-5b09568e"))
-        self.assertEqual("build/gcc-9-defconfig-5b09568e", test.name)
-        self.assertEqual("fail", test.status)
-
-        metric = first(self.squad.metrics(name="gcc-9-defconfig-b9979cfa-warnings"))
-        self.assertEqual("build/gcc-9-defconfig-b9979cfa-warnings", metric.name)
-        self.assertEqual(1, metric.result)
-
-        metric = first(self.squad.metrics(name="gcc-9-defconfig-5b09568e-warnings"))
-        self.assertEqual("build/gcc-9-defconfig-5b09568e-warnings", metric.name)
-        self.assertEqual(2, metric.result)
-
-        metric = first(self.squad.metrics(name="gcc-9-defconfig-5b09568e-duration"))
-        self.assertEqual("build/gcc-9-defconfig-5b09568e-duration", metric.name)
-        self.assertEqual(541, metric.result)
-
-    def test_submit_tuxbuild_buildset(self):
-        os.environ["KERNEL_BRANCH"] = "master"
-        proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/buildset.json")
-        self.assertTrue(proc.ok, msg=proc.out)
-        self.assertTrue(proc.err.count("Submitting 1 tests, 2 metrics") == 3)
-
-        build = self.squad.group("my_group").project("my_project").build("next-20201030")
-
-        # Make sure metadata values match expected values
-        urls = ['https://builds.tuxbuild.com/%s/' % _id for _id in ['9NeOU1kd65bhMrL4eyI2yA', 'cjLreGasHSZj3OctZlNdpw', 'x5Mi9j6xZItTGqVtOKmnVw']]
-        configs = [url + "config" for url in urls]
-        expected_metadata = {
-            'git_repo': "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
-            'git_ref': "master",
-            'git_sha': "4e78c578cb987725eef1cec7d11b6437109e9a49",
-            'git_short_log': '4e78c578cb98 ("Add linux-next specific files for 20201030")',
-            'git_describe': "next-20201030",
-            'kconfig': [['allnoconfig'], ['tinyconfig'], ['x86_64_defconfig']],
-            'kernel_version': "5.10.0-rc1",
-            'config': configs,
-            'download_url': urls,
-            'duration': 541,
-            'toolchain': 'gcc-8',
-        }
-        for expected_key in expected_metadata.keys():
-            self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))
-
-        # Make sure there's no extra attributes in the metadata object
-        metadata_attrs = build.metadata.__dict__
-        del metadata_attrs["id"]
-        self.assertEqual(sorted(expected_metadata.keys()), sorted(metadata_attrs.keys()))
-
-        environment = (
-            self.squad.group("my_group").project("my_project").environment("x86")
-        )
+        environment = project.environment("x86_64")
         self.assertIsNotNone(environment)
 
-        suite = self.squad.group("my_group").project("my_project").suite("build")
+        suite = project.suite("build")
         self.assertIsNotNone(suite)
 
         test = first(self.squad.tests(name="gcc-8-allnoconfig"))
@@ -287,94 +285,30 @@ class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
 
         metric = first(self.squad.metrics(name="gcc-8-tinyconfig-warnings"))
         self.assertEqual("build/gcc-8-tinyconfig-warnings", metric.name)
-        self.assertEqual(0, metric.result)
+        self.assertEqual(1, metric.result)
 
         metric = first(self.squad.metrics(name="gcc-8-x86_64_defconfig-warnings"))
         self.assertEqual("build/gcc-8-x86_64_defconfig-warnings", metric.name)
         self.assertEqual(0, metric.result)
 
+        metric = first(self.squad.metrics(name="gcc-8-allnoconfig-duration"))
+        self.assertEqual("build/gcc-8-allnoconfig-duration", metric.name)
+        self.assertEqual(121, metric.result)
+
+        metric = first(self.squad.metrics(name="gcc-8-tinyconfig-duration"))
+        self.assertEqual("build/gcc-8-tinyconfig-duration", metric.name)
+        self.assertEqual(125, metric.result)
+
         metric = first(self.squad.metrics(name="gcc-8-x86_64_defconfig-duration"))
         self.assertEqual("build/gcc-8-x86_64_defconfig-duration", metric.name)
-        self.assertEqual(541, metric.result)
+        self.assertEqual(347, metric.result)
 
     def test_submit_tuxbuild_empty(self):
-        proc = self.submit_tuxbuild("")
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn("No such file or directory: ''", proc.err)
-
-    def test_submit_tuxbuild_malformed(self):
-        proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/malformed.json")
+        proc = self.submit_tuxbuild(os.path.join(self.root_dir, "empty.json"))
         self.assertFalse(proc.ok, msg=proc.err)
         self.assertIn("Failed to load json", proc.err)
 
     def test_submit_tuxbuild_missing(self):
-        proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/missing.json")
+        proc = self.submit_tuxbuild(os.path.join(self.root_dir, "missing.json"))
         self.assertFalse(proc.ok)
-        self.assertIn(
-            "No such file or directory: 'tests/data/submit/tuxbuild/missing.json'",
-            proc.err,
-        )
-
-    def test_submit_tuxbuild_empty_build_status(self):
-        proc = self.submit_tuxbuild(
-            "tests/data/submit/tuxbuild/empty_build_status.json"
-        )
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: '' is not one of ['fail', 'pass']",
-            proc.err,
-        )
-        self.assertIn(
-            "Failed validating 'enum' in schema['items'][0]['properties']['build_status']", proc.err
-        )
-
-    def test_submit_tuxbuild_malformed_build_status(self):
-        proc = self.submit_tuxbuild(
-            "tests/data/submit/tuxbuild/malformed_build_status.json"
-        )
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: {'build': 'pass'} is not of type 'string'",
-            proc.err,
-        )
-        self.assertIn(
-            "Failed validating 'type' in schema['items'][0]['properties']['build_status']", proc.err
-        )
-
-    def test_submit_tuxbuild_missing_build_status(self):
-        proc = self.submit_tuxbuild(
-            "tests/data/submit/tuxbuild/missing_build_status.json"
-        )
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: 'build_status' is a required property",
-            proc.err,
-        )
-
-    def test_submit_tuxbuild_empty_kconfig(self):
-        proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/empty_kconfig.json")
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn("Failed to validate tuxbuild data: [] is too short", proc.err)
-        self.assertIn(
-            "Failed validating 'minItems' in schema['items'][0]['properties']['kconfig']", proc.err
-        )
-
-    def test_submit_tuxbuild_malformed_kconfig(self):
-        proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/malformed_kconfig.json")
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: {'CONFIG_ARM64_MODULE_PLTS': 'y'} is not of type 'string'",
-            proc.err,
-        )
-        self.assertIn(
-            "Failed validating 'type' in schema['items'][0]['properties']['kconfig']['items'][0]",
-            proc.err,
-        )
-
-    def test_submit_tuxbuild_missing_kconfig(self):
-        proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/missing_kconfig.json")
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: 'kconfig' is a required property",
-            proc.err,
-        )
+        self.assertIn("No such file or directory", proc.err)
