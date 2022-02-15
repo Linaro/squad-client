@@ -9,7 +9,7 @@
         "git_describe": "next-20201021",
         "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
         "git_sha": "5302568121ba345f5c22528aefd72d775f25221e",
-        "git_ref": null,
+        "git_ref": "master",
         "git_short_log": "5302568121ba (\"Add linux-next specific files for 20201021\")",
         "kconfig": [
             "defconfig",
@@ -38,7 +38,7 @@
         "git_describe": "next-20201021",
         "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
         "git_sha": "5302568121ba345f5c22528aefd72d775f25221e",
-        "git_ref": null,
+        "git_ref": "master",
         "git_short_log": "5302568121ba (\"Add linux-next specific files for 20201021\")",
         "kconfig": [
             "defconfig",
@@ -66,7 +66,7 @@
         "git_describe": "v4.4.4",
         "git_repo": "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
         "git_sha": "5302568121ba345f5c22528aefd72d775f25221e",
-        "git_ref": null,
+        "git_ref": "master",
         "git_short_log": "5302568121ba (\"Add linux-next specific files for 20201021\")",
         "kconfig": [
             "defconfig",
