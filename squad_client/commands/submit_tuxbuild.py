@@ -70,6 +70,7 @@ ALLOWED_METADATA = [
     "git_short_log",
     "kconfig",
     "kernel_version",
+    "toolchain",
 ]
 
 

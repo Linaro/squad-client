@@ -83,6 +83,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             'config': configs,
             'download_url': urls,
             'duration': 541,
+            'toolchain': 'gcc-9',
         }
         for expected_key in expected_metadata.keys():
             self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))
@@ -108,6 +109,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             'config': config,
             'download_url': url,
             'duration': 541,
+            'toolchain': 'gcc-9',
         }
         for expected_key in expected_metadata.keys():
             self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))
@@ -168,6 +170,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             'config': configs,
             'download_url': urls,
             'duration': 541,
+            'toolchain': 'gcc-8',
         }
         for expected_key in expected_metadata.keys():
             self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))
