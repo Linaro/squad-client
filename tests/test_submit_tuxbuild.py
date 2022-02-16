@@ -74,14 +74,11 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         configs = [url + "config" for url in urls]
         expected_metadata = {
             'git_repo': "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
-            'git_ref': None,
-            'git_commit': "5302568121ba345f5c22528aefd72d775f25221e",
+            'git_ref': "master",
             'git_sha': "5302568121ba345f5c22528aefd72d775f25221e",
             'git_short_log': '5302568121ba ("Add linux-next specific files for 20201021")',
             'git_describe': "next-20201021",
             'kconfig': [base_kconfig + ["CONFIG_ARM64_MODULE_PLTS=y"], base_kconfig + ["CONFIG_IGB=y", "CONFIG_UNWINDER_FRAME_POINTER=y"]],
-            'git_branch': os.environ.get("KERNEL_BRANCH"),
-            'make_kernelversion': "5.9.0",
             'kernel_version': "5.9.0",
             'config': configs,
             'download_url': urls,
@@ -102,14 +99,11 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         config = url + "config"
         expected_metadata = {
             'git_repo': "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
-            'git_ref': None,
-            'git_commit': "5302568121ba345f5c22528aefd72d775f25221e",
+            'git_ref': "master",
             'git_sha': "5302568121ba345f5c22528aefd72d775f25221e",
             'git_short_log': '5302568121ba ("Add linux-next specific files for 20201021")',
             'git_describe': "v4.4.4",
             'kconfig': base_kconfig + ["CONFIG_ARM64_MODULE_PLTS=y"],
-            'git_branch': os.environ.get("KERNEL_BRANCH"),
-            'make_kernelversion': "5.9.0",
             'kernel_version': "5.9.0",
             'config': config,
             'download_url': url,
@@ -165,14 +159,11 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         configs = [url + "config" for url in urls]
         expected_metadata = {
             'git_repo': "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
-            'git_ref': None,
-            'git_commit': "4e78c578cb987725eef1cec7d11b6437109e9a49",
+            'git_ref': "master",
             'git_sha': "4e78c578cb987725eef1cec7d11b6437109e9a49",
             'git_short_log': '4e78c578cb98 ("Add linux-next specific files for 20201030")',
             'git_describe': "next-20201030",
             'kconfig': [['allnoconfig'], ['tinyconfig'], ['x86_64_defconfig']],
-            'git_branch': os.environ.get("KERNEL_BRANCH"),
-            'make_kernelversion': "5.10.0-rc1",
             'kernel_version': "5.10.0-rc1",
             'config': configs,
             'download_url': urls,

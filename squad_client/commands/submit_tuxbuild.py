@@ -63,8 +63,6 @@ tuxbuild_schema = {
 ALLOWED_METADATA = [
     "download_url",
     "duration",
-    "git_branch",
-    "git_commit",
     "git_describe",
     "git_ref",
     "git_repo",
@@ -72,7 +70,6 @@ ALLOWED_METADATA = [
     "git_short_log",
     "kconfig",
     "kernel_version",
-    "make_kernelversion",
 ]
 
 
@@ -96,19 +93,9 @@ class SubmitTuxbuildCommand(SquadClientCommand):
     def _build_metadata(self, build):
         metadata = {k: v for k, v in build.items() if k in ALLOWED_METADATA}
 
-        # We expect git_commit, but tuxmake calls it git_sha
-        metadata.update({"git_commit": metadata.get("git_sha")})
-
-        # We expect `git_branch`, but tuxmake calls it `git_ref`
-        # `git_ref` will sometimes be null
-        metadata.update({"git_branch": metadata.get("git_ref")})
-
         # If `git_ref` is null, use `KERNEL_BRANCH` from the CI environment
-        if metadata.get("git_branch") is None:
-            metadata.update({"git_branch": os.getenv("KERNEL_BRANCH")})
-
-        # We expect `make_kernelversion`, but tuxmake calls it `kernel_version`
-        metadata.update({"make_kernelversion": metadata.get("kernel_version")})
+        if metadata.get("git_ref") is None:
+            metadata.update({"git_ref": os.getenv("KERNEL_BRANCH")})
 
         # add config file to the metadata
         metadata["config"] = urlparse.urljoin(metadata.get('download_url'), "config")
