@@ -54,10 +54,10 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
     def test_submit_tuxbuild_build(self):
         proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/build.json")
         self.assertTrue(proc.ok, msg=proc.err)
-        self.assertTrue(proc.err.count("Submitting 1 tests, 2 metrics") == 3)
+        self.assertTrue(proc.err.count("Submitting 1 tests, 2 metrics") == 1)
         project = self.squad.group("my_group").project("my_project")
 
-        # Check results for next-20201021, which has 2 instances in build.json
+        # Check results for next-20201021, which has 1 instances in build.json
         build = project.build("next-20201021")
 
         base_kconfig = [
@@ -70,18 +70,16 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         ]
 
         # Make sure metadata values match expected values
-        urls = ['https://builds.tuxbuild.com/%s/' % _id for _id in ['B3TECkH4_1X9yKoWOPIhew', 't8NSUfTBZiSPbBVaXLH7kw']]
-        configs = [url + "config" for url in urls]
         expected_metadata = {
             'git_repo': "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
             'git_ref': "master",
             'git_sha': "5302568121ba345f5c22528aefd72d775f25221e",
             'git_short_log': '5302568121ba ("Add linux-next specific files for 20201021")',
             'git_describe': "next-20201021",
-            'kconfig': [base_kconfig + ["CONFIG_ARM64_MODULE_PLTS=y"], base_kconfig + ["CONFIG_IGB=y", "CONFIG_UNWINDER_FRAME_POINTER=y"]],
+            'kconfig': base_kconfig + ["CONFIG_IGB=y", "CONFIG_UNWINDER_FRAME_POINTER=y"],
             'kernel_version': "5.9.0",
-            'config': configs,
-            'download_url': urls,
+            'config': "https://builds.tuxbuild.com/t8NSUfTBZiSPbBVaXLH7kw/config",
+            'download_url': "https://builds.tuxbuild.com/t8NSUfTBZiSPbBVaXLH7kw/",
             'duration': 541,
             'toolchain': 'gcc-9',
         }
@@ -93,37 +91,8 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         del metadata_attrs["id"]
         self.assertEqual(sorted(expected_metadata.keys()), sorted(metadata_attrs.keys()))
 
-        # Check results for v4.4.4, which has 1 instance in build.json
-        build = project.build("v4.4.4")
-        # Make sure metadata values match expected values
-        url = 'https://builds.tuxbuild.com/%s/' % 'B3TECkH4_1X9yKoWOPIhew'
-        config = url + "config"
-        expected_metadata = {
-            'git_repo': "https://gitlab.com/Linaro/lkft/mirrors/next/linux-next",
-            'git_ref': "master",
-            'git_sha': "5302568121ba345f5c22528aefd72d775f25221e",
-            'git_short_log': '5302568121ba ("Add linux-next specific files for 20201021")',
-            'git_describe': "v4.4.4",
-            'kconfig': base_kconfig + ["CONFIG_ARM64_MODULE_PLTS=y"],
-            'kernel_version': "5.9.0",
-            'config': config,
-            'download_url': url,
-            'duration': 541,
-            'toolchain': 'gcc-9',
-        }
-        for expected_key in expected_metadata.keys():
-            self.assertEqual(expected_metadata[expected_key], getattr(build.metadata, expected_key))
-
-        # Make sure there's no extra attributes in the metadata object
-        metadata_attrs = build.metadata.__dict__
-        del metadata_attrs["id"]
-        self.assertEqual(sorted(expected_metadata.keys()), sorted(metadata_attrs.keys()))
-
-        for arch in ["arm64", "x86"]:
-            environment = (
-                self.squad.group("my_group").project("my_project").environment(arch)
-            )
-            self.assertIsNotNone(environment, "environment %s does not exist" % (arch))
+        environment = self.squad.group("my_group").project("my_project").environment("x86")
+        self.assertIsNotNone(environment)
 
         suite = self.squad.group("my_group").project("my_project").suite("build")
         self.assertIsNotNone(suite)
@@ -132,20 +101,12 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         self.assertEqual("build/gcc-9-defconfig-b9979cfa", test.name)
         self.assertEqual("pass", test.status)
 
-        test = first(self.squad.tests(name="gcc-9-defconfig-5b09568e"))
-        self.assertEqual("build/gcc-9-defconfig-5b09568e", test.name)
-        self.assertEqual("fail", test.status)
-
         metric = first(self.squad.metrics(name="gcc-9-defconfig-b9979cfa-warnings"))
         self.assertEqual("build/gcc-9-defconfig-b9979cfa-warnings", metric.name)
         self.assertEqual(1, metric.result)
 
-        metric = first(self.squad.metrics(name="gcc-9-defconfig-5b09568e-warnings"))
-        self.assertEqual("build/gcc-9-defconfig-5b09568e-warnings", metric.name)
-        self.assertEqual(2, metric.result)
-
-        metric = first(self.squad.metrics(name="gcc-9-defconfig-5b09568e-duration"))
-        self.assertEqual("build/gcc-9-defconfig-5b09568e-duration", metric.name)
+        metric = first(self.squad.metrics(name="gcc-9-defconfig-b9979cfa-duration"))
+        self.assertEqual("build/gcc-9-defconfig-b9979cfa-duration", metric.name)
         self.assertEqual(541, metric.result)
 
     def test_submit_tuxbuild_buildset(self):
