@@ -1,6 +1,6 @@
-import unittest
-import subprocess as sp
 import os
+import subprocess as sp
+import unittest
 
 from . import settings
 from squad_client.core.api import SquadApi
