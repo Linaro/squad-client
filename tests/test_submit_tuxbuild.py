@@ -1,6 +1,7 @@
 import os
 import subprocess as sp
 import unittest
+import unittest.mock
 
 from . import settings
 from squad_client.core.api import SquadApi
@@ -51,6 +52,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         proc.err = err.decode("utf-8")
         return proc
 
+    @unittest.mock.patch.dict(os.environ, {"KERNEL_BRANCH": "master"})
     def test_submit_tuxbuild_build(self):
         proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/build.json")
         self.assertTrue(proc.ok, msg=proc.err)
@@ -109,8 +111,8 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         self.assertEqual("build/gcc-9-defconfig-b9979cfa-duration", metric.name)
         self.assertEqual(541, metric.result)
 
+    @unittest.mock.patch.dict(os.environ, {"KERNEL_BRANCH": "master"})
     def test_submit_tuxbuild_buildset(self):
-        os.environ["KERNEL_BRANCH"] = "master"
         proc = self.submit_tuxbuild("tests/data/submit/tuxbuild/buildset.json")
         self.assertTrue(proc.ok, msg=proc.out)
         self.assertTrue(proc.err.count("Submitting 1 tests, 2 metrics") == 3)
