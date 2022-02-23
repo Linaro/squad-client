@@ -83,6 +83,35 @@ def load_builds(build_json):
         raise InvalidBuildJson(f"Invalid build json: {jde}")
 
 
+def create_name(build):
+    suite = "build/"
+    name = ""
+
+    if build["build_name"]:
+        name = build["build_name"]
+    else:
+        name += "%s-%s-%s" % (
+            build["target_arch"],
+            build["toolchain"],
+            build["kconfig"][0],
+        )
+
+        if len(build["kconfig"]) > 1:
+            name += "-" + create_sha(build)
+
+    return suite + name
+
+
+def create_sha(build):
+    sha = hashlib.sha1()
+
+    # log?
+    for k in build["kconfig"][1:]:
+        sha.update(f"{k}".encode())
+
+    return sha.hexdigest()[0:8]
+
+
 class SubmitTuxbuildCommand(SquadClientCommand):
     command = "submit-tuxbuild"
     help_text = "submit tuxbuild results to SQUAD"
@@ -112,17 +141,6 @@ class SubmitTuxbuildCommand(SquadClientCommand):
 
         return metadata
 
-    def _get_test_name(self, kconfig, toolchain):
-        if len(kconfig[1:]):
-            kconfig_hash = "%s-%s" % (
-                kconfig[0],
-                hashlib.sha1(json.dumps(kconfig[1:]).encode()).hexdigest()[0:8],
-            )
-        else:
-            kconfig_hash = kconfig[0]
-
-        return "build/%s-%s" % (toolchain, kconfig_hash)
-
     def run(self, args):
         try:
             builds = load_builds(args.tuxbuild)
@@ -142,10 +160,8 @@ class SubmitTuxbuildCommand(SquadClientCommand):
         for build in builds:
             arch = build["target_arch"]
             description = build["git_describe"]
-            kconfig = build["kconfig"]
-            toolchain = build["toolchain"]
             warnings_count = build["warnings_count"]
-            test_name = self._get_test_name(kconfig, toolchain)
+            test_name = create_name(build)
             test_status = build["build_status"]
             duration = build["duration"]
 

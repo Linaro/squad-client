@@ -5,7 +5,7 @@ import unittest
 import unittest.mock
 
 from . import settings
-from squad_client.commands.submit_tuxbuild import TUXBUILD_SCHEMA, load_builds
+from squad_client.commands.submit_tuxbuild import TUXBUILD_SCHEMA, create_name, load_builds
 from squad_client.core.api import SquadApi
 from squad_client.core.models import Squad
 from squad_client.exceptions import InvalidBuildJson
@@ -59,6 +59,21 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             missing = {k: build[k] for k in build.keys() if k != f}
             with self.assertRaises(jsonschema.exceptions.ValidationError):
                 jsonschema.validate([missing], TUXBUILD_SCHEMA)
+
+    def test_create_name_with_build(self):
+        build = load_builds(os.path.join(self.build_dir, "build.json")).pop()
+        self.assertEqual(create_name(build), "build/gcc-11-lkftconfig")
+
+    def test_create_name_with_buildset(self):
+        builds = load_builds(os.path.join(self.buildset_dir, "build.json"))
+
+        tests = [
+            "build/x86_64-gcc-8-allnoconfig",
+            "build/x86_64-gcc-8-tinyconfig",
+            "build/x86_64-gcc-8-x86_64_defconfig",
+        ]
+
+        self.assertEqual([create_name(build) for build in builds], tests)
 
 
 class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
@@ -159,16 +174,16 @@ class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
         suite = self.squad.group('my_group').project('my_project').suite('build')
         self.assertIsNotNone(suite)
 
-        test = first(self.squad.tests(name='gcc-11-defconfig-ec3ad359'))
-        self.assertEqual('build/gcc-11-defconfig-ec3ad359', test.name)
+        test = first(self.squad.tests(name='gcc-11-lkftconfig'))
+        self.assertEqual('build/gcc-11-lkftconfig', test.name)
         self.assertEqual('pass', test.status)
 
-        metric = first(self.squad.metrics(name='gcc-11-defconfig-ec3ad359-warnings'))
-        self.assertEqual('build/gcc-11-defconfig-ec3ad359-warnings', metric.name)
+        metric = first(self.squad.metrics(name='gcc-11-lkftconfig-warnings'))
+        self.assertEqual('build/gcc-11-lkftconfig-warnings', metric.name)
         self.assertEqual(1, metric.result)
 
-        metric = first(self.squad.metrics(name='gcc-11-defconfig-ec3ad359-duration'))
-        self.assertEqual('build/gcc-11-defconfig-ec3ad359-duration', metric.name)
+        metric = first(self.squad.metrics(name='gcc-11-lkftconfig-duration'))
+        self.assertEqual('build/gcc-11-lkftconfig-duration', metric.name)
         self.assertEqual(422, metric.result)
 
         build.delete()
@@ -228,40 +243,40 @@ class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
         suite = project.suite('build')
         self.assertIsNotNone(suite)
 
-        test = first(self.squad.tests(name='gcc-8-allnoconfig'))
-        self.assertEqual('build/gcc-8-allnoconfig', test.name)
+        test = first(self.squad.tests(name='x86_64-gcc-8-allnoconfig'))
+        self.assertEqual('build/x86_64-gcc-8-allnoconfig', test.name)
         self.assertEqual('pass', test.status)
 
-        test = first(self.squad.tests(name='gcc-8-tinyconfig'))
-        self.assertEqual('build/gcc-8-tinyconfig', test.name)
+        test = first(self.squad.tests(name='x86_64-gcc-8-tinyconfig'))
+        self.assertEqual('build/x86_64-gcc-8-tinyconfig', test.name)
         self.assertEqual('pass', test.status)
 
-        test = first(self.squad.tests(name='gcc-8-x86_64_defconfig'))
-        self.assertEqual('build/gcc-8-x86_64_defconfig', test.name)
+        test = first(self.squad.tests(name='x86_64-gcc-8-x86_64_defconfig'))
+        self.assertEqual('build/x86_64-gcc-8-x86_64_defconfig', test.name)
         self.assertEqual('pass', test.status)
 
-        metric = first(self.squad.metrics(name='gcc-8-allnoconfig-warnings'))
-        self.assertEqual('build/gcc-8-allnoconfig-warnings', metric.name)
+        metric = first(self.squad.metrics(name='x86_64-gcc-8-allnoconfig-warnings'))
+        self.assertEqual('build/x86_64-gcc-8-allnoconfig-warnings', metric.name)
         self.assertEqual(0, metric.result)
 
-        metric = first(self.squad.metrics(name='gcc-8-tinyconfig-warnings'))
-        self.assertEqual('build/gcc-8-tinyconfig-warnings', metric.name)
+        metric = first(self.squad.metrics(name='x86_64-gcc-8-tinyconfig-warnings'))
+        self.assertEqual('build/x86_64-gcc-8-tinyconfig-warnings', metric.name)
         self.assertEqual(1, metric.result)
 
-        metric = first(self.squad.metrics(name='gcc-8-x86_64_defconfig-warnings'))
-        self.assertEqual('build/gcc-8-x86_64_defconfig-warnings', metric.name)
+        metric = first(self.squad.metrics(name='x86_64-gcc-8-x86_64_defconfig-warnings'))
+        self.assertEqual('build/x86_64-gcc-8-x86_64_defconfig-warnings', metric.name)
         self.assertEqual(0, metric.result)
 
-        metric = first(self.squad.metrics(name='gcc-8-allnoconfig-duration'))
-        self.assertEqual('build/gcc-8-allnoconfig-duration', metric.name)
+        metric = first(self.squad.metrics(name='x86_64-gcc-8-allnoconfig-duration'))
+        self.assertEqual('build/x86_64-gcc-8-allnoconfig-duration', metric.name)
         self.assertEqual(324, metric.result)
 
-        metric = first(self.squad.metrics(name='gcc-8-tinyconfig-duration'))
-        self.assertEqual('build/gcc-8-tinyconfig-duration', metric.name)
+        metric = first(self.squad.metrics(name='x86_64-gcc-8-tinyconfig-duration'))
+        self.assertEqual('build/x86_64-gcc-8-tinyconfig-duration', metric.name)
         self.assertEqual(350, metric.result)
 
-        metric = first(self.squad.metrics(name='gcc-8-x86_64_defconfig-duration'))
-        self.assertEqual('build/gcc-8-x86_64_defconfig-duration', metric.name)
+        metric = first(self.squad.metrics(name='x86_64-gcc-8-x86_64_defconfig-duration'))
+        self.assertEqual('build/x86_64-gcc-8-x86_64_defconfig-duration', metric.name)
         self.assertEqual(460, metric.result)
 
         build.delete()
