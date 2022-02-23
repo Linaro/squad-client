@@ -2,8 +2,7 @@ import hashlib
 import json
 import jsonschema
 import os
-
-from urllib import parse as urlparse
+import urllib
 
 from squad_client import logging
 from squad_client.exceptions import InvalidBuildJson
@@ -83,6 +82,19 @@ def load_builds(build_json):
         raise InvalidBuildJson(f"Invalid build json: {jde}")
 
 
+def create_metadata(build):
+    metadata = {k: v for k, v in build.items() if k in ALLOWED_METADATA}
+
+    # If `git_ref` is null, use `KERNEL_BRANCH` from the CI environment
+    if metadata.get("git_ref") is None:
+        metadata.update({"git_ref": os.getenv("KERNEL_BRANCH")})
+
+    # add config file to the metadata
+    metadata["config"] = urllib.parse.urljoin(metadata.get('download_url'), "config")
+
+    return metadata
+
+
 def create_name(build):
     suite = "build/"
     name = ""
@@ -129,18 +141,6 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             help="File with tuxbuild results to submit",
         )
 
-    def _build_metadata(self, build):
-        metadata = {k: v for k, v in build.items() if k in ALLOWED_METADATA}
-
-        # If `git_ref` is null, use `KERNEL_BRANCH` from the CI environment
-        if metadata.get("git_ref") is None:
-            metadata.update({"git_ref": os.getenv("KERNEL_BRANCH")})
-
-        # add config file to the metadata
-        metadata["config"] = urlparse.urljoin(metadata.get('download_url'), "config")
-
-        return metadata
-
     def run(self, args):
         try:
             builds = load_builds(args.tuxbuild)
@@ -175,7 +175,7 @@ class SubmitTuxbuildCommand(SquadClientCommand):
                 env_slug=arch,
                 tests=tests,
                 metrics=metrics,
-                metadata=self._build_metadata(build)
+                metadata=create_metadata(build),
             )
 
         return True

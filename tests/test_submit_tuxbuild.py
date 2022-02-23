@@ -5,7 +5,7 @@ import unittest
 import unittest.mock
 
 from . import settings
-from squad_client.commands.submit_tuxbuild import TUXBUILD_SCHEMA, create_name, load_builds
+from squad_client.commands.submit_tuxbuild import ALLOWED_METADATA, TUXBUILD_SCHEMA, create_metadata, create_name, load_builds
 from squad_client.core.api import SquadApi
 from squad_client.core.models import Squad
 from squad_client.exceptions import InvalidBuildJson
@@ -74,6 +74,35 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         ]
 
         self.assertEqual([create_name(build) for build in builds], tests)
+
+    @unittest.mock.patch.dict(os.environ, {"KERNEL_BRANCH": "master"})
+    def check_metadata(self, build):
+        metadata = create_metadata(build)
+
+        for key in ALLOWED_METADATA:
+            self.assertIn(key, metadata, msg=key)
+
+        for key in metadata:
+            self.assertTrue(metadata[key], msg=key)
+
+            if key == "config":
+                self.assertTrue(metadata["config"].startswith(build["download_url"]))
+                self.assertTrue(metadata["config"].endswith("config"))
+            elif key == "git_ref":
+                self.assertEqual(metadata["git_ref"], os.environ["KERNEL_BRANCH"])
+            else:
+                self.assertEqual(metadata[key], build[key], msg=key)
+
+    def test_create_metadata_with_build(self):
+        build = load_builds(os.path.join(self.build_dir, "build.json")).pop()
+
+        self.check_metadata(build)
+
+    def test_create_metadata_with_buildset(self):
+        builds = load_builds(os.path.join(self.buildset_dir, "build.json"))
+
+        for build in builds:
+            self.check_metadata(build)
 
 
 class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
