@@ -1,10 +1,11 @@
+import jsonschema
 import os
 import subprocess as sp
 import unittest
 import unittest.mock
 
 from . import settings
-from squad_client.commands.submit_tuxbuild import load_builds
+from squad_client.commands.submit_tuxbuild import TUXBUILD_SCHEMA, load_builds
 from squad_client.core.api import SquadApi
 from squad_client.core.models import Squad
 from squad_client.exceptions import InvalidBuildJson
@@ -38,6 +39,26 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
     def test_load_builds_empty_json(self):
         with self.assertRaises(InvalidBuildJson):
             load_builds(os.path.join(self.root_dir, "empty.json"))
+
+    def test_json_schema_with_build(self):
+        builds = load_builds(os.path.join(self.build_dir, "build.json"))
+        jsonschema.validate(builds, TUXBUILD_SCHEMA)
+
+    def test_json_schema_with_buildset(self):
+        builds = load_builds(os.path.join(self.buildset_dir, "build.json"))
+        jsonschema.validate(builds, TUXBUILD_SCHEMA)
+
+    def test_json_schema_with_missing_fields(self):
+        build = load_builds(os.path.join(self.build_dir, "build.json")).pop()
+
+        """
+        Make sure that if a required field is missing an exception is thrown
+        """
+        required_fields = TUXBUILD_SCHEMA["items"][0]["required"]
+        for f in required_fields:
+            missing = {k: build[k] for k in build.keys() if k != f}
+            with self.assertRaises(jsonschema.exceptions.ValidationError):
+                jsonschema.validate([missing], TUXBUILD_SCHEMA)
 
 
 class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
@@ -254,67 +275,3 @@ class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
         proc = self.submit_tuxbuild(os.path.join(self.root_dir, 'missing.json'))
         self.assertFalse(proc.ok, msg=proc.err)
         self.assertIn('No such file or directory', proc.err)
-
-    def test_submit_tuxbuild_empty_build_status(self):
-        proc = self.submit_tuxbuild(
-            'tests/data/submit/tuxbuild/empty_build_status.json'
-        )
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: '' is not one of ['fail', 'pass']",
-            proc.err,
-        )
-        self.assertIn(
-            "Failed validating 'enum' in schema['items'][0]['properties']['build_status']", proc.err
-        )
-
-    def test_submit_tuxbuild_malformed_build_status(self):
-        proc = self.submit_tuxbuild(
-            'tests/data/submit/tuxbuild/malformed_build_status.json'
-        )
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: {'build': 'pass'} is not of type 'string'",
-            proc.err,
-        )
-        self.assertIn(
-            "Failed validating 'type' in schema['items'][0]['properties']['build_status']", proc.err
-        )
-
-    def test_submit_tuxbuild_missing_build_status(self):
-        proc = self.submit_tuxbuild(
-            'tests/data/submit/tuxbuild/missing_build_status.json'
-        )
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: 'build_status' is a required property",
-            proc.err,
-        )
-
-    def test_submit_tuxbuild_empty_kconfig(self):
-        proc = self.submit_tuxbuild('tests/data/submit/tuxbuild/empty_kconfig.json')
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn("Failed to validate tuxbuild data: [] is too short", proc.err)
-        self.assertIn(
-            "Failed validating 'minItems' in schema['items'][0]['properties']['kconfig']", proc.err
-        )
-
-    def test_submit_tuxbuild_malformed_kconfig(self):
-        proc = self.submit_tuxbuild('tests/data/submit/tuxbuild/malformed_kconfig.json')
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: {'CONFIG_ARM64_MODULE_PLTS': 'y'} is not of type 'string'",
-            proc.err,
-        )
-        self.assertIn(
-            "Failed validating 'type' in schema['items'][0]['properties']['kconfig']['items'][0]",
-            proc.err,
-        )
-
-    def test_submit_tuxbuild_missing_kconfig(self):
-        proc = self.submit_tuxbuild('tests/data/submit/tuxbuild/missing_kconfig.json')
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: 'kconfig' is a required property",
-            proc.err,
-        )

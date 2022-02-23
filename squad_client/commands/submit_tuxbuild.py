@@ -14,7 +14,7 @@ from squad_client.core.command import SquadClientCommand
 logger = logging.getLogger(__name__)
 
 
-tuxbuild_schema = {
+TUXBUILD_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "array",
     "minItems": 1,
@@ -134,7 +134,7 @@ class SubmitTuxbuildCommand(SquadClientCommand):
             return False
 
         try:
-            jsonschema.validate(instance=builds, schema=tuxbuild_schema)
+            jsonschema.validate(instance=builds, schema=TUXBUILD_SCHEMA)
         except jsonschema.exceptions.ValidationError as ve:
             logger.error("Failed to validate tuxbuild data: %s", ve)
             return False
