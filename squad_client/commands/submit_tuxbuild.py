@@ -6,6 +6,7 @@ import os
 from urllib import parse as urlparse
 
 from squad_client import logging
+from squad_client.exceptions import InvalidBuildJson
 from squad_client.shortcuts import submit_results
 from squad_client.core.command import SquadClientCommand
 
@@ -74,6 +75,14 @@ ALLOWED_METADATA = [
 ]
 
 
+def load_builds(build_json):
+    try:
+        with open(build_json) as f:
+            return json.load(f)
+    except json.JSONDecodeError as jde:
+        raise InvalidBuildJson(f"Invalid build json: {jde}")
+
+
 class SubmitTuxbuildCommand(SquadClientCommand):
     command = "submit-tuxbuild"
     help_text = "submit tuxbuild results to SQUAD"
@@ -103,20 +112,6 @@ class SubmitTuxbuildCommand(SquadClientCommand):
 
         return metadata
 
-    def _load_builds(self, path):
-        builds = None
-        try:
-            with open(path) as f:
-                builds = json.load(f)
-
-        except json.JSONDecodeError as jde:
-            logger.error("Failed to load json: %s", jde)
-
-        except OSError as ose:
-            logger.error("Failed to open file: %s", ose)
-
-        return builds
-
     def _get_test_name(self, kconfig, toolchain):
         if len(kconfig[1:]):
             kconfig_hash = "%s-%s" % (
@@ -129,10 +124,13 @@ class SubmitTuxbuildCommand(SquadClientCommand):
         return "build/%s-%s" % (toolchain, kconfig_hash)
 
     def run(self, args):
-        builds = self._load_builds(args.tuxbuild)
-
-        # log
-        if builds is None:
+        try:
+            builds = load_builds(args.tuxbuild)
+        except InvalidBuildJson as ibj:
+            logger.error("Failed to load build json: %s", ibj)
+            return False
+        except OSError as ose:
+            logger.error("Failed to load build json: %s", ose)
             return False
 
         try:

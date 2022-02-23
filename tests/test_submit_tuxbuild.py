@@ -4,12 +4,43 @@ import unittest
 import unittest.mock
 
 from . import settings
+from squad_client.commands.submit_tuxbuild import load_builds
 from squad_client.core.api import SquadApi
 from squad_client.core.models import Squad
+from squad_client.exceptions import InvalidBuildJson
 from squad_client.utils import first
 
 
 class SubmitTuxbuildCommandTest(unittest.TestCase):
+
+    def setUp(self):
+        self.root_dir = os.path.join("tests", "data", "submit_tuxbuild")
+        self.assertTrue(os.path.exists(self.root_dir))
+
+        self.build_dir = os.path.join(self.root_dir, "build-x86-gcc")
+        self.assertTrue(os.path.exists(self.build_dir))
+
+        self.buildset_dir = os.path.join(self.root_dir, "buildset-x86")
+        self.assertTrue(os.path.exists(self.buildset_dir))
+
+    def test_load_builds_with_build(self):
+        builds = load_builds(os.path.join(self.build_dir, "build.json"))
+        self.assertEqual(len(builds), 1)
+
+    def test_load_builds_with_buildset(self):
+        builds = load_builds(os.path.join(self.buildset_dir, "build.json"))
+        self.assertEqual(len(builds), 3)
+
+    def test_load_builds_missing_json(self):
+        with self.assertRaises(FileNotFoundError):
+            load_builds(os.path.join(self.root_dir, "missing.json"))
+
+    def test_load_builds_empty_json(self):
+        with self.assertRaises(InvalidBuildJson):
+            load_builds(os.path.join(self.root_dir, "empty.json"))
+
+
+class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
 
     testing_server = "http://localhost:%s" % settings.DEFAULT_SQUAD_PORT
     testing_token = '193cd8bb41ab9217714515954e8724f651ef8601'
@@ -217,7 +248,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
     def test_submit_tuxbuild_empty(self):
         proc = self.submit_tuxbuild(os.path.join(self.root_dir, 'empty.json'))
         self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn('Failed to load json', proc.err)
+        self.assertIn('Failed to load build json', proc.err)
 
     def test_submit_tuxbuild_missing(self):
         proc = self.submit_tuxbuild(os.path.join(self.root_dir, 'missing.json'))
