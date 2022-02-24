@@ -1,15 +1,108 @@
+import jsonschema
 import os
 import subprocess as sp
 import unittest
 import unittest.mock
 
 from . import settings
+from squad_client.commands.submit_tuxbuild import ALLOWED_METADATA, TUXBUILD_SCHEMA, create_metadata, create_name, load_builds
 from squad_client.core.api import SquadApi
 from squad_client.core.models import Squad
+from squad_client.exceptions import InvalidBuildJson
 from squad_client.utils import first
 
 
 class SubmitTuxbuildCommandTest(unittest.TestCase):
+
+    def setUp(self):
+        self.root_dir = os.path.join("tests", "data", "submit_tuxbuild")
+        self.assertTrue(os.path.exists(self.root_dir))
+
+        self.build_dir = os.path.join(self.root_dir, "build-x86-gcc")
+        self.assertTrue(os.path.exists(self.build_dir))
+
+        self.buildset_dir = os.path.join(self.root_dir, "buildset-x86")
+        self.assertTrue(os.path.exists(self.buildset_dir))
+
+    def test_load_builds_with_build(self):
+        builds = load_builds(os.path.join(self.build_dir, "build.json"))
+        self.assertEqual(len(builds), 1)
+
+    def test_load_builds_with_buildset(self):
+        builds = load_builds(os.path.join(self.buildset_dir, "build.json"))
+        self.assertEqual(len(builds), 3)
+
+    def test_load_builds_missing_json(self):
+        with self.assertRaises(FileNotFoundError):
+            load_builds(os.path.join(self.root_dir, "missing.json"))
+
+    def test_load_builds_empty_json(self):
+        with self.assertRaises(InvalidBuildJson):
+            load_builds(os.path.join(self.root_dir, "empty.json"))
+
+    def test_json_schema_with_build(self):
+        builds = load_builds(os.path.join(self.build_dir, "build.json"))
+        jsonschema.validate(builds, TUXBUILD_SCHEMA)
+
+    def test_json_schema_with_buildset(self):
+        builds = load_builds(os.path.join(self.buildset_dir, "build.json"))
+        jsonschema.validate(builds, TUXBUILD_SCHEMA)
+
+    def test_json_schema_with_missing_fields(self):
+        build = load_builds(os.path.join(self.build_dir, "build.json")).pop()
+
+        """
+        Make sure that if a required field is missing an exception is thrown
+        """
+        for f in ALLOWED_METADATA:
+            missing = {k: build[k] for k in build.keys() if k != f}
+            with self.assertRaises(jsonschema.exceptions.ValidationError):
+                jsonschema.validate([missing], TUXBUILD_SCHEMA)
+
+    def test_create_name_with_build(self):
+        build = load_builds(os.path.join(self.build_dir, "build.json")).pop()
+        self.assertEqual(create_name(build), "build/gcc-11-lkftconfig")
+
+    def test_create_name_with_buildset(self):
+        builds = load_builds(os.path.join(self.buildset_dir, "build.json"))
+
+        tests = [
+            "build/x86_64-gcc-8-allnoconfig",
+            "build/x86_64-gcc-8-tinyconfig",
+            "build/x86_64-gcc-8-x86_64_defconfig",
+        ]
+
+        self.assertEqual([create_name(build) for build in builds], tests)
+
+    @unittest.mock.patch.dict(os.environ, {"KERNEL_BRANCH": "master"})
+    def check_metadata(self, build):
+        metadata = create_metadata(build)
+
+        for key in ALLOWED_METADATA:
+            self.assertIn(key, metadata, msg=key)
+
+        for key in metadata:
+            if key == "config":
+                self.assertTrue(metadata["config"].startswith(build["download_url"]))
+                self.assertTrue(metadata["config"].endswith("config"))
+            elif key == "git_ref":
+                self.assertEqual(metadata["git_ref"], os.environ["KERNEL_BRANCH"])
+            else:
+                self.assertEqual(metadata[key], build[key], msg=key)
+
+    def test_create_metadata_with_build(self):
+        build = load_builds(os.path.join(self.build_dir, "build.json")).pop()
+
+        self.check_metadata(build)
+
+    def test_create_metadata_with_buildset(self):
+        builds = load_builds(os.path.join(self.buildset_dir, "build.json"))
+
+        for build in builds:
+            self.check_metadata(build)
+
+
+class SubmitTuxbuildCommandIntegrationTest(unittest.TestCase):
 
     testing_server = "http://localhost:%s" % settings.DEFAULT_SQUAD_PORT
     testing_token = '193cd8bb41ab9217714515954e8724f651ef8601'
@@ -107,16 +200,16 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         suite = self.squad.group('my_group').project('my_project').suite('build')
         self.assertIsNotNone(suite)
 
-        test = first(self.squad.tests(name='gcc-11-defconfig-ec3ad359'))
-        self.assertEqual('build/gcc-11-defconfig-ec3ad359', test.name)
+        test = first(self.squad.tests(name='gcc-11-lkftconfig'))
+        self.assertEqual('build/gcc-11-lkftconfig', test.name)
         self.assertEqual('pass', test.status)
 
-        metric = first(self.squad.metrics(name='gcc-11-defconfig-ec3ad359-warnings'))
-        self.assertEqual('build/gcc-11-defconfig-ec3ad359-warnings', metric.name)
+        metric = first(self.squad.metrics(name='gcc-11-lkftconfig-warnings'))
+        self.assertEqual('build/gcc-11-lkftconfig-warnings', metric.name)
         self.assertEqual(1, metric.result)
 
-        metric = first(self.squad.metrics(name='gcc-11-defconfig-ec3ad359-duration'))
-        self.assertEqual('build/gcc-11-defconfig-ec3ad359-duration', metric.name)
+        metric = first(self.squad.metrics(name='gcc-11-lkftconfig-duration'))
+        self.assertEqual('build/gcc-11-lkftconfig-duration', metric.name)
         self.assertEqual(422, metric.result)
 
         build.delete()
@@ -176,40 +269,40 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         suite = project.suite('build')
         self.assertIsNotNone(suite)
 
-        test = first(self.squad.tests(name='gcc-8-allnoconfig'))
-        self.assertEqual('build/gcc-8-allnoconfig', test.name)
+        test = first(self.squad.tests(name='x86_64-gcc-8-allnoconfig'))
+        self.assertEqual('build/x86_64-gcc-8-allnoconfig', test.name)
         self.assertEqual('pass', test.status)
 
-        test = first(self.squad.tests(name='gcc-8-tinyconfig'))
-        self.assertEqual('build/gcc-8-tinyconfig', test.name)
+        test = first(self.squad.tests(name='x86_64-gcc-8-tinyconfig'))
+        self.assertEqual('build/x86_64-gcc-8-tinyconfig', test.name)
         self.assertEqual('pass', test.status)
 
-        test = first(self.squad.tests(name='gcc-8-x86_64_defconfig'))
-        self.assertEqual('build/gcc-8-x86_64_defconfig', test.name)
+        test = first(self.squad.tests(name='x86_64-gcc-8-x86_64_defconfig'))
+        self.assertEqual('build/x86_64-gcc-8-x86_64_defconfig', test.name)
         self.assertEqual('pass', test.status)
 
-        metric = first(self.squad.metrics(name='gcc-8-allnoconfig-warnings'))
-        self.assertEqual('build/gcc-8-allnoconfig-warnings', metric.name)
+        metric = first(self.squad.metrics(name='x86_64-gcc-8-allnoconfig-warnings'))
+        self.assertEqual('build/x86_64-gcc-8-allnoconfig-warnings', metric.name)
         self.assertEqual(0, metric.result)
 
-        metric = first(self.squad.metrics(name='gcc-8-tinyconfig-warnings'))
-        self.assertEqual('build/gcc-8-tinyconfig-warnings', metric.name)
+        metric = first(self.squad.metrics(name='x86_64-gcc-8-tinyconfig-warnings'))
+        self.assertEqual('build/x86_64-gcc-8-tinyconfig-warnings', metric.name)
         self.assertEqual(1, metric.result)
 
-        metric = first(self.squad.metrics(name='gcc-8-x86_64_defconfig-warnings'))
-        self.assertEqual('build/gcc-8-x86_64_defconfig-warnings', metric.name)
+        metric = first(self.squad.metrics(name='x86_64-gcc-8-x86_64_defconfig-warnings'))
+        self.assertEqual('build/x86_64-gcc-8-x86_64_defconfig-warnings', metric.name)
         self.assertEqual(0, metric.result)
 
-        metric = first(self.squad.metrics(name='gcc-8-allnoconfig-duration'))
-        self.assertEqual('build/gcc-8-allnoconfig-duration', metric.name)
+        metric = first(self.squad.metrics(name='x86_64-gcc-8-allnoconfig-duration'))
+        self.assertEqual('build/x86_64-gcc-8-allnoconfig-duration', metric.name)
         self.assertEqual(324, metric.result)
 
-        metric = first(self.squad.metrics(name='gcc-8-tinyconfig-duration'))
-        self.assertEqual('build/gcc-8-tinyconfig-duration', metric.name)
+        metric = first(self.squad.metrics(name='x86_64-gcc-8-tinyconfig-duration'))
+        self.assertEqual('build/x86_64-gcc-8-tinyconfig-duration', metric.name)
         self.assertEqual(350, metric.result)
 
-        metric = first(self.squad.metrics(name='gcc-8-x86_64_defconfig-duration'))
-        self.assertEqual('build/gcc-8-x86_64_defconfig-duration', metric.name)
+        metric = first(self.squad.metrics(name='x86_64-gcc-8-x86_64_defconfig-duration'))
+        self.assertEqual('build/x86_64-gcc-8-x86_64_defconfig-duration', metric.name)
         self.assertEqual(460, metric.result)
 
         build.delete()
@@ -217,73 +310,9 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
     def test_submit_tuxbuild_empty(self):
         proc = self.submit_tuxbuild(os.path.join(self.root_dir, 'empty.json'))
         self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn('Failed to load json', proc.err)
+        self.assertIn('Failed to load build json', proc.err)
 
     def test_submit_tuxbuild_missing(self):
         proc = self.submit_tuxbuild(os.path.join(self.root_dir, 'missing.json'))
         self.assertFalse(proc.ok, msg=proc.err)
         self.assertIn('No such file or directory', proc.err)
-
-    def test_submit_tuxbuild_empty_build_status(self):
-        proc = self.submit_tuxbuild(
-            'tests/data/submit/tuxbuild/empty_build_status.json'
-        )
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: '' is not one of ['fail', 'pass']",
-            proc.err,
-        )
-        self.assertIn(
-            "Failed validating 'enum' in schema['items'][0]['properties']['build_status']", proc.err
-        )
-
-    def test_submit_tuxbuild_malformed_build_status(self):
-        proc = self.submit_tuxbuild(
-            'tests/data/submit/tuxbuild/malformed_build_status.json'
-        )
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: {'build': 'pass'} is not of type 'string'",
-            proc.err,
-        )
-        self.assertIn(
-            "Failed validating 'type' in schema['items'][0]['properties']['build_status']", proc.err
-        )
-
-    def test_submit_tuxbuild_missing_build_status(self):
-        proc = self.submit_tuxbuild(
-            'tests/data/submit/tuxbuild/missing_build_status.json'
-        )
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: 'build_status' is a required property",
-            proc.err,
-        )
-
-    def test_submit_tuxbuild_empty_kconfig(self):
-        proc = self.submit_tuxbuild('tests/data/submit/tuxbuild/empty_kconfig.json')
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn("Failed to validate tuxbuild data: [] is too short", proc.err)
-        self.assertIn(
-            "Failed validating 'minItems' in schema['items'][0]['properties']['kconfig']", proc.err
-        )
-
-    def test_submit_tuxbuild_malformed_kconfig(self):
-        proc = self.submit_tuxbuild('tests/data/submit/tuxbuild/malformed_kconfig.json')
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: {'CONFIG_ARM64_MODULE_PLTS': 'y'} is not of type 'string'",
-            proc.err,
-        )
-        self.assertIn(
-            "Failed validating 'type' in schema['items'][0]['properties']['kconfig']['items'][0]",
-            proc.err,
-        )
-
-    def test_submit_tuxbuild_missing_kconfig(self):
-        proc = self.submit_tuxbuild('tests/data/submit/tuxbuild/missing_kconfig.json')
-        self.assertFalse(proc.ok, msg=proc.err)
-        self.assertIn(
-            "Failed to validate tuxbuild data: 'kconfig' is a required property",
-            proc.err,
-        )

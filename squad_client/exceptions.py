@@ -1,3 +1,7 @@
+class InvalidBuildJson(Exception):
+    pass
+
+
 class InvalidSquadObject(Exception):
     pass
 
