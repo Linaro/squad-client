@@ -50,9 +50,15 @@ TUXBUILD_SCHEMA = {
             },
         },
         "required": [
-            "download_url",
             "build_status",
+            "download_url",
+            "duration",
             "git_describe",
+            "git_ref",
+            "git_repo",
+            "git_sha",
+            "git_short_log",
+            "kernel_version",
             "kconfig",
             "target_arch",
             "toolchain",
@@ -60,18 +66,7 @@ TUXBUILD_SCHEMA = {
     }],
 }
 
-ALLOWED_METADATA = [
-    "download_url",
-    "duration",
-    "git_describe",
-    "git_ref",
-    "git_repo",
-    "git_sha",
-    "git_short_log",
-    "kconfig",
-    "kernel_version",
-    "toolchain",
-]
+ALLOWED_METADATA = TUXBUILD_SCHEMA["items"][0]["required"]
 
 
 def load_builds(build_json):

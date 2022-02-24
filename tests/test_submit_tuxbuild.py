@@ -54,8 +54,7 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
         """
         Make sure that if a required field is missing an exception is thrown
         """
-        required_fields = TUXBUILD_SCHEMA["items"][0]["required"]
-        for f in required_fields:
+        for f in ALLOWED_METADATA:
             missing = {k: build[k] for k in build.keys() if k != f}
             with self.assertRaises(jsonschema.exceptions.ValidationError):
                 jsonschema.validate([missing], TUXBUILD_SCHEMA)
@@ -83,8 +82,6 @@ class SubmitTuxbuildCommandTest(unittest.TestCase):
             self.assertIn(key, metadata, msg=key)
 
         for key in metadata:
-            self.assertTrue(metadata[key], msg=key)
-
             if key == "config":
                 self.assertTrue(metadata["config"].startswith(build["download_url"]))
                 self.assertTrue(metadata["config"].endswith("config"))
