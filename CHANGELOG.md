@@ -1,3 +1,25 @@
+# 0.26
+
+This 0.26 release changes how we name build tests and metrics.
+
+Complete list of changes going in: 
+
+* commands:
+  * add toolchain to the metadata
+  * don't duplicate required fields
+  * drop duplicate names
+  * submit_tuxbuild: update build json loading
+  * submit_tuxbuild: update build test naming
+  * submit_tuxbuild: update metadata creation
+* tests:
+  * data: submit: tuxbuild: only test a single build
+  * test_submit_tuxbuild: fix the order of imports
+  * test_submit_tuxbuild: mock environment variable
+  * test_submit_tuxbuild: test build testrun metadata
+  * test_submit_tuxbuild: update json schema tests
+  * test_submit_tuxbuild: update test data
+  * test_submit_tuxbuild: use consistent quoting
+
 # 0.25
 
 This 0.25 release adds support to create build confidence settings
