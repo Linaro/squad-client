@@ -3,22 +3,23 @@
 set -eu
 
 export SQUAD_CLIENT_RELEASE=1
+EDITOR=${EDITOR-editor}
 
 v=$(python3 -c 'from squad_client.version import __version__ as v; print(v)')
-if git rev-parse --verify --quiet "${v}" >/dev/null; then
+if git rev-parse --verify --quiet "v${v}" >/dev/null; then
     echo "Version ${v} has already been released. Let's prepare a new one"
-    editor squad_client/version.py
+    $EDITOR squad_client/version.py
 fi
 
 v=$(python3 -c 'from squad_client.version import __version__ as v; print(v)')
-if git rev-parse --verify --quiet "${v}" >/dev/null; then
+if git rev-parse --verify --quiet "v${v}" >/dev/null; then
     echo "Version ${v} has already been released. Aborting"
     exit 1
 fi
 
 if ! grep -q "^# $v" CHANGELOG.md; then
     echo "Let's now document the changes in CHANGELOG.md"
-    editor CHANGELOG.md
+    $EDITOR CHANGELOG.md
 fi
 
 if ! grep -q "^# $v" CHANGELOG.md; then
@@ -39,30 +40,12 @@ if [ "${TEST:-yes}" != "no" ]; then
     ./manage.py test
 fi
 
-git commit --message "New release: ${v}" CHANGELOG.md squad_client/version.py || true
-
-# build
+# Build squad-client pip package and docker container
+./scripts/build "$v"
 rm -rf build/ dist/ *.egg-info/
-python3 setup.py sdist bdist_wheel
-docker build -t squadproject/squad-client:$v .
-docker tag squadproject/squad-client:$v squadproject/squad-client:latest
 
-# test
-tar=$(mktemp tar.XXXXXXXXX)
-git=$(mktemp git.XXXXXXXXX)
-trap cleanup INT TERM EXIT
-cleanup() {
-    rm -rf "$tar" "$git"
-}
-git ls-tree -r --name-only HEAD | grep -v '\.tar$' | sort > "$git"
-
-tar taf dist/squad-client-${v}.tar.gz | cut -d / -f 2- | grep -v '\(/$\|^$\|PKG-INFO\|egg-info\|\.pyc\|\.sqlite3\)' | sort > "$tar"
-diff -u "$tar" "$git"
-
-if [ "${UPLOAD:-yes}" = 'no' ]; then
-    echo "I: not uploading packages; they are left in dist/"
-    echo "I: you can run \`./scripts/upload $v\` to make the upload"
-    return
-fi
-
-./scripts/upload "$v"
+# Commit changes and push the new tag
+git commit --message "New release: ${v}" CHANGELOG.md squad_client/version.py || true
+git tag -s -m "SQUAD Client release $v" "v$v"
+git push
+git push --tags

@@ -10,6 +10,7 @@ include .coveragerc
 include .coverage
 include .travis.yml
 include .github/workflows/test.yml
+include .github/workflows/release.yml
 include .flake8
 
 recursive-include tests/ *

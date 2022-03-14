@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -eu
+
+v="$1"
+
+# Build pip package
+rm -rf build/ dist/ *.egg-info/
+python3 setup.py sdist bdist_wheel
+
+# test
+tar=$(mktemp tar.XXXXXXXXX)
+git=$(mktemp git.XXXXXXXXX)
+trap cleanup INT TERM EXIT
+cleanup() {
+    rm -rf "$tar" "$git"
+}
+git ls-tree -r --name-only HEAD | grep -v '\.tar$' | sort > "$git"
+
+tar taf dist/squad-client-${v}.tar.gz | cut -d / -f 2- | grep -v '\(/$\|^$\|PKG-INFO\|egg-info\|\.pyc\|\.sqlite3\)' | sort > "$tar"
+diff -u "$tar" "$git"
+
+# Build docker container
+docker build -t squadproject/squad-client:$v .
