@@ -98,9 +98,11 @@ class BuildTest(unittest.TestCase):
 
     def setUp(self):
         self.build = first(Squad().builds(version='my_build'))
+        self.build2 = first(Squad().builds(version='my_build2'))
 
     def test_basic(self):
         self.assertTrue(self.build is not None)
+        self.assertTrue(self.build2 is not None)
 
     def test_build_metadata(self):
         metadata = self.build.metadata
@@ -125,6 +127,13 @@ class BuildTest(unittest.TestCase):
         tests = self.build.tests(environment__slug='mynonexistentenv').values()
         self.assertEqual(0, len(tests))
 
+    def test_build_tests_change_cache_on_different_builds(self):
+        tests = self.build.tests(environment__slug='my_env').values()
+        self.assertEqual(4, len(tests))
+
+        tests = self.build2.tests(environment__slug='my_env').values()
+        self.assertEqual(0, len(tests))
+
     def test_build_metrics(self):
         tests = self.build.metrics().values()
         self.assertEqual(1, len(tests))
@@ -143,6 +152,13 @@ class BuildTest(unittest.TestCase):
 
         tests = self.build.metrics(environment__slug='mynonexistentenv').values()
         self.assertEqual(0, len(tests))
+
+    def test_build_metrics_change_cache_on_different_builds(self):
+        metrics = self.build.metrics(environment__slug='my_env').values()
+        self.assertEqual(1, len(metrics))
+
+        metrics = self.build2.metrics(environment__slug='my_env').values()
+        self.assertEqual(0, len(metrics))
 
 
 class TestRunTest(unittest.TestCase):

@@ -434,9 +434,12 @@ class Build(SquadObject):
 
         return testruns
 
-    __tests__ = {}
+    __tests__ = None
 
     def tests(self, count=ALL, **filters):
+        if self.__tests__ is None:
+            self.__tests__ = {}
+
         filters['count'] = count
         filters_str = str(OrderedDict(filters))
         if self.__tests__.get(filters_str) is None:
@@ -444,9 +447,12 @@ class Build(SquadObject):
             self.__tests__[filters_str] = self.__fetch__(Test, filters, count, endpoint=endpoint)
         return self.__tests__[filters_str]
 
-    __metrics__ = {}
+    __metrics__ = None
 
     def metrics(self, count=ALL, **filters):
+        if self.__metrics__ is None:
+            self.__metrics__ = {}
+
         filters['count'] = count
         filters_str = str(OrderedDict(filters))
         if self.__metrics__.get(filters_str) is None:
