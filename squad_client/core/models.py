@@ -515,7 +515,7 @@ class TestJob(SquadObject):
 
 class MetricSuite:
     name = ''
-    __metrics__ = {}
+    __metrics__ = None
 
     def add_metric(self, metric):
         if self.__metrics__ is None:
