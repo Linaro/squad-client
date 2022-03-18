@@ -518,8 +518,8 @@ class MetricSuite:
     __metrics__ = {}
 
     def add_metric(self, metric):
-        if self.__metric__ is None:
-            self.__metric__ = {}
+        if self.__metrics__ is None:
+            self.__metrics__ = {}
         self.__metrics__[metric.id] = metric
 
     @property
