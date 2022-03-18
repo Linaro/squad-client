@@ -599,8 +599,8 @@ class TestRun(SquadObject):
         objects = self.__fill__(TestRunMetadata, [new_metadata])
         self.__metadata__ = first(objects)
 
-    test_suites = []
-    metric_suites = []
+    test_suites = None
+    metric_suites = None
 
     def bucket_metric_and_test_suites(self):
         all_tests = self.tests()
@@ -614,8 +614,8 @@ class TestRun(SquadObject):
                     test_suite.add_test(test)
 
         all_metrics = self.metrics()
+        self.metric_suites = []
         if len(all_metrics):
-            self.metric_suites = []
             for suite_name, metrics in groupby(sorted(all_metrics.values(), key=lambda m: m.name), lambda m: parse_metric_name(m.name)[0]):
                 metric_suite = MetricSuite()
                 metric_suite.name = suite_name
