@@ -1,3 +1,8 @@
+# 0.26.1
+
+This 0.26.1 release fixes cache variables that had
+been shared among instances.
+
 # 0.26
 
 This 0.26 release changes how we name build tests and metrics.
