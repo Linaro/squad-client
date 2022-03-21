@@ -1,8 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
 set -eu
 
-v="$1"
+tag="$1"
+v="${tag:1}"
 
 # Build pip package
 rm -rf build/ dist/ *.egg-info/

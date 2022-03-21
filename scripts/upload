@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
-v="$1"
+tag="$1"
+v="${tag:1}"
 
 if [ "$GPG_DEFAULT_KEY_ID" = "" ]
 then
