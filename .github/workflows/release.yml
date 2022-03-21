@@ -35,7 +35,7 @@ jobs:
         DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
         VERSION: ${{ github.ref_name }}
         GPG_DEFAULT_KEY_ID: ${{ secrets.GPG_SIGNING_KEY_ID }}
-	SQUAD_CLIENT_RELEASE: 1
+        SQUAD_CLIENT_RELEASE: 1
       run: |
         docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
         ./scripts/build "$VERSION"
