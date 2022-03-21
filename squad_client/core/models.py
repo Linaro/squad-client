@@ -434,9 +434,12 @@ class Build(SquadObject):
 
         return testruns
 
-    __tests__ = {}
+    __tests__ = None
 
     def tests(self, count=ALL, **filters):
+        if self.__tests__ is None:
+            self.__tests__ = {}
+
         filters['count'] = count
         filters_str = str(OrderedDict(filters))
         if self.__tests__.get(filters_str) is None:
@@ -444,9 +447,12 @@ class Build(SquadObject):
             self.__tests__[filters_str] = self.__fetch__(Test, filters, count, endpoint=endpoint)
         return self.__tests__[filters_str]
 
-    __metrics__ = {}
+    __metrics__ = None
 
     def metrics(self, count=ALL, **filters):
+        if self.__metrics__ is None:
+            self.__metrics__ = {}
+
         filters['count'] = count
         filters_str = str(OrderedDict(filters))
         if self.__metrics__.get(filters_str) is None:
@@ -509,11 +515,11 @@ class TestJob(SquadObject):
 
 class MetricSuite:
     name = ''
-    __metrics__ = {}
+    __metrics__ = None
 
     def add_metric(self, metric):
-        if self.__metric__ is None:
-            self.__metric__ = {}
+        if self.__metrics__ is None:
+            self.__metrics__ = {}
         self.__metrics__[metric.id] = metric
 
     @property
@@ -593,8 +599,8 @@ class TestRun(SquadObject):
         objects = self.__fill__(TestRunMetadata, [new_metadata])
         self.__metadata__ = first(objects)
 
-    test_suites = []
-    metric_suites = []
+    test_suites = None
+    metric_suites = None
 
     def bucket_metric_and_test_suites(self):
         all_tests = self.tests()
@@ -608,8 +614,8 @@ class TestRun(SquadObject):
                     test_suite.add_test(test)
 
         all_metrics = self.metrics()
+        self.metric_suites = []
         if len(all_metrics):
-            self.metric_suites = []
             for suite_name, metrics in groupby(sorted(all_metrics.values(), key=lambda m: m.name), lambda m: parse_metric_name(m.name)[0]):
                 metric_suite = MetricSuite()
                 metric_suite.name = suite_name
