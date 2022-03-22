@@ -97,8 +97,7 @@ def create_name(build):
     if build["build_name"]:
         name = build["build_name"]
     else:
-        name += "%s-%s-%s" % (
-            build["target_arch"],
+        name += "%s-%s" % (
             build["toolchain"],
             build["kconfig"][0],
         )
