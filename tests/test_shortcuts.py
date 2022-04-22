@@ -12,6 +12,7 @@ from squad_client.shortcuts import (
     submit_results,
     submit_job,
     create_or_update_project,
+    watchjob,
 )
 
 
@@ -106,6 +107,35 @@ class SubmitJobShortcutTest(TestCase):
 
         for testjob in results.values():
             if testjob.environment == "my_submitted_env":
+                return
+
+        self.assertTrue(False)
+
+
+class WatchjobShortcutTest(TestCase):
+    def setUp(self):
+        self.squad = Squad()
+        SquadApi.configure(
+            url="http://localhost:%s" % settings.DEFAULT_SQUAD_PORT,
+            token="193cd8bb41ab9217714515954e8724f651ef8601",
+        )
+
+    def test_basic(self):
+        testjob_id = "watched-job-id"
+        success = watchjob(
+            group_project_slug="my_group/my_project",
+            build_version="my_build",
+            env_slug="my_env",
+            backend_name="my_backend",
+            testjob_id=testjob_id,
+        )
+
+        self.assertTrue(success)
+        results = self.squad.testjobs()
+        self.assertTrue(len(results) > 0)
+
+        for testjob in results.values():
+            if testjob.job_id == testjob_id:
                 return
 
         self.assertTrue(False)

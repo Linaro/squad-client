@@ -123,6 +123,7 @@ class SquadApi:
             elif response.status_code == 403:
                 raise ApiException('%s %s is forbidden' % (method, endpoint))
             elif response.status_code == 500:
+                logger.error(response.text)
                 logger.error('You hit a bug in SQUAD, please report it at https://github.com/Linaro/squad/issues/new so we can get it fixed.')
 
             return response

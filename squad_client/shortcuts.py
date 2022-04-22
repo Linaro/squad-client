@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from .core.models import ALL, Squad, Group, Project, Backend, Build, Environment, Test, Metric, MetricThreshold, TestRun, TestJob, SquadObjectException
+from .core.models import ALL, Squad, Group, Project, Build, Environment, Test, Metric, MetricThreshold, TestRun, TestJob, Backend, SquadObjectException
 from .utils import split_build_url, first, split_group_project_slug, getid
 
 
@@ -209,3 +209,29 @@ def create_or_update_project(group_slug=None, slug=None, name=None, description=
                 errors.append(str(e))
 
     return project, errors
+
+
+def watchjob(group_project_slug=None, build_version=None, env_slug=None, backend_name=None, testjob_id=None):
+    group_slug, project_slug = split_group_project_slug(group_project_slug)
+
+    group = Group()
+    project = Project()
+    build = Build()
+    testjob = TestJob()
+    environment = Environment()
+    backend = Backend()
+
+    group.slug = group_slug
+    project.group = group
+    project.slug = project_slug
+    backend.name = backend_name
+    environment.slug = env_slug
+    build.version = build_version
+
+    testjob.target_build = build
+    testjob.target = project
+    testjob.backend = backend
+    testjob.job_id = testjob_id
+    testjob.environment = environment
+
+    return testjob.watch()
