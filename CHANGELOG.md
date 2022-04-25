@@ -1,3 +1,16 @@
+# 0.27
+
+This 0.27 release adds support for sending watchjob requests
+to SQUAD. Part of the watchjob is to enable support of TuxSuite
+as squad backend.
+
+Complete list of changes going in:
+
+* core: models: add support for watchjob
+* core: api: log error message from squad server
+* commands: add submit tuxsuite command
+* commands: submit_tuxbuild: don't add target_arch into the test_name
+
 # 0.26.1
 
 This 0.26.1 release fixes cache variables that had
