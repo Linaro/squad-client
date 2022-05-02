@@ -1,3 +1,8 @@
+# 0.27.1
+
+This 0.27.1 release fixes tuxsuite support for accepting
+a single tuxtest result.
+
 # 0.27
 
 This 0.27 release adds support for sending watchjob requests
