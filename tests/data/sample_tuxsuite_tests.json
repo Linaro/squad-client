@@ -1,4 +1,4 @@
-[
+
     {
             "boot_args": null,
             "device": "qemu-ppc64",
@@ -33,4 +33,4 @@
             "user_agent": "tuxsuite/0.34.2",
             "waiting_for": "1yPYFzmqqQ7WViC3cdPUSnZXg6L"
     }
-]
+
