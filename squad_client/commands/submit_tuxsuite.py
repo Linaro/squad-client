@@ -105,9 +105,6 @@ class SubmitTuxSuiteCommand(SquadClientCommand):
         for result_type in ['builds', 'tests']:
             num_watching_jobs = 0
             for result in results[result_type].values():
-                if result['result'] == 'unknown':
-                    continue
-
                 job_id = self._generate_job_id(result_type, result)
 
                 num_watching_jobs += 1
