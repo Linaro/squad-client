@@ -1,3 +1,9 @@
+# 0.28
+
+This 0.28 release tweaks submit-tuxsuite command into also
+submitting unfinished builds or tests so that they can be
+watched by SQUAD.
+
 # 0.27.1
 
 This 0.27.1 release fixes tuxsuite support for accepting
