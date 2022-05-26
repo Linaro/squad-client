@@ -1,3 +1,7 @@
+# 0.28.1
+
+This 0.28.1 release adds "metadata" in the Test object.
+
 # 0.28
 
 This 0.28 release tweaks submit-tuxsuite command into also
