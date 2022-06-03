@@ -389,6 +389,10 @@ class Project(SquadObject):
         filters.update({'project': self.id})
         return self.__fetch__(MetricThreshold, filters, count)
 
+    def testjobs(self, count=DEFAULT_COUNT, **filters):
+        filters.update({'target': self.id})
+        return self.__fetch__(TestJob, filters, count)
+
     def __repr__(self):
         return self.slug
 
