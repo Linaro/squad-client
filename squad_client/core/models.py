@@ -440,7 +440,7 @@ class ProjectBasicSettings(SquadObject):
 class Build(SquadObject):
 
     endpoint = '/api/builds/'
-    attrs = ['url', 'id', 'testjobs', 'finished',
+    attrs = ['url', 'id', 'finished',
              'version', 'created_at', 'datetime', 'patch_id', 'keep_data', 'project',
              'patch_source', 'patch_baseline']
 
@@ -453,6 +453,20 @@ class Build(SquadObject):
                 testruns[_id].bucket_metric_and_test_suites()
 
         return testruns
+
+    # this _ testjobs__ attribute is for getting the TestJob objects for this Build
+    __testjobs__ = None
+
+    def testjobs(self, count=ALL, **filters):
+        if self.__testjobs__ is None:
+            self.__testjobs__ = {}
+
+        filters['count'] = count
+        filters_str = str(OrderedDict(filters))
+        if self.__testjobs__.get(filters_str) is None:
+            endpoint = '%s%d/testjobs/' % (self.endpoint, self.id)
+            self.__testjobs__[filters_str] = self.__fetch__(TestJob, filters, count, endpoint=endpoint)
+        return self.__testjobs__[filters_str]
 
     __tests__ = None
 
