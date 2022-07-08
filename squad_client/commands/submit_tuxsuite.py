@@ -43,7 +43,7 @@ class SubmitTuxSuiteCommand(SquadClientCommand):
         # the plan.json contains both tests and build results formatted as: {"builds": {}, "tests": {}}
         # both test.json and build.json contains either tests or builds only, respectively, formatted as: [{}]
         if type(results) == dict:
-            if results.get('tests') and results.get('builds'):
+            if "tests" in results and "builds" in results:
                 return results
             # else it's a single test result file
             results = [results]
