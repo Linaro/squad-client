@@ -37,12 +37,13 @@ class SubmitTuxSuiteCommand(SquadClientCommand):
                 results = json.load(f)
         except Exception as e:
             logger.error("Failed to load json: %s", e)
+            return None
 
         # results file can be one of 3 types: build.json, test.json or plan.json
         # the plan.json contains both tests and build results formatted as: {"builds": {}, "tests": {}}
         # both test.json and build.json contains either tests or builds only, respectively, formatted as: [{}]
         if type(results) == dict:
-            if results.get('tests') and results.get('builds'):
+            if "tests" in results and "builds" in results:
                 return results
             # else it's a single test result file
             results = [results]
