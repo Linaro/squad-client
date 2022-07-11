@@ -1,3 +1,8 @@
+# 0.28.2
+
+This 0.28.2 release fixes submit-tuxsuite command when
+the results file has empty tests or builds.
+
 # 0.28.1
 
 This 0.28.1 release adds "metadata" in the Test object.
