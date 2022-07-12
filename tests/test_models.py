@@ -216,6 +216,12 @@ class ProjectTest(unittest.TestCase):
         threshold = first(thresholds)
         self.assertEqual(threshold.name, 'my-threshold')
 
+    def test_project_testjobs(self):
+        testjobs = self.project.testjobs()
+        self.assertEqual(1, len(testjobs))
+        testjob = first(testjobs)
+        self.assertEqual(testjob.name, 'my_testjob')
+
     def test_compare_builds_from_same_project(self):
         # tests
         comparison = self.project.compare_builds(self.build2.id, self.build.id)
