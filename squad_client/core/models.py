@@ -533,7 +533,7 @@ class TestJob(SquadObject):
              'submitted_at', 'fetched_at', 'submitted', 'fetched', 'fetch_attempts',
              'last_fetch_attempt', 'failure', 'can_resubmit', 'resubmitted_count',
              'job_id', 'job_status', 'backend', 'testrun', 'target', 'target_build',
-             'parent_job']
+             'parent_job', 'started_at', 'ended_at']
 
     def submit(self):
         squad = Squad()
