@@ -477,6 +477,20 @@ class Build(SquadObject):
             self.__metrics__[filters_str] = self.__fetch__(Metric, filters, count, endpoint=endpoint)
         return self.__metrics__[filters_str]
 
+    __failures_with_confidence__ = None
+
+    def failures_with_confidence(self, count=ALL, **filters):
+        if self.__failures_with_confidence__ is None:
+            self.__failures_with_confidence__ = {}
+
+        filters['count'] = count
+        filters['fields'] = 'id,name,environment,confidence'
+        filters_str = str(OrderedDict(filters))
+        if self.__failures_with_confidence__.get(filters_str) is None:
+            endpoint = '%s%d/failures_with_confidence' % (self.endpoint, self.id)
+            self.__failures_with_confidence__[filters_str] = self.__fetch__(TestWithConfidence, filters, count, endpoint=endpoint)
+        return self.__failures_with_confidence__[filters_str]
+
     __metadata__ = None
     __status__ = None
 
@@ -682,6 +696,13 @@ class Test(SquadObject):
 
     def __repr__(self):
         return self.short_name
+
+
+class TestWithConfidence(Test):
+    attrs = ['id', 'name', 'environment', 'confidence']
+
+    def __repr__(self):
+        return self.name
 
 
 class Suite(SquadObject):
