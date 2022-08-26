@@ -13,6 +13,7 @@ from squad_client.shortcuts import (
     submit_job,
     create_or_update_project,
     watchjob,
+    download_tests,
 )
 
 
@@ -137,8 +138,6 @@ class WatchjobShortcutTest(TestCase):
         for testjob in results.values():
             if testjob.job_id == testjob_id:
                 return
-
-        self.assertTrue(False)
 
 
 class CreateOrUpdateShortcutTest(TestCase):
@@ -332,3 +331,40 @@ class CreateOrUpdateShortcutTest(TestCase):
         self.assertEqual(['Project exists already'], errors)
 
         project.delete()
+
+
+class DownloadTestsShortcutTest(TestCase):
+    def setUp(self):
+        self.squad = Squad()
+        SquadApi.configure(
+            url="http://localhost:%s" % settings.DEFAULT_SQUAD_PORT,
+            token="193cd8bb41ab9217714515954e8724f651ef8601",
+        )
+
+    def test_basic(self):
+        group = self.squad.group("my_group")
+        project = group.project("my_project")
+        environment = project.environment("my_env")
+        suite = project.suite("my_suite")
+        build = project.build("my_build")
+        filename = "/tmp/test-download-tests.txt"
+        success = download_tests(
+            project=project,
+            build=build,
+            environment=environment,
+            suite=suite,
+            output_filename=filename,
+        )
+
+        self.assertTrue(success)
+
+        lines = []
+        with open(filename, "r") as fp:
+            lines = fp.readlines()
+
+        self.assertEqual(lines, [
+            'my_env/my_suite/my_failed_test fail\n',
+            'my_env/my_suite/my_passed_test pass\n',
+            'my_env/my_suite/my_skipped_test skip\n',
+            'my_env/my_suite/my_xfailed_test pass\n',
+        ])

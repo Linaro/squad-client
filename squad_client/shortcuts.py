@@ -1,3 +1,5 @@
+import logging
+import re
 from collections import defaultdict
 
 from .core.models import ALL, Squad, Group, Project, Build, Environment, Test, Metric, MetricThreshold, TestRun, TestJob, Backend, SquadObjectException
@@ -5,6 +7,7 @@ from .utils import split_build_url, first, split_group_project_slug, getid
 
 
 squad = Squad()
+logger = logging.getLogger(__name__)
 
 
 def compare_builds(baseline_id, build_id, by="tests", force=False):
@@ -235,3 +238,110 @@ def watchjob(group_project_slug=None, build_version=None, env_slug=None, backend
     testjob.environment = environment
 
     return testjob.watch()
+
+
+def get_build(build_version, project):
+    """
+        Any of the following formats are accepted for build_version
+        - latest              latest build (finished or not)
+        - latest+N            latest build (finished or not) "+N" is ignored
+        - latest-N            latest Nth build (finished or not)
+        - latest-finished     latest build that is finished
+        - latest-finished+N   latest build that is finished "+N" is ignored
+        - latest-finished-N   latest Nth build that is finished
+        - v1.2.3              build that has version matching "v1.2.3"
+        - v1.2.3+N            Nth build after "v1.2.3"
+        - v1.2.3-N            Nth build prior to "v1.2.3"
+    """
+
+    # This regex HAS to match
+    regex = r'^(.*?)([-+]\d+)?$'
+    matches = re.search(regex, build_version)
+    if matches is None:
+        logger.error(f'Unknown behavior: {regex} is supposed to match any string > 0, including build version {build_version}')
+        return None
+
+    build_version = matches.group(1)
+    nth_build = matches.group(2)
+    logger.debug(f'Build version {build_version}, Nth build {nth_build}')
+
+    # Filters that serve for all cases
+    filters = {
+        'count': 1,
+        'ordering': '-1',
+    }
+
+    look_forward = False
+    offset = None
+    if nth_build is not None:
+        # For previous Nth builds, offset is enough to handle it
+        offset = int(nth_build[1:])
+        look_forward = (nth_build[0] == '+')
+
+    if build_version in ['latest', 'latest-finished']:
+        if offset:
+            filters['offset'] = offset
+
+        if build_version == 'latest-finished':
+            filters['status_finished'] = True
+
+        logger.debug(f'Fetching {build_version} build with filters = {filters}')
+        return first(project.builds(**filters))
+
+    # User specified an actual build version
+    filters['version'] = build_version
+
+    logger.debug(f'Fetching {build_version} build with filters = {filters}')
+    build = first(project.builds(**filters))
+    if build is None or offset is None:
+        return build
+
+    # Check if user wants N forward or backward builds
+    if look_forward:
+        # Retrieving the Nth-forward build
+        # my-build+5 (the 5th build that happened after "my-build")
+        filters['id__gt'] = build.id
+        filters['ordering'] = 'id'
+    else:
+        filters['id__lt'] = build.id
+
+    # The 1 is because offset=0 is already the build right after/before the current one
+    filters['offset'] = offset - 1
+
+    # Reset version filter
+    del filters['version']
+
+    logger.debug(f'Fetching build with filters = {filters}')
+    return first(project.builds(**filters))
+
+
+def download_tests(project, build, environment=None, suite=None, output_filename=None):
+    environments = project.environments(count=ALL)
+
+    filters = {
+        'count': ALL,
+        'fields': 'id,name,status,environment',
+    }
+
+    if environment:
+        filters['environment'] = environment.id
+
+    if suite:
+        filters['suite'] = suite.id
+
+    filename = output_filename or f'{build.version}.txt'
+    logger.info(f'Downloading test results for {project.slug}/{build.version}/{environment or "(all envs)"}/{suite or "(all suites)"} to {filename}')
+
+    tests = build.tests(**filters)
+    output = []
+    for test in tests.values():
+        env_slug = environments[getid(test.environment)].slug
+        output.append(f'{env_slug}/{test.name} {test.status}')
+
+    output.sort()
+
+    with open(filename, 'w') as fp:
+        for line in output:
+            fp.write(line + '\n')
+
+    return True
