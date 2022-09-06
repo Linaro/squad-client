@@ -1,3 +1,9 @@
+# 0.29
+
+This 0.29 release introduces a new command called "download-results",
+which allow users to download test results of a given build into a sorted
+list of tests in a text format.
+
 # 0.28.2
 
 This 0.28.2 release fixes submit-tuxsuite command when
