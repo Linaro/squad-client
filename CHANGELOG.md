@@ -1,3 +1,9 @@
+# 0.29.1
+
+This 0.29.1 release just prints out the submitted SQUAD job id
+to stdout. This is useful for invoking tools to know which job
+got submitted.
+
 # 0.29
 
 This 0.29 release introduces a new command called "download-results",
