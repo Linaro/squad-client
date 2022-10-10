@@ -304,6 +304,9 @@ class Squad(SquadObject):
         status_code = response.status_code
         if status_code not in [200, 201, 500]:
             logger.error('Failed to submit job request: %s' % response.text)
+
+        logger.info('SQUAD job id: %s' % response.text)
+
         return response.ok
 
     def watchjob(self, group=None, project=None, build=None, environment=None, backend=None, testjob_id=None):
