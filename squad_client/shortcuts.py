@@ -345,3 +345,25 @@ def download_tests(project, build, environment=None, suite=None, output_filename
             fp.write(line + '\n')
 
     return True
+
+
+def register_callback(group_slug=None, project_slug=None, build_version=None, url=None, record_response=False):
+
+    errors = []
+
+    group = squad.group(group_slug)
+    if group is None:
+        errors.append('Group "%s" not found' % group_slug)
+        return False, errors
+
+    project = group.project(project_slug)
+    if project is None:
+        errors.append('Project %s not found in %s' % (project_slug, group_slug))
+        return False, errors
+
+    build = project.build(build_version)
+    if build is None:
+        errors.append('Build %s not found in %s' % (build_version, project_slug))
+        return False, errors
+
+    return build.register_callback(url, record_response=record_response), errors

@@ -14,6 +14,7 @@ from squad_client.shortcuts import (
     create_or_update_project,
     watchjob,
     download_tests,
+    register_callback,
 )
 
 
@@ -368,3 +369,29 @@ class DownloadTestsShortcutTest(TestCase):
             'my_env/my_suite/my_skipped_test skip\n',
             'my_env/my_suite/my_xfailed_test pass\n',
         ])
+
+
+class RegisterCallbackShortcutTest(TestCase):
+    def setUp(self):
+        self.squad = Squad()
+        SquadApi.configure(
+            url="http://localhost:%s" % settings.DEFAULT_SQUAD_PORT,
+            token="193cd8bb41ab9217714515954e8724f651ef8601",
+        )
+
+    def test_basic(self):
+        group = self.squad.group("my_group")
+        project = group.project("my_project")
+        build = project.build("my_build")
+        url = "http://some-url.example"
+
+        success, errors = register_callback(
+            group_slug=group.slug,
+            project_slug=project.slug,
+            build_version=build.version,
+            url=url,
+            record_response=True,
+        )
+
+        self.assertTrue(success)
+        self.assertEqual([], errors)

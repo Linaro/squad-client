@@ -501,6 +501,19 @@ class Build(SquadObject):
             self.__status__ = first(objects)
         return self.__status__
 
+    def register_callback(self, url, record_response=False):
+        logger.info('Registering callback "%s" to build %s (record response: %s)' % (url, self.version, record_response))
+
+        endpoint = '%s%d/callbacks/' % (self.endpoint, self.id)
+        response = SquadApi.post(endpoint, data={
+            'callback_url': url,
+            'callback_record_response': record_response,
+        })
+
+        if not response.ok:
+            logger.error('Failed to register callback: %s' % response.text)
+        return response.ok
+
     def __repr__(self):
         return self.version
 
