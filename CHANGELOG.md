@@ -1,3 +1,9 @@
+# 0.30
+
+This 0.30 release adds a new command in squad-client: register-callback.
+It allows users to register callback URLs to builds, so when they are finished
+SQUAD can trigger such URLs.
+
 # 0.29.1
 
 This 0.29.1 release just prints out the submitted SQUAD job id
