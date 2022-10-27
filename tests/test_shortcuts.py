@@ -352,8 +352,8 @@ class DownloadTestsShortcutTest(TestCase):
         success = download_tests(
             project=project,
             build=build,
-            environment=environment,
-            suite=suite,
+            filter_envs=[environment],
+            filter_suites=[suite],
             output_filename=filename,
         )
 

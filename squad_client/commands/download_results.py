@@ -32,6 +32,9 @@ class DownloadResultsCommand(SquadClientCommand):
             "--filename", help="Name of the output file where results will be written"
         )
         parser.add_argument(
+            "--format", help="Format of the output line", default='{test.environment.slug}/{test.name} {test.status}'
+        )
+        parser.add_argument(
             "--debug",
             action='store_true',
             help="Set debug mode"
@@ -69,5 +72,6 @@ class DownloadResultsCommand(SquadClientCommand):
             build,
             filter_envs=environments,
             filter_suites=suites,
+            format_string=args.format,
             output_filename=args.filename,
         )

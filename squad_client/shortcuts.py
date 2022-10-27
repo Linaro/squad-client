@@ -315,12 +315,14 @@ def get_build(build_version, project):
     return first(project.builds(**filters))
 
 
-def download_tests(project, build, filter_envs=None, filter_suites=None, output_filename=None):
-    environments = project.environments(count=ALL)
+def download_tests(project, build, filter_envs=None, filter_suites=None, format_string=None, output_filename=None):
+    all_environments = project.environments(count=ALL)
+    all_suites = project.suites(count=ALL)
+    all_testruns = build.testruns(count=ALL)
 
     filters = {
         'count': ALL,
-        'fields': 'id,name,status,environment',
+        'fields': 'id,name,status,environment,suite,test_run,build',
     }
 
     envs = None
@@ -336,11 +338,17 @@ def download_tests(project, build, filter_envs=None, filter_suites=None, output_
     filename = output_filename or f'{build.version}.txt'
     logger.info(f'Downloading test results for {project.slug}/{build.version}/{envs or "(all envs)"}/{suites or "(all suites)"} to {filename}')
 
+    if format_string is None:
+        format_string = '{test.environment.slug}/{test.name} {test.status}'
+
     tests = build.tests(**filters)
     output = []
     for test in tests.values():
-        env_slug = environments[getid(test.environment)].slug
-        output.append(f'{env_slug}/{test.name} {test.status}')
+        test.build = build
+        test.environment = all_environments[getid(test.environment)]
+        test.suite = all_suites[getid(test.suite)]
+        test.test_run = all_testruns[getid(test.test_run)]
+        output.append(format_string.format(test=test))
 
     output.sort()
 
