@@ -315,7 +315,7 @@ def get_build(build_version, project):
     return first(project.builds(**filters))
 
 
-def download_tests(project, build, environment=None, suite=None, output_filename=None):
+def download_tests(project, build, filter_envs=None, filter_suites=None, output_filename=None):
     environments = project.environments(count=ALL)
 
     filters = {
@@ -323,14 +323,18 @@ def download_tests(project, build, environment=None, suite=None, output_filename
         'fields': 'id,name,status,environment',
     }
 
-    if environment:
-        filters['environment'] = environment.id
+    envs = None
+    if filter_envs:
+        filters['environment__id__in'] = [e.id for e in filter_envs]
+        envs = ','.join([e.slug for e in filter_envs])
 
-    if suite:
-        filters['suite'] = suite.id
+    suites = None
+    if filter_suites:
+        filters['suite__id__in'] = [s.id for s in filter_suites]
+        suites = ','.join([s.slug for s in filter_suites])
 
     filename = output_filename or f'{build.version}.txt'
-    logger.info(f'Downloading test results for {project.slug}/{build.version}/{environment or "(all envs)"}/{suite or "(all suites)"} to {filename}')
+    logger.info(f'Downloading test results for {project.slug}/{build.version}/{envs or "(all envs)"}/{suites or "(all suites)"} to {filename}')
 
     tests = build.tests(**filters)
     output = []

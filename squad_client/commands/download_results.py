@@ -23,10 +23,10 @@ class DownloadResultsCommand(SquadClientCommand):
             "--build", help="Build version. Exemples: my-build-version. Or pre-defined build aliases: latest and latest-finished", required=True,
         )
         parser.add_argument(
-            "--environment", help="Test environment"
+            "--environments", help="Test environments (separated by ',')"
         )
         parser.add_argument(
-            "--suite", help="Test suite"
+            "--suites", help="Test suites (separated by ',')"
         )
         parser.add_argument(
             "--filename", help="Name of the output file where results will be written"
@@ -56,18 +56,18 @@ class DownloadResultsCommand(SquadClientCommand):
             logger.error(f"Build \"{group.slug}/{project.slug}/{args.build}\" not found")
             return False
 
-        environment = None
-        if args.environment:
-            environment = project.environment(args.environment)
+        environments = None
+        if args.environments:
+            environments = [project.environment(e) for e in args.environments.split(",")]
 
-        suite = None
-        if args.suite:
-            suite = project.suite(args.suite)
+        suites = None
+        if args.suites:
+            suites = [project.suite(s) for s in args.suites.split(",")]
 
         return download_tests(
             project,
             build,
-            environment=environment,
-            suite=suite,
+            filter_envs=environments,
+            filter_suites=suites,
             output_filename=args.filename,
         )
