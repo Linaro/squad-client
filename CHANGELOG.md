@@ -1,3 +1,8 @@
+# 0.31
+
+This 0.31 release allow downloading test results filtered by environments, suites
+and also it allows specifying a format of the test output line by line.
+
 # 0.30
 
 This 0.30 release adds a new command in squad-client: register-callback.
