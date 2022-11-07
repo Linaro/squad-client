@@ -327,12 +327,12 @@ def download_tests(project, build, filter_envs=None, filter_suites=None, format_
 
     envs = None
     if filter_envs:
-        filters['environment__id__in'] = [e.id for e in filter_envs]
+        filters['environment__id__in'] = ','.join([str(e.id) for e in filter_envs])
         envs = ','.join([e.slug for e in filter_envs])
 
     suites = None
     if filter_suites:
-        filters['suite__id__in'] = [s.id for s in filter_suites]
+        filters['suite__id__in'] = ','.join([str(s.id) for s in filter_suites])
         suites = ','.join([s.slug for s in filter_suites])
 
     filename = output_filename or f'{build.version}.txt'
