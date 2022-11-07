@@ -1,3 +1,8 @@
+# 0.31.1
+
+This 0.31.1 release fixes a bug when accessing TestRunMetadata fields that don't exist.
+The release also fixes a bug when downloading test results filtering suites and envs
+
 # 0.31
 
 This 0.31 release allow downloading test results filtered by environments, suites
