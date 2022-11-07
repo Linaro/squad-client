@@ -175,6 +175,7 @@ class TestRunTest(unittest.TestCase):
         self.assertTrue(self.testrun.metadata_file is not None)
         self.assertTrue(self.testrun.metadata is not None)
         self.assertEqual(self.testrun.metadata.foo, "bar")
+        self.assertEqual(self.testrun.metadata.not_existing, None)
 
         self.assertTrue(self.testrun_no_metadata.metadata_file is not None)
         self.assertTrue(self.testrun_no_metadata.metadata is None)

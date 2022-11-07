@@ -582,7 +582,8 @@ class TestRunStatus(SquadObject):
 
 
 class TestRunMetadata(SquadObject):
-    pass
+    def __getattr__(self, name):
+        return None
 
 
 class TestRun(SquadObject):
