@@ -1,3 +1,8 @@
+# 0.32
+
+This 0.31.1 release adds `testjobs` attribute for the Build object and it also
+allows prefetching testruns' metadata when fetching build testruns.
+
 # 0.31.1
 
 This 0.31.1 release fixes a bug when accessing TestRunMetadata fields that don't exist.
