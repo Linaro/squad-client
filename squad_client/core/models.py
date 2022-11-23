@@ -39,8 +39,8 @@ class SquadObject:
 
     def __init__(self, _id=None):
         if _id:
-            self.endpoint += str(_id)
-            self.__fetch__()
+            endpoint = '%s%d' % (self.endpoint, _id)
+            self.__fetch__(endpoint=endpoint)
 
     @classmethod
     def get_type(cls, _type):
@@ -99,7 +99,7 @@ class SquadObject:
         """
 
         if klass is None:
-            response = SquadApi.get(self.endpoint)
+            response = SquadApi.get(endpoint or self.endpoint)
             result = response.json()
             self.__fill_object__(result)
             return
