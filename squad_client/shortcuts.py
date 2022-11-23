@@ -318,7 +318,7 @@ def get_build(build_version, project):
 def download_tests(project, build, filter_envs=None, filter_suites=None, format_string=None, output_filename=None):
     all_environments = project.environments(count=ALL)
     all_suites = project.suites(count=ALL)
-    all_testruns = build.testruns(count=ALL)
+    all_testruns = build.testruns(count=ALL, prefetch_metadata=True)
 
     filters = {
         'count': ALL,

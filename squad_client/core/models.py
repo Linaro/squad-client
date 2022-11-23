@@ -444,13 +444,21 @@ class Build(SquadObject):
              'version', 'created_at', 'datetime', 'patch_id', 'keep_data', 'project',
              'patch_source', 'patch_baseline']
 
-    def testruns(self, count=ALL, bucket_suites=False, **filters):
+    def testruns(self, count=ALL, bucket_suites=False, prefetch_metadata=False, **filters):
         filters.update({'build': self.id})
         testruns = self.__fetch__(TestRun, filters, count)
 
         if bucket_suites:
             for _id in testruns.keys():
                 testruns[_id].bucket_metric_and_test_suites()
+
+        if prefetch_metadata:
+            endpoint = '%s%d/metadata_by_testrun' % (self.endpoint, self.id)
+            response = SquadApi.get(endpoint)
+            if response.text != "None":
+                metadata_by_testrun = response.json()
+                for testrun_id in testruns.keys():
+                    testruns[testrun_id].metadata = metadata_by_testrun[str(testrun_id)]
 
         return testruns
 

@@ -4,6 +4,7 @@ from . import settings
 from squad_client.core.api import SquadApi
 from squad_client.core.models import Squad, ALL, Project
 from squad_client.utils import first
+from unittest.mock import patch
 
 
 SquadApi.configure(url='http://localhost:%s' % settings.DEFAULT_SQUAD_PORT)
@@ -159,6 +160,15 @@ class BuildTest(unittest.TestCase):
 
         metrics = self.build2.metrics(environment__slug='my_env').values()
         self.assertEqual(0, len(metrics))
+
+    def test_build_testrun(self):
+        testruns = self.build.testruns(prefetch_metadata=True)
+        self.assertEqual(2, len(testruns))
+
+        with patch('squad_client.core.api.SquadApi.get') as squad_api_get:
+            testrun = first(testruns)
+            self.assertEqual('bar', testrun.metadata.foo)
+            squad_api_get.assert_not_called()
 
 
 class TestRunTest(unittest.TestCase):
