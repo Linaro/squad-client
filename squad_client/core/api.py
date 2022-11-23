@@ -107,6 +107,9 @@ class SquadApi:
             params.update(urllib.parse.parse_qs(parsed_url.query))
             kwargs['params'] = params
 
+        if endpoint[-1] != '/':
+            endpoint += '/'
+
         url = '%s%s' % (SquadApi.url, endpoint if endpoint[0] != '/' else endpoint[1:])
         logger.debug('%s %s (%s)' % (method, url, kwargs))
 
