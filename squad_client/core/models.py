@@ -569,6 +569,40 @@ class TestJob(SquadObject):
             backend=self.backend,
             testjob_id=self.job_id,)
 
+    __testrun_obj__ = None
+
+    @property
+    def testrun_obj(self):
+        if self.__testrun_obj__ is not None:
+            return self.__testrun_obj__
+
+        if self.testrun is None:
+            return None
+
+        response = SquadApi.get(self.testrun)
+        if response.text == "None":
+            self.__testrun_obj__ = None
+            return None
+
+        testrun_objects = self.__fill__(TestRun, [response.json()])
+        self.__testrun_obj__ = first(testrun_objects)
+
+        return self.__testrun_obj__
+
+    @property
+    def metadata(self):
+        if self.testrun_obj is None:
+            return None
+        else:
+            return self.testrun_obj.metadata
+
+    @property
+    def metrics(self):
+        if self.testrun_obj is None:
+            return None
+        else:
+            return self.testrun_obj.metrics()
+
 
 class MetricSuite:
     name = ''
