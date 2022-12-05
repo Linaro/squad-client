@@ -39,7 +39,7 @@ class SquadObject:
 
     def __init__(self, _id=None):
         if _id:
-            endpoint = '%s%d' % (self.endpoint, _id)
+            endpoint = f'{self.endpoint}{_id}'
             self.__fetch__(endpoint=endpoint)
 
     @classmethod
@@ -551,7 +551,7 @@ class BuildStatus(SquadObject):
 class TestJob(SquadObject):
 
     endpoint = '/api/testjobs/'
-    attrs = ['url', 'external_url', 'definition', 'name', 'environment', 'created_at',
+    attrs = ['url', 'id', 'external_url', 'definition', 'name', 'environment', 'created_at',
              'submitted_at', 'fetched_at', 'submitted', 'fetched', 'fetch_attempts',
              'last_fetch_attempt', 'failure', 'can_resubmit', 'resubmitted_count',
              'job_id', 'job_status', 'backend', 'testrun', 'target', 'target_build',

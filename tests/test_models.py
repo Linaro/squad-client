@@ -2,7 +2,7 @@ import unittest
 
 from . import settings
 from squad_client.core.api import SquadApi
-from squad_client.core.models import Squad, ALL, Project
+from squad_client.core.models import Squad, ALL, Project, TestJob
 from squad_client.utils import first
 from unittest.mock import patch
 
@@ -303,3 +303,11 @@ class SuiteTest(unittest.TestCase):
     def test_suite_tests(self):
         tests = self.suite.tests()
         self.assertEqual(4, len(tests))
+
+
+class TestJobTest(unittest.TestCase):
+
+    def test_basic(self):
+        testjob = first(Squad().testjobs())
+        fetched_by_id = TestJob(str(testjob.id))
+        self.assertEqual(testjob.id, fetched_by_id.id)
