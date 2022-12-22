@@ -1,3 +1,8 @@
+# 0.33
+
+This 0.33 release adds a new method to TestJob model, allowing filtering
+test jobs resubmitted.
+
 # 0.32.1
 
 This 0.32.1 release fixes a small bug when trying to fetch TestJob objects
