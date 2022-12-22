@@ -311,3 +311,10 @@ class TestJobTest(unittest.TestCase):
         testjob = first(Squad().testjobs())
         fetched_by_id = TestJob(str(testjob.id))
         self.assertEqual(testjob.id, fetched_by_id.id)
+
+    def test_resubmitted_jobs(self):
+        testjob = first(Squad().testjobs())
+        resubmitted_jobs = testjob.resubmitted_jobs()
+        self.assertEqual(1, len(resubmitted_jobs))
+        resubmitted = first(resubmitted_jobs)
+        self.assertEqual(testjob.url, resubmitted.parent_job)

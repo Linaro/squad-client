@@ -577,6 +577,10 @@ class TestJob(SquadObject):
             backend=self.backend,
             testjob_id=self.job_id,)
 
+    def resubmitted_jobs(self):
+        endpoint = '%s%d/resubmitted_jobs/' % (self.endpoint, self.id)
+        return self.__fetch__(TestJob, endpoint=endpoint, filters={})
+
 
 class MetricSuite:
     name = ''

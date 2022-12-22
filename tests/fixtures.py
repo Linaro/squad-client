@@ -54,6 +54,7 @@ mci.Backend.objects.create(name='my_tuxsuite_backend', implementation_type='tuxs
 
 backend = mci.Backend.objects.create(name='my_backend', implementation_type='lava')
 testjob = testrun.test_jobs.create(backend=backend, target=project, target_build=build)
+resubmitted_testjob = mci.TestJob.objects.create(backend=backend, target=project, target_build=build, parent_job=testjob)
 
 emailtemplate = m.EmailTemplate.objects.create(name='my_emailtemplate')
 suitemetadata = m.SuiteMetadata.objects.create(name='my_suitemetadata')
