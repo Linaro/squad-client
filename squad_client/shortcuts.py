@@ -255,7 +255,7 @@ def get_build(build_version, project):
     """
 
     # This regex HAS to match
-    regex = r'^(.*?)([-+]\d+)?$'
+    regex = r'^(.*?(?:-\d{8})?)([-+]\d+)?$'
     matches = re.search(regex, build_version)
     if matches is None:
         logger.error(f'Unknown behavior: {regex} is supposed to match any string > 0, including build version {build_version}')
