@@ -1,3 +1,8 @@
+# 0.34
+
+This 0.34 release adds a retry strategy to requests to backend server and also
+make squad-client reuse connections previously opened.
+
 # 0.33
 
 This 0.33 release adds a new method to TestJob model, allowing filtering
