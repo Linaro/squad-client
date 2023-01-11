@@ -1,4 +1,6 @@
+from http.client import HTTPMessage
 from unittest import TestCase
+from unittest.mock import ANY, Mock, patch, call
 
 from . import settings
 from squad_client.core.api import SquadApi, ApiException
@@ -31,3 +33,20 @@ class SquadApiTest(TestCase):
 
         # reset config
         self.setUp()
+
+    @patch("urllib3.connectionpool.HTTPConnectionPool._get_conn")
+    def test_handle_retries(self, getconn_mock):
+        getconn_mock.return_value.getresponse.side_effect = [
+            Mock(status=500, msg=HTTPMessage()),
+            Mock(status=429, msg=HTTPMessage()),
+            Mock(status=200, msg=HTTPMessage()),
+        ]
+
+        r = SquadApi.get("http://localhost:%s/testme" % settings.DEFAULT_SQUAD_PORT)
+        r.raise_for_status()
+
+        self.assertEqual(getconn_mock.return_value.request.mock_calls, [
+            call("GET", "/testme/", body=None, headers=ANY),
+            call("GET", "/testme/", body=None, headers=ANY),
+            call("GET", "/testme/", body=None, headers=ANY),
+        ])

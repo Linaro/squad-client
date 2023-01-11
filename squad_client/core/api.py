@@ -49,6 +49,7 @@ class SquadApi:
     token = None
     headers = None
     version = None
+    session = None
 
     @staticmethod
     def configure(url, token=None, cache=0):
@@ -91,6 +92,20 @@ class SquadApi:
         return SquadApi.__request__('DELETE', endpoint, params=params, data=data)
 
     @staticmethod
+    def get_session():
+        if SquadApi.session is None:
+            retry_strategy = Retry(
+                total=5,
+                backoff_factor=1,
+                status_forcelist=[429, 500, 502, 503, 504],
+                allowed_methods=["HEAD", "GET", "PUT", "DELETE", "OPTIONS", "TRACE"])
+            adapter = HTTPAdapter(max_retries=retry_strategy)
+            SquadApi.session = requests.Session()
+            SquadApi.session.mount('http://', adapter)
+            SquadApi.session.mount('https://', adapter)
+        return SquadApi.session
+
+    @staticmethod
     def __request__(method, endpoint, **kwargs):
         if SquadApi.url is None:
             raise ApiException('Missing "url" in SquadApi configuration. Example: `export SQUAD_HOST=http://qa-reports.linaro.org`')
@@ -118,16 +133,8 @@ class SquadApi:
             kwargs['headers'] = SquadApi.headers
 
         try:
-            retry_strategy = Retry(total=5, backoff_factor=1,
-                            status_forcelist=[429, 500, 502, 503, 504],
-                            method_whitelist=["HEAD", "GET", "PUT", "DELETE", "OPTIONS", "TRACE"]
-                        )
-            adapter = HTTPAdapter(max_retries=retry_strategy)
-            http = requests.Session()
-            http.mount('http://', adapter)
-            http.mount('https://', adapter)
-
-            response = http.request(method, url, auth=NullAuth(), **kwargs)
+            session = SquadApi.get_session()
+            response = session.request(method, url, auth=NullAuth(), **kwargs)
 
             if response.status_code == 401:
                 msg = 'Unauthorized access to "%s"' % url
