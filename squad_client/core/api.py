@@ -3,6 +3,7 @@ import requests_cache
 import urllib
 import re
 
+from requests.adapters import HTTPAdapter, Retry
 from squad_client import logging
 from squad_client.version import __min_squad_version__ as min_squad_version
 
@@ -117,7 +118,17 @@ class SquadApi:
             kwargs['headers'] = SquadApi.headers
 
         try:
-            response = requests.request(method, url, auth=NullAuth(), **kwargs)
+            retry_strategy = Retry(total=5, backoff_factor=1,
+                            status_forcelist=[429, 500, 502, 503, 504],
+                            method_whitelist=["HEAD", "GET", "PUT", "DELETE", "OPTIONS", "TRACE"]
+                        )
+            adapter = HTTPAdapter(max_retries=retry_strategy)
+            http = requests.Session()
+            http.mount('http://', adapter)
+            http.mount('https://', adapter)
+
+            response = http.request(method, url, auth=NullAuth(), **kwargs)
+
             if response.status_code == 401:
                 msg = 'Unauthorized access to "%s"' % url
                 # logger.error(msg)
