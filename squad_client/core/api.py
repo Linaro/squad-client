@@ -4,6 +4,7 @@ import urllib
 import re
 
 from requests.adapters import HTTPAdapter, Retry
+
 from squad_client import logging
 from squad_client.version import __min_squad_version__ as min_squad_version
 
@@ -97,8 +98,7 @@ class SquadApi:
             retry_strategy = Retry(
                 total=5,
                 backoff_factor=1,
-                status_forcelist=[429, 500, 502, 503, 504],
-                allowed_methods=["HEAD", "GET", "PUT", "DELETE", "OPTIONS", "TRACE"])
+                status_forcelist=[429, 500, 502, 503, 504])
             adapter = HTTPAdapter(max_retries=retry_strategy)
             SquadApi.session = requests.Session()
             SquadApi.session.mount('http://', adapter)
