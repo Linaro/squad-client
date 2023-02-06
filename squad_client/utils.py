@@ -38,7 +38,10 @@ def get_class_name(obj):
 def getid(url):
     try:
         matches = re.search(r'^.*/(\d+)/$', url)
-        _id = int(matches.group(1))
-        return _id
-    except (ValueError, TypeError) as e:
-        return -1
+        if matches:
+            _id = int(matches.group(1))
+            return _id
+    except (ValueError, TypeError):
+        pass
+
+    return -1
