@@ -1,3 +1,9 @@
+# 0.35
+
+This 0.35 release removes the need for having to update urllib3 by not
+using "allowed_methods" in HTTPAdapter. The release also adds "token" attribute
+to Backend class to allow users to dynamically create backends via squad-client.
+
 # 0.34
 
 This 0.34 release adds a retry strategy to requests to backend server and also
