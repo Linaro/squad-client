@@ -761,7 +761,7 @@ class Environment(SquadObject):
 class Backend(SquadObject):
 
     endpoint = '/api/backends/'
-    attrs = ['id', 'name', 'url', 'username', 'implementation_type', 'backend_settings',
+    attrs = ['id', 'name', 'url', 'username', 'token', 'implementation_type', 'backend_settings',
              'poll_interval', 'max_fetch_attempts', 'poll_enabled', 'listen_enabled']
 
 
