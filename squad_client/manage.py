@@ -27,6 +27,10 @@ def main():
 
     args = parser.parse_args()
 
+    if args.version:
+        print('squad-client: %s' % squad_client_version)
+        return 0
+
     if args.debug:
         logging.setLevel(logging.DEBUG)
 
@@ -42,11 +46,6 @@ def main():
         except ApiException as e:
             logger.error('Failed to configure squad api: %s' % e)
             return -1
-
-    if args.version:
-        print('squad-client: %s' % squad_client_version)
-        print('squad server: %s' % SquadApi.version)
-        return 0
 
     if args.command is None:
         parser.print_help()
