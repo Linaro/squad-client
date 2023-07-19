@@ -1,3 +1,8 @@
+# 0.36
+
+This 0.36 release allows fetching test runs statuses without traversing builds
+endpoint. The release also adds `datetime` to Project class.
+
 # 0.35
 
 This 0.35 release removes the need for having to update urllib3 by not
