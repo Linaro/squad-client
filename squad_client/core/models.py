@@ -252,6 +252,9 @@ class Squad(SquadObject):
     def reports(self, count=DEFAULT_COUNT, **filters):
         return self.__fetch__(Report, filters, count)
 
+    def statuses(self, count=DEFAULT_COUNT, **filters):
+        return self.__fetch__(TestRunStatus, filters, count)
+
     def submit(self, group=None, project=None, build=None, environment=None,
                tests=None, metrics=None, metadata=None, log=None, attachments=None):
 
@@ -602,9 +605,20 @@ class Metric(SquadObject):
 
 
 class TestRunStatus(SquadObject):
+    endpoint = '/api/statuses/'
     attrs = ['url', 'id', 'tests_pass', 'tests_fail', 'tests_xfail',
              'tests_skip', 'metrics_summary', 'has_metrics',
-             'suite', 'suite_version']
+             'suite']
+
+    def __repr__(self):
+        return f"tests_pass: {self.tests_pass}, " \
+               f"tests_fail: {self.tests_fail}, " \
+               f"tests_xfail: {self.tests_xfail}, " \
+               f"tests_skip: {self.tests_skip}"
+
+    @property
+    def tests_total(self):
+        return self.tests_pass + self.tests_fail + self.tests_xfail + self.tests_skip
 
 
 class TestRunMetadata(SquadObject):
