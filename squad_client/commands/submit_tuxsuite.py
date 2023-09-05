@@ -77,6 +77,20 @@ class SubmitTuxSuiteCommand(SquadClientCommand):
         uid = result['uid']
         return f'{_type}:{project}#{uid}'
 
+    def _get_env_slug(self, result, result_type):
+        env_key = lambda result_type: 'device' if result_type == 'tests' else 'target_arch'
+        if result.get(env_key(result_type)) is None and \
+                result_type == "builds" and \
+                result.get("sources") and \
+                result.get("sources").get("android") and \
+                result.get("sources").get("android").get("build_config"):
+            # for Android builds case
+            env_slug = result.get("sources").get("android").get("build_config")
+            env_slug = env_slug.replace('/', '_').replace(":", '_')
+        else:
+            env_slug = result[env_key(result_type)]
+        return env_slug
+
     def run(self, args):
         """
             Submitting TuxSuite results to SQUAD basically consists of:
@@ -102,7 +116,6 @@ class SubmitTuxSuiteCommand(SquadClientCommand):
                 logger.error("Failed to retrieve tuxsuite build: %s" % e)
                 return False
 
-        env_key = lambda result_type: 'device' if result_type == 'tests' else 'target_arch'  # noqa
         for result_type in ['builds', 'tests']:
             num_watching_jobs = 0
             for result in results[result_type].values():
@@ -112,7 +125,7 @@ class SubmitTuxSuiteCommand(SquadClientCommand):
                 watchjob(
                     group_project_slug='%s/%s' % (args.group, args.project),
                     build_version=build,
-                    env_slug=result[env_key(result_type)],
+                    env_slug=self._get_env_slug(result, result_type),
                     backend_name=args.backend,
                     testjob_id=job_id,
                 )
