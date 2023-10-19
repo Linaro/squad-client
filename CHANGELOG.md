@@ -1,3 +1,7 @@
+# 0.38
+
+This 0.38 release adds support for oe builds in submit_tuxsuite command.
+
 # 0.37
 
 This 0.37 release adds is_release attribute to Build class. This has been present
