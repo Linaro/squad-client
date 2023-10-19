@@ -108,11 +108,20 @@ class SubmitTuxSuiteCommand(SquadClientCommand):
             for result in results[result_type].values():
                 job_id = self._generate_job_id(result_type, result)
 
+                # handle oe builds
+                if result_type == 'builds' and 'build_name' not in result:
+                    job_id = f'OE{job_id}'
+
+                    # oe builds do not necessarily have an environment, so use a generic one
+                    env_slug = 'env'
+                else:
+                    env_slug = result[env_key(result_type)]
+
                 num_watching_jobs += 1
                 watchjob(
                     group_project_slug='%s/%s' % (args.group, args.project),
                     build_version=build,
-                    env_slug=result[env_key(result_type)],
+                    env_slug=env_slug,
                     backend_name=args.backend,
                     testjob_id=job_id,
                 )

@@ -171,5 +171,59 @@
         "user_agent": "tuxsuite/0.43.8",
         "waited_by": [],
         "warnings_count": 1
+    },
+    {
+        "project": "blueprints/trustedsubstrate",
+        "uid": "2UGxUanGQ1QysqrOm4hn2xZ2U9n",
+        "plan": "2UGxUXlhuckaVtGa8TO6Lxi66EK",
+        "distro": "poky",
+        "machine": "trs-qemuarm64",
+        "container": "ubuntu-20.04",
+        "environment": {
+            "TEMPLATECONF": "../trs/meta-trs/conf/templates/default/"
+        },
+        "local_conf": [],
+        "bblayers_conf": [],
+        "artifacts": [
+            "tmp_trs-qemuarm64/deploy/images/trs-qemuarm64"
+        ],
+        "targets": [
+            "mc:trs-qemuarm64:trs-image"
+        ],
+        "name": "",
+        "envsetup": "poky/oe-init-build-env",
+        "user": "charles.oliveira@linaro.org",
+        "token_name": "meta-ewaol",
+        "user_agent": "tuxsuite/1.18.0",
+        "download_url": "https://storage.tuxsuite.com/public/blueprints/trustedsubstrate/oebuilds/2UGxUanGQ1QysqrOm4hn2xZ2U9n/",
+        "sources": {
+            "repo": {
+                "branch": "main",
+                "manifest": "default.xml",
+                "url": "https://gitlab.com/Linaro/trusted-reference-stack/trs-manifest/"
+            }
+        },
+        "state": "finished",
+        "result": "fail",
+        "waited_by": [],
+        "errors_count": 0,
+        "warnings_count": 0,
+        "running_time": "2023-08-21T01:04:13.687435",
+        "finished_time": "2023-08-21T01:20:18.257202",
+        "manifest_file": "2e1117139abdb5d0f801fc5fb3a598503b26c1b6afd7b33965561033f99f8b97/local-manifest.xml",
+        "pinned_manifest": null,
+        "kas_override": null,
+        "no_cache": false,
+        "is_public": true,
+        "callback": null,
+        "extraconfigs": [
+            "../meta-ts/meta-trustedsubstrate/conf/templates/multiconfig/",
+            "../meta-trs/conf/templates/multiconfig"
+        ],
+        "is_canceling": false,
+        "provisioning_time": "2023-08-21T01:02:14.590006",
+        "duration": 967,
+        "setup_duration": 108,
+        "status_message": ""
     }
 ]

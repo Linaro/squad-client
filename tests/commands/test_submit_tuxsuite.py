@@ -70,6 +70,7 @@ class SubmitTuxSuiteTest(TestCase):
 
         job_ids = [
             'BUILD:linaro@lkft#2843VDPeVhg4yaTkgTur0T3ykmq',  # from sample_tuxsuite_builds.json
+            'OEBUILD:linaro@lkft#2UGxUanGQ1QysqrOm4hn2xZ2U9n',  # from sample_tuxsuite_builds.json, but it's an oe build
             'TEST:linaro@lkft#1yPYGuuaUxuH42KrjEiokDrGRSQ',   # from sample_tuxsuite_tests.json
             'BUILD:linaro@lkft#1yPYDyGoF449fDc374OsaWJVVzl',  # both below from sample_tuxsuite_tuxplan.json
             'TEST:linaro@lkft#1yPYDsKqAtxplNqXIg6shMtrDvj',
