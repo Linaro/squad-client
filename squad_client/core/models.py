@@ -443,7 +443,7 @@ class ProjectBasicSettings(SquadObject):
 class Build(SquadObject):
 
     endpoint = '/api/builds/'
-    attrs = ['url', 'id', 'finished',
+    attrs = ['url', 'id', 'finished', 'is_release',
              'version', 'created_at', 'datetime', 'patch_id', 'keep_data', 'project',
              'patch_source', 'patch_baseline']
 
