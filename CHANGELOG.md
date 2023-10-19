@@ -1,3 +1,8 @@
+# 0.37
+
+This 0.37 release adds is_release attribute to Build class. This has been present
+in SQUAD api for quite some time now.
+
 # 0.36
 
 This 0.36 release allows fetching test runs statuses without traversing builds
