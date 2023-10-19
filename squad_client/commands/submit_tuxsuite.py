@@ -52,10 +52,10 @@ class SubmitTuxSuiteCommand(SquadClientCommand):
         indexed = {r['uid']: r for r in results}
 
         # now attempt to identify the results type
-        if results[0].get('build_name') is not None:
-            results = {'builds': indexed, 'tests': {}}
-        else:
+        if results[0].get('results') is not None:
             results = {'tests': indexed, 'builds': {}}
+        else:
+            results = {'builds': indexed, 'tests': {}}
         return results
 
     def _generate_job_id(self, result_type, result):
