@@ -172,7 +172,7 @@ def create_or_update_project(group_slug=None, slug=None, name=None, description=
     if moderate_notifications is not None:
         project.moderate_notifications = moderate_notifications
     if important_metadata_keys:
-        project.important_metadata_keys = '\n'.join(important_metadata_keys) if type(important_metadata_keys) == list else important_metadata_keys
+        project.important_metadata_keys = '\n'.join(important_metadata_keys) if type(important_metadata_keys) is list else important_metadata_keys
     if wait_before_notification_timeout is not None:
         project.wait_before_notification = wait_before_notification_timeout
     if force_finishing_builds_on_timeout is not None:
