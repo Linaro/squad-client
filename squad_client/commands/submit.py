@@ -171,6 +171,7 @@ class SubmitCommand(SquadClientCommand):
             metrics=metrics_dict,
             log=logs_file,
             metadata=metadata_dict,
+            attachments=args.attachments,
         )
 
         return True

@@ -263,6 +263,7 @@ class Squad(SquadObject):
         num_metrics = 0
 
         data = {}
+        files = []
         if tests:
             tests_dict = {}
             for test in tests.values():
@@ -284,8 +285,11 @@ class Squad(SquadObject):
 
         logger.info('Submitting %i tests, %i metrics' % (num_tests, num_metrics))
 
-        # TODO handle attachments
-        response = SquadApi.post(path, data=data)
+        if attachments:
+            for attachment in attachments:
+                files.append(('attachment', (attachment, open(attachment, 'rb').read())))
+
+        response = SquadApi.post(path, data=data, files=files)
         status_code = response.status_code
         if status_code not in [200, 201, 500]:
             logger.error('Failed to submit results: %s' % response.text)
@@ -633,7 +637,7 @@ class TestRun(SquadObject):
              'created_at', 'completed', 'datetime', 'build_url',
              'job_id', 'job_status', 'job_url', 'resubmit_url',
              'data_processed', 'status_recorded', 'build',
-             'environment']
+             'environment', 'attachments']
     attachments = None
     log = None
 

@@ -86,7 +86,8 @@ class SubmitCommandTest(unittest.TestCase):
         if metadata:
             argv += ['--metadata', metadata]
         if attachments:
-            argv += ['--attachments', attachments]
+            argv += ['--attachments']
+            argv.extend(attachments)
         if result_name:
             argv += ['--result-name', result_name]
         if result_value:
@@ -177,11 +178,26 @@ class SubmitCommandTest(unittest.TestCase):
         self.assertTrue(proc.ok)
         self.assertIn('1 metrics', proc.err)
 
+    def test_submit_single_attachment_with_metrics(self):
+        proc = self.manage_submit(metrics='tests/submit_results/sample_metrics.json',
+                                  attachments=['tests/submit_results/sample_attachment1.txt'])
+        self.assertTrue(proc.ok)
+        self.assertIn('0 tests, 1 metrics', proc.err)
+
+    def test_submit_multiple_attachment_with_results(self):
+        proc = self.manage_submit(results='tests/submit_results/sample_results.yaml',
+                                  attachments=['tests/submit_results/sample_attachment1.txt',
+                                               'tests/submit_results/sample_attachment2.txt'])
+        self.assertTrue(proc.ok)
+        self.assertIn('0 metrics', proc.err)
+
     def test_submit_everything(self):
         proc = self.manage_submit(results='tests/submit_results/sample_results.json',
                                   metrics='tests/submit_results/sample_metrics.json',
                                   metadata='tests/submit_results/sample_metadata.json',
-                                  logs='tests/submit_results/sample_log.log')
+                                  logs='tests/submit_results/sample_log.log',
+                                  attachments=['tests/submit_results/sample_attachment1.txt',
+                                               'tests/submit_results/sample_attachment2.txt'])
         self.assertTrue(proc.ok, msg=proc.err)
         self.assertIn('2 tests, 1 metrics', proc.err)
 

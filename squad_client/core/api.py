@@ -81,8 +81,8 @@ class SquadApi:
         return SquadApi.__request__('GET', endpoint, params=params)
 
     @staticmethod
-    def post(endpoint, params={}, data={}):
-        return SquadApi.__request__('POST', endpoint, params=params, data=data)
+    def post(endpoint, params={}, data={}, files={}):
+        return SquadApi.__request__('POST', endpoint, params=params, data=data, files=files)
 
     @staticmethod
     def patch(endpoint, params={}, data={}):
