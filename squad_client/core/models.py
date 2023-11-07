@@ -638,7 +638,7 @@ class TestRun(SquadObject):
              'job_id', 'job_status', 'job_url', 'resubmit_url',
              'data_processed', 'status_recorded', 'build',
              'environment', 'attachments']
-    attachments = None
+
     log = None
 
     __tests__ = None
@@ -689,6 +689,29 @@ class TestRun(SquadObject):
 
     test_suites = None
     metric_suites = None
+
+    __attachments__ = None
+
+    @property
+    def attachments(self):
+        if self.__attachments__ is None:
+            return None
+        else:
+            return self.__attachments__
+
+    @attachments.setter
+    def attachments(self, attachments):
+        self.__attachments__ = attachments
+
+    @property
+    def attachment_urls(self):
+        # Returns the list of attachment urls from the TestRun
+        attachment_urls = []
+        if self.attachments is not None:
+            for attachment in self.attachments:
+                attachment_urls.append(attachment['download_url'])
+
+        return attachment_urls
 
     def bucket_metric_and_test_suites(self):
         all_tests = self.tests()
