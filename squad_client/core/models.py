@@ -287,7 +287,8 @@ class Squad(SquadObject):
 
         if attachments:
             for attachment in attachments:
-                files.append(('attachment', (attachment, open(attachment, 'rb').read())))
+                filename = attachment.filename
+                files.append(('attachment', (filename, open(filename, 'rb').read())))
 
         response = SquadApi.post(path, data=data, files=files)
         status_code = response.status_code
@@ -630,6 +631,31 @@ class TestRunMetadata(SquadObject):
         return None
 
 
+class TestRunAttachment(SquadObject):
+
+    attrs = ['download_url', 'filename', 'length', 'mimetype']
+
+    def __init__(self, attachment):
+
+        # this class can be used for both uploading and loading attachments
+        # for uploading, `attachment` is a string with the file path to be uploaded
+        # for loading, `attachment` is a dictionary returned from SQUAD api
+        if type(attachment) is str:
+            self.filename = attachment
+        else:
+            self.__fill_object__(attachment)
+
+    def read(self):
+        if not hasattr(self, 'download_url'):
+            return None
+
+        logger.info('Downloading attachment from %s' % self.download_url)
+        response = SquadApi.get(self.download_url)
+        if response.status_code != 200:
+            return None
+        return response.content
+
+
 class TestRun(SquadObject):
 
     endpoint = '/api/testruns/'
@@ -641,7 +667,14 @@ class TestRun(SquadObject):
 
     log = None
 
-    __tests__ = None
+    def __init__(self):
+        super().__init__(self)
+        self.__attachments__ = []
+        self.__metadata__ = None
+        self.__metrics__ = None
+        self.__tests__ = None
+        self.test_suites = None
+        self.metric_suites = None
 
     def add_test(self, test):
         if self.__tests__ is None:
@@ -654,8 +687,6 @@ class TestRun(SquadObject):
             self.__tests__ = self.__fetch__(Test, filters, count)
         return self.__tests__
 
-    __metrics__ = None
-
     def add_metric(self, metric):
         if self.__metrics__ is None:
             self.__metrics__ = {}
@@ -666,8 +697,6 @@ class TestRun(SquadObject):
             filters.update({'test_run': self.id})
             self.__metrics__ = self.__fetch__(Metric, filters, count)
         return self.__metrics__
-
-    __metadata__ = None
 
     @property
     def metadata(self):
@@ -687,31 +716,15 @@ class TestRun(SquadObject):
         objects = self.__fill__(TestRunMetadata, [new_metadata])
         self.__metadata__ = first(objects)
 
-    test_suites = None
-    metric_suites = None
-
-    __attachments__ = None
-
     @property
     def attachments(self):
-        if self.__attachments__ is None:
-            return None
-        else:
-            return self.__attachments__
+        return self.__attachments__
 
     @attachments.setter
     def attachments(self, attachments):
-        self.__attachments__ = attachments
-
-    @property
-    def attachment_urls(self):
-        # Returns the list of attachment urls from the TestRun
-        attachment_urls = []
-        if self.attachments is not None:
-            for attachment in self.attachments:
-                attachment_urls.append(attachment['download_url'])
-
-        return attachment_urls
+        if attachments:
+            for attachment in attachments:
+                self.__attachments__.append(TestRunAttachment(attachment))
 
     def bucket_metric_and_test_suites(self):
         all_tests = self.tests()
