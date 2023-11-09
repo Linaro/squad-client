@@ -50,6 +50,17 @@ RecordTestRunStatus()(testrun)
 testrun_no_metadata = build.test_runs.create(environment=environment)
 RecordTestRunStatus()(testrun_no_metadata)
 
+testrun_attachments = build.test_runs.create(environment=environment)
+filename1 = 'foo1.txt'
+contents1 = b'attachment file 1 content'
+attachment1 = testrun_attachments.attachments.create(filename=filename1, length=len(contents1))
+attachment1.save_file(filename1, contents1)
+
+filename2 = 'foo2.txt'
+contents2 = b'attachment file 2 content'
+attachment2 = testrun_attachments.attachments.create(filename=filename2, length=len(contents2))
+attachment2.save_file(filename2, contents2)
+
 mci.Backend.objects.create(name='my_tuxsuite_backend', implementation_type='tuxsuite')
 
 backend = mci.Backend.objects.create(name='my_backend', implementation_type='lava')

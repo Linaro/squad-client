@@ -1,4 +1,5 @@
 import unittest
+import requests
 
 from . import settings
 from squad_client.core.api import SquadApi
@@ -163,7 +164,7 @@ class BuildTest(unittest.TestCase):
 
     def test_build_testrun(self):
         testruns = self.build.testruns(prefetch_metadata=True)
-        self.assertEqual(2, len(testruns))
+        self.assertEqual(3, len(testruns))
 
         with patch('squad_client.core.api.SquadApi.get') as squad_api_get:
             testrun = first(testruns)
@@ -174,9 +175,10 @@ class BuildTest(unittest.TestCase):
 class TestRunTest(unittest.TestCase):
 
     def setUp(self):
-        self.testruns = Squad().testruns(count=2)
+        self.testruns = Squad().testruns(count=3)
         self.testrun = self.testruns[1]
         self.testrun_no_metadata = self.testruns[2]
+        self.testrun_attachment = self.testruns[3]
 
     def test_basic(self):
         self.assertTrue(self.testrun is not None)
@@ -193,6 +195,26 @@ class TestRunTest(unittest.TestCase):
     def test_testrun_status(self):
         status = self.testrun.summary()
         self.assertEqual(1, status.tests_fail)
+
+    def test_testrun_attachment(self):
+        """Test that created attachment entries can be retrieved from the TestRun."""
+        self.assertTrue(self.testrun_attachment.attachments is not None)
+        self.assertTrue(len(self.testrun_attachment.attachments) == 2)
+
+    def test_testrun_attachment_urls(self):
+        """Test that created attachment entries can be accessed via the attachment_urls TestRun property."""
+        attachment_urls = self.testrun_attachment.attachment_urls
+        self.assertTrue(attachment_urls is not None)
+        self.assertTrue(len(attachment_urls) == 2)
+
+        attachment_contents = []
+        expected_attachment_contents = [b'attachment file 1 content', b'attachment file 2 content']
+
+        for attachment_url in attachment_urls:
+            request = requests.get(attachment_url)
+            attachment_contents.append(request.content)
+
+        self.assertEqual(attachment_contents, expected_attachment_contents)
 
 
 class ProjectTest(unittest.TestCase):
