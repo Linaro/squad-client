@@ -315,6 +315,24 @@ def get_build(build_version, project):
     return first(project.builds(**filters))
 
 
+def download_attachments(testrun, filenames=None):
+    attachment_filenames = [attachment.filename for attachment in testrun.attachments]
+    if filenames:
+        for filename in filenames:
+            if filename not in attachment_filenames:
+                logger.error(f"Error: Attachment filename {filename} not found in TestRun {testrun.id}. "
+                             f"Attachments in TestRun are: {attachment_filenames}")
+                return False
+
+    for attachment in testrun.attachments:
+        if not filenames or attachment.filename in filenames:
+            logger.debug(f"Downloading {attachment.filename}")
+            with open(attachment.filename, 'wb') as fp:
+                fp.write(attachment.read())
+
+    return True
+
+
 def download_tests(project, build, filter_envs=None, filter_suites=None, format_string=None, output_filename=None):
     all_environments = project.environments(count=ALL)
     all_suites = project.suites(count=ALL)
