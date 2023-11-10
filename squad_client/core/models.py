@@ -667,14 +667,14 @@ class TestRun(SquadObject):
 
     log = None
 
-    def __init__(self):
-        super().__init__(self)
+    def __init__(self, _id=None):
         self.__attachments__ = []
         self.__metadata__ = None
         self.__metrics__ = None
         self.__tests__ = None
         self.test_suites = None
         self.metric_suites = None
+        super().__init__(_id)
 
     def add_test(self, test):
         if self.__tests__ is None:
