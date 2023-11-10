@@ -67,7 +67,7 @@ class SubmitResultsShortcutTest(TestCase):
         metrics = {"metrica": 42}
 
         with self.assertLogs(logger='squad_client.core.models', level=logging.ERROR) as cm:
-            success = submit_results(
+            success, testrun_id = submit_results(
                 group_project_slug="my_group/my_project",
                 build_version="my_build",
                 env_slug="my_env",
@@ -75,7 +75,6 @@ class SubmitResultsShortcutTest(TestCase):
                 metrics=metrics,
                 metadata=metadata,
             )
-
             self.assertIn(
                 'ERROR:squad_client.core.models:Failed to submit results: There is already a test run with job_id 12345',
                 cm.output

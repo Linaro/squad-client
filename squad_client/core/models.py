@@ -294,7 +294,7 @@ class Squad(SquadObject):
         status_code = response.status_code
         if status_code not in [200, 201, 500]:
             logger.error('Failed to submit results: %s' % response.text)
-        return response.ok
+        return response.ok, response.text
 
     def submitjob(self, group=None, project=None, build=None, environment=None,
                   backend=None, definition=None):
