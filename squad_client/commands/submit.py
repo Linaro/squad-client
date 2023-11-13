@@ -163,7 +163,7 @@ class SubmitCommand(SquadClientCommand):
                     logger.error("Incompatible metadata detected")
                     return False
 
-        submit_results(
+        ok, testrun_id = submit_results(
             group_project_slug="%s/%s" % (args.group, args.project),
             build_version=args.build,
             env_slug=args.environment,
@@ -173,5 +173,7 @@ class SubmitCommand(SquadClientCommand):
             metadata=metadata_dict,
             attachments=args.attachments,
         )
+
+        logger.info(f"TESTRUN_ID {testrun_id}")
 
         return True

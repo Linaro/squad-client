@@ -1,4 +1,5 @@
 import logging
+import os
 from unittest import TestCase
 
 
@@ -13,6 +14,7 @@ from squad_client.shortcuts import (
     submit_job,
     create_or_update_project,
     watchjob,
+    download_attachments,
     download_tests,
     register_callback,
 )
@@ -67,7 +69,7 @@ class SubmitResultsShortcutTest(TestCase):
         metrics = {"metrica": 42}
 
         with self.assertLogs(logger='squad_client.core.models', level=logging.ERROR) as cm:
-            success = submit_results(
+            success, testrun_id = submit_results(
                 group_project_slug="my_group/my_project",
                 build_version="my_build",
                 env_slug="my_env",
@@ -75,7 +77,6 @@ class SubmitResultsShortcutTest(TestCase):
                 metrics=metrics,
                 metadata=metadata,
             )
-
             self.assertIn(
                 'ERROR:squad_client.core.models:Failed to submit results: There is already a test run with job_id 12345',
                 cm.output
@@ -332,6 +333,43 @@ class CreateOrUpdateShortcutTest(TestCase):
         self.assertEqual(['Project exists already'], errors)
 
         project.delete()
+
+
+class DownloadAttachmentsShortcutTest(TestCase):
+    def setUp(self):
+        self.squad = Squad()
+        SquadApi.configure(url="http://localhost:%s" % settings.DEFAULT_SQUAD_PORT)
+        group = self.squad.group("my_group")
+        project = group.project("my_project")
+        build = project.build("my_build")
+        self.testrun = build.testruns()[3]
+
+    def tearDown(self):
+        for filename in ["foo1.txt", "foo2.txt"]:
+            if os.path.isfile(filename):
+                os.remove(filename)
+
+    def test_download_all(self):
+        expected_files = ["foo1.txt", "foo2.txt"]
+        success = download_attachments(self.testrun)
+        self.assertTrue(success)
+        # Check all files downloaded
+        for filename in expected_files:
+            self.assertTrue(os.path.isfile(filename))
+
+    def test_download_file_list(self):
+        filenames = ["foo2.txt"]
+        success = download_attachments(self.testrun, filenames)
+        self.assertTrue(success)
+        # Check foo1.txt wasn't downloaded but foo2.txt was
+        self.assertFalse(os.path.isfile("foo1.txt"))
+        self.assertTrue(os.path.isfile("foo2.txt"))
+
+    def test_download_file_missing(self):
+        filenames = ["foo1.txt", "foo3.txt"]
+        success = download_attachments(self.testrun, filenames)
+        # Download should fail
+        self.assertFalse(success)
 
 
 class DownloadTestsShortcutTest(TestCase):
