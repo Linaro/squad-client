@@ -1,3 +1,8 @@
+# 0.39
+
+This 0.39 release implement support for pushing and downloading attachments
+from SQUAD.
+
 # 0.38
 
 This 0.38 release adds support for oe builds in submit_tuxsuite command.
