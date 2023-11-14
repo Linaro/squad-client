@@ -46,7 +46,7 @@ class SubmitResultsShortcutTest(TestCase):
         metadata = {"job_id": "12345", "a-metadata-field": "value"}
         tests = {"testa": "pass", "testb": {"result": "pass", "log": "the log"}}
         metrics = {"metrica": 42}
-        success = submit_results(
+        success, testrun_id = submit_results(
             group_project_slug="my_group/my_project",
             build_version="my_build",
             env_slug="my_env",
