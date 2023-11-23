@@ -30,6 +30,11 @@ class SubmitTuxSuiteCommand(SquadClientCommand):
         parser.add_argument(
             "--json", help="File with tuxsuite results to submit", required=True
         )
+        parser.add_argument(
+            "--fetch-now", help="Tell SQUAD to poll jobs right away. Disabled by default",
+            action='store_true',
+            default=False,
+        )
 
     def _load_results_file(self, path):
         try:
@@ -124,6 +129,7 @@ class SubmitTuxSuiteCommand(SquadClientCommand):
                     env_slug=env_slug,
                     backend_name=args.backend,
                     testjob_id=job_id,
+                    delay_fetch=not args.fetch_now,
                 )
 
             logger.info(f"Triggered {num_watching_jobs} watch jobs for {result_type}")

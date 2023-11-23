@@ -317,7 +317,7 @@ class Squad(SquadObject):
 
         return response.ok
 
-    def watchjob(self, group=None, project=None, build=None, environment=None, backend=None, testjob_id=None):
+    def watchjob(self, group=None, project=None, build=None, environment=None, backend=None, testjob_id=None, delay_fetch=False):
 
         path = '/api/watchjob/%s/%s/%s/%s' % (group.slug, project.slug, build.version, environment.slug)
 
@@ -328,7 +328,11 @@ class Squad(SquadObject):
 
         logger.info('Watching job %s' % testjob_id)
 
-        response = SquadApi.post(path, data=data)
+        params = {}
+        if delay_fetch:
+            params['delay_fetch'] = 'true'
+
+        response = SquadApi.post(path, params=params, data=data)
         status_code = response.status_code
         if status_code not in [200, 201, 500]:
             logger.error('Failed to watch job: %s' % response.text)
@@ -575,7 +579,7 @@ class TestJob(SquadObject):
             backend=self.backend,
             definition=self.definition,)
 
-    def watch(self):
+    def watch(self, delay_fetch=False):
         squad = Squad()
         return squad.watchjob(
             group=self.target.group,
@@ -583,7 +587,8 @@ class TestJob(SquadObject):
             build=self.target_build,
             environment=self.environment,
             backend=self.backend,
-            testjob_id=self.job_id,)
+            testjob_id=self.job_id,
+            delay_fetch=delay_fetch,)
 
     def resubmitted_jobs(self):
         endpoint = '%s%d/resubmitted_jobs/' % (self.endpoint, self.id)

@@ -214,7 +214,7 @@ def create_or_update_project(group_slug=None, slug=None, name=None, description=
     return project, errors
 
 
-def watchjob(group_project_slug=None, build_version=None, env_slug=None, backend_name=None, testjob_id=None):
+def watchjob(group_project_slug=None, build_version=None, env_slug=None, backend_name=None, testjob_id=None, delay_fetch=False):
     group_slug, project_slug = split_group_project_slug(group_project_slug)
 
     group = Group()
@@ -237,7 +237,7 @@ def watchjob(group_project_slug=None, build_version=None, env_slug=None, backend
     testjob.job_id = testjob_id
     testjob.environment = environment
 
-    return testjob.watch()
+    return testjob.watch(delay_fetch=delay_fetch)
 
 
 def get_build(build_version, project):
