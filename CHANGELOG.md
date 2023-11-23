@@ -1,3 +1,9 @@
+# 0.40
+
+This 0.40 release changes `submit-tuxsuite` command default behavior by
+telling SQUAD not to poll builds and tests results right away. If
+such behavior is required, please use `--fetch-now`.
+
 # 0.39
 
 This 0.39 release implement support for pushing and downloading attachments
