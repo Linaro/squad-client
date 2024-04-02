@@ -1,3 +1,8 @@
+# 0.41
+
+This 0.41 release checks for SQUAD_TOKEN environment variable whenever
+it tries to access the API.
+
 # 0.40
 
 This 0.40 release changes `submit-tuxsuite` command default behavior by
