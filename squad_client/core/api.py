@@ -1,3 +1,4 @@
+import os
 import requests
 import requests_cache
 import urllib
@@ -57,6 +58,7 @@ class SquadApi:
         if url is None or url_validator_regex.match(url) is None:
             raise ApiException('Malformed url: "%s"' % url)
 
+        token = token or os.getenv('SQUAD_TOKEN')
         if token:
             SquadApi.token = token
             SquadApi.headers = {"Authorization": 'token %s' % token}
