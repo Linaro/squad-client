@@ -64,8 +64,9 @@ class ReportTest(unittest.TestCase):
 
 class ReportGeneratorTest(unittest.TestCase):
 
+    @patch('squad_client.report.SquadApi.configure')
     @patch('squad_client.core.models.Squad.fetch')
-    def test_basics(self, squad_fetch):
+    def test_basics(self, squad_fetch, api_configure):
         squad_fetch.return_value = 'fetched string'
         template = 'Report: {{ dummy }}'
         output = StringIO()

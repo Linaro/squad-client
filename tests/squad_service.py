@@ -58,7 +58,7 @@ class SquadAdmin:
         return proc
 
     def migrate(self):
-        proc = self.__run_process__(['migrate'], stderr=sp.PIPE)
+        proc = self.__run_process__(['migrate', '-v', '3'], stderr=sp.PIPE)
         if not proc.ok:
             self.logger.error('Failed to migrate!')
             print(proc.err.decode('utf-8'), file=sys.stderr)

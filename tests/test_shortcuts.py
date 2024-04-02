@@ -124,13 +124,14 @@ class WatchjobShortcutTest(TestCase):
         )
 
     def test_basic(self):
-        testjob_id = "watched-job-id"
+        testjob_id = "TEST:tuxsuite@job#123"
         success = watchjob(
             group_project_slug="my_group/my_project",
             build_version="my_build",
             env_slug="my_env",
-            backend_name="my_backend",
+            backend_name="my_tuxsuite_backend",
             testjob_id=testjob_id,
+            delay_fetch=True,
         )
 
         self.assertTrue(success)
