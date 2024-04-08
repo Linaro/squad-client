@@ -594,6 +594,11 @@ class TestJob(SquadObject):
         endpoint = '%s%d/resubmitted_jobs/' % (self.endpoint, self.id)
         return self.__fetch__(TestJob, endpoint=endpoint, filters={})
 
+    def cancel(self):
+        endpoint = '%s%d/cancel/' % (self.endpoint, self.id)
+        response = SquadApi.post(endpoint)
+        return response.status_code == 200
+
 
 class MetricSuite:
     name = ''

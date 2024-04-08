@@ -333,3 +333,8 @@ class TestJobTest(unittest.TestCase):
         self.assertEqual(1, len(resubmitted_jobs))
         resubmitted = first(resubmitted_jobs)
         self.assertEqual(testjob.url, resubmitted.parent_job)
+
+    def test_cancel(self):
+        testjob = first(Squad().testjobs())
+        cancel = testjob.cancel()
+        self.assertEqual(200, cancel)
