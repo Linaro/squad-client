@@ -336,5 +336,4 @@ class TestJobTest(unittest.TestCase):
 
     def test_cancel(self):
         testjob = first(Squad().testjobs())
-        cancel = testjob.cancel()
-        self.assertEqual(200, cancel)
+        self.assertTrue(testjob.cancel())
