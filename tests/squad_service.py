@@ -40,7 +40,7 @@ class SquadAdmin:
         if os.path.isfile(settings.DEFAULT_SQUAD_DATABASE_NAME):
             os.remove(settings.DEFAULT_SQUAD_DATABASE_NAME)
 
-    def __run_process__(self, args, timeout=10, daemon=False, input=None, stdin=sp.DEVNULL, stdout=sp.DEVNULL, stderr=sp.DEVNULL):
+    def __run_process__(self, args, timeout=30, daemon=False, input=None, stdin=sp.DEVNULL, stdout=sp.DEVNULL, stderr=sp.DEVNULL):
         proc = sp.Popen(self.cmd + args, env=self.env, stdin=stdin, stdout=stdout, stderr=stderr)
         proc.ok = False
 
