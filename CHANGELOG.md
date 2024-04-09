@@ -1,3 +1,7 @@
+# 0.42
+
+This 0.42 release adds `cancel` function to individual test jobs
+
 # 0.41
 
 This 0.41 release checks for SQUAD_TOKEN environment variable whenever
