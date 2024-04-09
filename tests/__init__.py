@@ -26,7 +26,10 @@ def run(coverage=False, tests=['discover'], verbose=False):
 
     env = os.environ.copy()
     env['LOG_LEVEL'] = 'ERROR'
-    del env['SQUAD_TOKEN']
+
+    if 'SQUAD_TOKEN' in env:
+        del env['SQUAD_TOKEN']
+
     proc = sp.Popen(argv, env=env)
     proc.wait()
 
