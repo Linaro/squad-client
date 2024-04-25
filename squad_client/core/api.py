@@ -156,4 +156,4 @@ class SquadApi:
         except requests.exceptions.Timeout as e:
             raise ApiException('Timeout Error: %s' % e)
         except requests.exceptions.RequestException as e:
-            raise ApiException('OOps: Something unexpected happened while requesting the API: %s' % e)
+            raise ApiException('Oops: Something unexpected happened while requesting the API: %s' % e)
